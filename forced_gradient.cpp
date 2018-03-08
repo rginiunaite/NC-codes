@@ -39,7 +39,7 @@ double func(double diff_conc, double slope, int n_seed) {
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1;
     double speed_l = 0.5; // speed of a leader cell
-    double speed_f = 0.1; // speed of a follower cell
+    double speed_f = 0.5; // speed of a follower cell
 
     double domain_fraction = 0.5; // fraction of the end of the domain that we count the percentage of cells in
 
