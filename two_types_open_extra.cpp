@@ -17,7 +17,7 @@ using namespace std;
 using namespace Aboria;
 using namespace Eigen; // objects VectorXf, MatrixXf
 
-int main() {
+VectorXi func(double diff_conc, double lam, int n_seed){
 
 
     // model parameters
@@ -28,10 +28,10 @@ int main() {
     const int length_y = 12;//120;//20;//4;
     double cell_radius = 0.75;//0.5; // radius of a cell
     const double diameter = 2 * cell_radius;//2 // diameter in which there have to be no cells, equivalent to size of the cell
-    const int N_steps = 200; // number of times the cells move up the gradient
+    const int N_steps = 20; // number of times the cells move up the gradient
     const size_t N = 7; // initial number of cells
     double l_filo = 27.5/10;//2; // sensing radius
-    double diff_conc = 0.05; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
+    //double diff_conc = 0.05; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1;
     double speed_l = 0.5;//0.05; // speed of a leader cell
@@ -63,15 +63,8 @@ int main() {
 //    double t_s = 16*60;//4.31*10;
 //    double constant = 29.12;
 
-    // for extremely slow dynamics
-//    double L_0 = 30; // will have to make this consistent with actual initial length
-//    double a = 0.001;//0.008;//0.23/10;
-//    double L_inf = 86.76;
-//    double t_s = 16;//4.31*10;
-//    double constant = 29.12;
-
     double L_0 = 30; // will have to make this consistent with actual initial length
-    double a = 0.008;//0.008;//0.23/10;
+    double a = 0.001;//0.008;//0.23/10;
     double L_inf = 86.76;
     double t_s = 16;//4.31*10;
     double constant = 29.12;
@@ -92,7 +85,7 @@ int main() {
     // parameters for internalisation
 
     double R = cell_radius;//7.5/10; // \nu m cell radius
-    double lam = 500;//(100)/10; // to 1000 /h chemoattractant internalisation
+    //double lam = 500;//(100)/10; // to 1000 /h chemoattractant internalisation
 
 
     // matrix that stores the values of concentration of chemoattractant
@@ -169,7 +162,7 @@ int main() {
 
 
 
-    particle_type particles;
+    particle_type particles(N);
 
 
     // create chemical trails and chain types of particles moving along the trails
@@ -202,8 +195,7 @@ int main() {
      * periodic in x and y
      */
 
-    particles.init_neighbour_search(vdouble2(0,0), 5*vdouble2(length_x,length_y), vbool2(false,false));
-    particles.init_neighbour_search(vdouble2(0,0), 5*vdouble2(length_x,length_y), vbool2(false,false));
+
 
 
     /*
@@ -211,22 +203,18 @@ int main() {
      */
 
     for (int i=0; i<N; ++i) {
-
-        particle_type::value_type p;
-        get<radius>(p) = cell_radius;
-        get<type>(p) = 0; // initially all cells are leaders
+        get<radius>(particles)[i] = cell_radius;
+        get<type>(particles)[i] = 0; // initially all cells are leaders
 
         //get<position>(p) = vdouble2(cell_radius,(i+1)*diameter); // x=2, uniformly in y
-        get<position>(p) = vdouble2(cell_radius,(i+1)*double(length_y)/double(N)-0.5 * double(length_y)/double(N)); // x=2, uniformly in y
-        cout << "initial position " << get<position>(p) << endl;
+        get<position>(particles)[i] = vdouble2(cell_radius,(i+1)*double(length_y)/double(N)-0.5 * double(length_y)/double(N)); // x=2, uniformly in y
+        cout << "initial position " << get<position>(particles)[i] << endl;
         /*
          * loop over all neighbouring particles within "diameter=2*radius" distance
          */
-
-
-        particles.push_back(p);
     }
-    particles.update_positions();
+    particles.init_neighbour_search(vdouble2(0,0), 5*vdouble2(length_x,length_y), vbool2(false,false));
+
 
 
     /*
@@ -882,21 +870,15 @@ int main() {
                 if (get<chain>(particles[particle_id(j)]) == 0){
 
                     double random_angle = uniformpi(gen1);
-                    int sign_x, sign_y;
 
-                    while (round((x[0] * (length_x / domain_length) + sin(random_angle) + sign_x * l_filo)) < 0 ||
-                           round((x[0] * (length_x / domain_length) + sin(random_angle) + sign_x * l_filo)) >
-                           length_x - 1 || round(x[1] + cos(random_angle) + sign_y * l_filo) < 0 ||
-                           round(x[1] + cos(random_angle) + sign_y * l_filo) > length_y - 1) {
+
+                    while (round((x[0] * (length_x / domain_length) + sin(random_angle) * l_filo)) < 0 ||
+                           round((x[0] * (length_x / domain_length) + sin(random_angle) * l_filo)) >
+                           length_x - 1 || round(x[1] + cos(random_angle)  * l_filo) < 0 ||
+                           round(x[1] + cos(random_angle) * l_filo) > length_y - 1) {
                         random_angle = uniformpi(gen1);
 
-                        if (sin(random_angle) < 0) {
-                            sign_x = -1;
-                        } else { sign_x = 1; }
 
-                        if (cos(random_angle) < 0) {
-                            sign_y = -1;
-                        } else { sign_y = 1; }
 
                     }
 
@@ -966,7 +948,9 @@ int main() {
 //#ifdef HAVE_VTK
 //        vtkWriteGrid("followers",t,particles.get_grid(true));
 //#endif
+        cout << "how many steps work " << t << endl;
     }
+
 
 
 
@@ -981,6 +965,290 @@ int main() {
             output1 << track_position[i][j] << ", ";
         }
         output1 << "\n" << endl;
+    }
+
+
+
+//    // return the furthest distance travelled by the cells
+//    double furthest_distance = 0 ;
+//    vdouble2 dist; // variable for positions
+//
+//    for (int i = 0; i < particles.size(); i++) {
+//
+//        dist = get<position>(particles[i]);
+//
+//        if (furthest_distance < dist[0]){
+//            furthest_distance = dist[0];
+//        }
+//
+//    }
+//
+//
+//
+//    return furthest_distance;
+//
+
+
+    /*
+     * return the density of cells in each of the fifth of the domain
+     */
+    const int domain_partition = int (domain_length/double(5));  // number of intervalas of 50 \mu m
+
+    VectorXi proportions = VectorXi::Zero(domain_partition); // integer with number of cells in particular part
+    //array<double, domain_partition> proportions;
+
+
+    double one_part = domain_length/double(domain_partition);
+
+    cout << "one part of the domain " << one_part << endl;
+
+    for (int i = 0; i < domain_partition; i++){
+
+        for (int j = 0; j < particles.size(); j++){
+            vdouble2 x = get<position>(particles[j]);
+            //cout<< "domain partition " << i*one_part << endl;
+            //cout << "x coordinate " << x[0] << endl;
+            if (i*one_part < x[0] && x[0] < (i+1)* one_part){
+                proportions(i) += 1;
+            }
+        }
+
+    }
+
+
+    // for loops to count the number of cells in each of the fifth of the domain
+    cout << "proportions " << proportions << endl;
+    return proportions;
+
+}
+
+
+
+
+
+
+//int main(){
+//
+//    const int number_parameters = 1; // parameter range
+//
+//    const int sim_num = 1;
+//
+//    MatrixXf all_distances = MatrixXf::Zero(number_parameters,sim_num); //matrix over which I am going to average
+//
+////n would correspond to different seeds
+//    for (int n = 0; n < sim_num; n++) {
+//
+//        // define parameters that I will change
+//        //VectorXf slope, threshold;
+//        //array<double, 1> lam;
+//        double lam;
+//        array<double, number_parameters> threshold;
+//        //array<double,number_parameters,number_parameters>;
+//
+//        //MatrixXd furthest_distance = MatrixXd::Zero(number_parameters, number_parameters); // need for because that is how paraview accepts data, third dimension is just zeros
+//        //MatrixXf furthest_distance = MatrixXf::Zero(number_parameters, 1);
+//        VectorXf furthest_distance = VectorXf::Zero(number_parameters);
+//
+//
+//        for (int i = 0; i < number_parameters; i++) {
+//
+//            //lam[i] = 10 * (i + 1);//0.1;
+//            //threshold[i] = 0.5;//0.01*(i+1);// 0.01;
+//            //threshold[i] = 1*(i+1);// 0.01;
+//            threshold[i] = 0.005 * (i + 1);// 0.01;
+//
+//        }
+//
+//        //lam[0] = 100;
+//
+//        lam = 500;
+//        //cout << "lam " << lam[0] << endl;
+//        //cout << "threshold " << threshold[0] << endl;
+//
+//        //cout << "value " << func(0.05,410.0) << endl;
+//
+//        for (int i = 0; i < number_parameters; i++) {
+//            for (int j = 0; j < 1; j++) {
+//                cout << "iteration i " << i << endl;
+//                furthest_distance(i, j) = func(threshold[i], lam, n);
+//
+//
+//            }
+//            all_distances(i, n) = furthest_distance(i, 0);
+//        }
+//
+//
+//        /*
+//        // save data to plot chemoattractant concentration
+//        ofstream output("furthest_distance_matrix_cell_induced.csv");
+//
+//        MatrixXd furthest_distance_3col(number_parameters * number_parameters, 4), furthest_distance_3col_ind(number_parameters * number_parameters,
+//                                                                    2); // need for because that is how paraview accepts data, third dimension is just zeros
+//
+//
+//
+//        // x, y coord, 1st and 2nd columns respectively
+//        int k = 0;
+//        // it has to be 3D for paraview
+//        while (k < number_parameters * number_parameters) {
+//            for (int i = 0; i < number_parameters; i++) {
+//                for (int j = 0; j < number_parameters; j++) {
+//                    furthest_distance_3col_ind(k, 0) = i;
+//                    furthest_distance_3col_ind(k, 1) = j;
+//                    furthest_distance_3col(k, 2) = 0;
+//                    k += 1;
+//                }
+//            }
+//        }
+//
+//
+//        // y and x (initially) column
+//        for (int i = 0; i < number_parameters * number_parameters; i++) {
+//            furthest_distance_3col(i, 1) = furthest_distance_3col_ind(i, 1);
+//            furthest_distance_3col(i, 0) = furthest_distance_3col_ind(i, 0);
+//        }
+//
+//
+//        // u column
+//        for (int i = 0; i < number_parameters * number_parameters; i++) {
+//            furthest_distance_3col(i, 3) = furthest_distance(furthest_distance_3col_ind(i, 0), furthest_distance_3col_ind(i, 1));
+//        }
+//
+//        output << "x, y, z, u" << "\n" << endl;
+//
+//
+//        for (int i = 0; i < number_parameters * number_parameters; i++) {
+//            for (int j = 0; j < 4; j++) {
+//                output << furthest_distance_3col(i, j) << ", ";
+//            }
+//            output << "\n" << endl;
+//        }
+//        */
+//
+//
+//
+//
+//        // This might be useful for matlab
+//        ofstream output2("furthest_distance_matrix_matlab_cell_induced.csv");
+//
+//        for (int i = 0; i < number_parameters; i++) {
+//
+//            for (int j = 0; j < 1; j++) {
+//
+//                output2 << furthest_distance(i, j) << ", ";
+//
+//            }
+//            output2 << "\n" << endl;
+//        }
+//
+//    }
+//
+//
+//        ofstream output3("simulations_cell_induced.csv");
+//
+//        for (int i = 0; i < number_parameters; i++) {
+//
+//            for (int j = 0; j < sim_num; j++) {
+//
+//                output3 << all_distances(i, j) << ", ";
+//
+//            }
+//            output3 << "\n" << endl;
+//        }
+//
+//
+//
+//}
+
+
+
+/*
+ * main for proportions in different sections
+ */
+
+
+// parameter analysis
+int main(){
+
+    const int number_parameters = 1; // parameter range
+    const int sim_num = 1;
+
+    //cout << "fails here " << endl;
+    VectorXi vector_check_length = func(0.005, 500, 2); //just to know what the length is
+    //cout << "after function is called " << endl;
+    int num_parts = vector_check_length.size(); // number of parts that I partition my domain
+
+    MatrixXf sum_of_all = MatrixXf::Zero(num_parts,number_parameters); // sum of the values over all simulations
+
+//n would correspond to different seeds
+    for (int n = 0; n < sim_num; n++) {
+
+
+        // define parameters that I will change
+        //VectorXf slope, threshold;
+        array<double, number_parameters> threshold;
+        double lam = 500;
+        //array<double,number_parameters,number_parameters>;
+
+        MatrixXf furthest_distance = MatrixXf::Zero(number_parameters,1);
+        //VectorXf furthest_distance = VectorXf::Zero(number_parameters);
+
+
+        for (int i = 0; i < number_parameters; i++) {
+
+           threshold[i] = 0.5;
+            //threshold[i] = 0.005 * (i + 1);// 0.01;
+            //cout << "slope " << slope[i] << endl;
+
+        }
+
+
+        MatrixXi numbers = MatrixXi::Zero(num_parts,number_parameters); // can't initialise because do not know the size
+
+        cout << "stops here" << endl;
+
+        for (int i = 0; i < number_parameters; i++) {
+
+            //for (int j = 0; j < 1; j++) {
+
+            numbers.block(0,i,num_parts,1) = func(threshold[i], lam, n);
+            //cout << "fails here 2" << endl;
+
+            //}
+        }
+
+
+        // This is what I am using for MATLAB
+        ofstream output2("numbers_matrix_matlab_two_types.csv");
+
+        for (int i = 0; i < numbers.rows(); i++) {
+
+            for (int j = 0; j < numbers.cols(); j++) {
+
+                output2 << numbers(i, j) << ", ";
+
+                sum_of_all(i,j) += numbers(i,j);
+
+            }
+            output2 << "\n" << endl;
+        }
+
+    }
+
+    /*
+    * will store everything in one matrix, the entries will be summed over all simulations
+    */
+
+    ofstream output3("simulations_domain_partition_cell_induced_two_types.csv");
+
+    for (int i = 0; i < num_parts; i++) {
+
+        for (int j = 0; j < number_parameters; j++) {
+
+            output3 << sum_of_all(i, j) << ", ";
+
+        }
+        output3 << "\n" << endl;
     }
 
 

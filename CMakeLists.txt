@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.5)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Aboria/cmake"
         ${CMAKE_MODULE_PATH})
@@ -37,6 +37,7 @@ include_directories(src ${INCLUDES})
 #add_executable(two_types_open_extra two_types_open_extra.cpp)
 #add_executable(forced_gradient forced_gradient.cpp)
 add_executable(two_types_chains two_types_chains.cpp)
+
 
 #target_link_libraries(one_type_cells ${LIBRARIES})
 #target_link_libraries(two_types_open_extra ${LIBRARIES})

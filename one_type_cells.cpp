@@ -28,10 +28,10 @@ int main() {
     const int length_y = 12;//120;//20;//4;
     double cell_radius = 0.75;//0.5; // radius of a cell
     const double diameter = 2 * cell_radius;//2 // diameter in which there have to be no cells, equivalent to size of the cell
-    const int N_steps = 800; // number of times the cells move up the gradient
+    const int N_steps = 200; // number of times the cells move up the gradient
     const size_t N = 7; // initial number of cells
     double l_filo = 27.5/10;//2; // sensing radius
-    double diff_conc = 0.05; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
+    double diff_conc = 0.5; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1;
     double speed_l = 0.5;//0.05; // speed of a leader cell
@@ -159,7 +159,7 @@ int main() {
 
 
 
-    particle_type particles;
+    particle_type particles(N);
 
 
 
@@ -178,8 +178,6 @@ int main() {
      * periodic in x and y
      */
 
-    particles.init_neighbour_search(vdouble2(0,0), 5*vdouble2(length_x,length_y), vbool2(false,false));
-    particles.init_neighbour_search(vdouble2(0,0), 5*vdouble2(length_x,length_y), vbool2(false,false));
 
 
     /*
@@ -188,19 +186,16 @@ int main() {
 
     for (int i=0; i<N; ++i) {
 
-        particle_type::value_type p;
-        get<radius>(p) = cell_radius;
+
+        get<radius>(particles[i]) = cell_radius;
 
 
-        get<position>(p) = vdouble2(cell_radius,(i+1)*diameter); // x=2, uniformly in y
-        /*
-         * loop over all neighbouring particles within "diameter=2*radius" distance
-         */
+        get<position>(particles[i]) = vdouble2(cell_radius,(i+1)*diameter); // x=2, uniformly in y
 
-
-        particles.push_back(p);
     }
-    particles.update_positions();
+
+    particles.init_neighbour_search(vdouble2(0,0), 5*vdouble2(length_x,length_y), vbool2(false,false));
+
 
 
     /*

@@ -60,39 +60,39 @@ CMAKE_SOURCE_DIR = /home/rasa/NC-codes
 CMAKE_BINARY_DIR = /home/rasa/NC-codes/cmake-build-debug
 
 #=============================================================================
-# Target rules for target CMakeFiles/two_types_chains.dir
+# Target rules for target CMakeFiles/forced_gradient.dir
 
 # All Build rule for target.
-CMakeFiles/two_types_chains.dir/all:
-	$(MAKE) -f CMakeFiles/two_types_chains.dir/build.make CMakeFiles/two_types_chains.dir/depend
-	$(MAKE) -f CMakeFiles/two_types_chains.dir/build.make CMakeFiles/two_types_chains.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/rasa/NC-codes/cmake-build-debug/CMakeFiles --progress-num=1,2 "Built target two_types_chains"
-.PHONY : CMakeFiles/two_types_chains.dir/all
+CMakeFiles/forced_gradient.dir/all:
+	$(MAKE) -f CMakeFiles/forced_gradient.dir/build.make CMakeFiles/forced_gradient.dir/depend
+	$(MAKE) -f CMakeFiles/forced_gradient.dir/build.make CMakeFiles/forced_gradient.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/rasa/NC-codes/cmake-build-debug/CMakeFiles --progress-num=1,2 "Built target forced_gradient"
+.PHONY : CMakeFiles/forced_gradient.dir/all
 
 # Include target in all.
-all: CMakeFiles/two_types_chains.dir/all
+all: CMakeFiles/forced_gradient.dir/all
 
 .PHONY : all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/two_types_chains.dir/rule: cmake_check_build_system
+CMakeFiles/forced_gradient.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/rasa/NC-codes/cmake-build-debug/CMakeFiles 2
-	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/two_types_chains.dir/all
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/forced_gradient.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/rasa/NC-codes/cmake-build-debug/CMakeFiles 0
-.PHONY : CMakeFiles/two_types_chains.dir/rule
+.PHONY : CMakeFiles/forced_gradient.dir/rule
 
 # Convenience name for target.
-two_types_chains: CMakeFiles/two_types_chains.dir/rule
+forced_gradient: CMakeFiles/forced_gradient.dir/rule
 
-.PHONY : two_types_chains
-
-# clean rule for target.
-CMakeFiles/two_types_chains.dir/clean:
-	$(MAKE) -f CMakeFiles/two_types_chains.dir/build.make CMakeFiles/two_types_chains.dir/clean
-.PHONY : CMakeFiles/two_types_chains.dir/clean
+.PHONY : forced_gradient
 
 # clean rule for target.
-clean: CMakeFiles/two_types_chains.dir/clean
+CMakeFiles/forced_gradient.dir/clean:
+	$(MAKE) -f CMakeFiles/forced_gradient.dir/build.make CMakeFiles/forced_gradient.dir/clean
+.PHONY : CMakeFiles/forced_gradient.dir/clean
+
+# clean rule for target.
+clean: CMakeFiles/forced_gradient.dir/clean
 
 .PHONY : clean
 

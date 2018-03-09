@@ -508,4 +508,4 @@ but not all the files it references.
 
 -- Configuring done
 -- Generating done
--- Build files have been written to: /home/rasa/NC-codes/cmake-build-debug
+-- Build files have been written to: /home/rasa/NC-codes

@@ -37,8 +37,8 @@
 					<DistClean command="/usr/bin/make -j4 -f &quot;/home/rasa/NC-codes/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
-			<Target title="two_types_chains">
-				<Option output="/home/rasa/NC-codes/cmake-build-debug/two_types_chains" prefix_auto="0" extension_auto="0"/>
+			<Target title="forced_gradient">
+				<Option output="/home/rasa/NC-codes/cmake-build-debug/forced_gradient" prefix_auto="0" extension_auto="0"/>
 				<Option working_dir="/home/rasa/NC-codes/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
@@ -61,14 +61,14 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/rasa/NC-codes/cmake-build-debug/Makefile&quot;  VERBOSE=1 two_types_chains"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/rasa/NC-codes/cmake-build-debug/Makefile&quot;  VERBOSE=1 forced_gradient"/>
 					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/rasa/NC-codes/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
 					<Clean command="/usr/bin/make -j4 -f &quot;/home/rasa/NC-codes/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 					<DistClean command="/usr/bin/make -j4 -f &quot;/home/rasa/NC-codes/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
-			<Target title="two_types_chains/fast">
-				<Option output="/home/rasa/NC-codes/cmake-build-debug/two_types_chains" prefix_auto="0" extension_auto="0"/>
+			<Target title="forced_gradient/fast">
+				<Option output="/home/rasa/NC-codes/cmake-build-debug/forced_gradient" prefix_auto="0" extension_auto="0"/>
 				<Option working_dir="/home/rasa/NC-codes/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
@@ -91,15 +91,15 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/rasa/NC-codes/cmake-build-debug/Makefile&quot;  VERBOSE=1 two_types_chains/fast"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/rasa/NC-codes/cmake-build-debug/Makefile&quot;  VERBOSE=1 forced_gradient/fast"/>
 					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/rasa/NC-codes/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
 					<Clean command="/usr/bin/make -j4 -f &quot;/home/rasa/NC-codes/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 					<DistClean command="/usr/bin/make -j4 -f &quot;/home/rasa/NC-codes/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/home/rasa/NC-codes/two_types_chains.cpp">
-			<Option target="two_types_chains"/>
+		<Unit filename="/home/rasa/NC-codes/forced_gradient.cpp">
+			<Option target="forced_gradient"/>
 		</Unit>
 		<Unit filename="/home/rasa/NC-codes/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
