@@ -34,7 +34,7 @@ int main() {
     const int N_steps = 1600; // number of times the cells move up the gradient
     const size_t N = 7; // initial number of cells
     double l_filo = 27.5/10;//2; // sensing radius
-    double diff_conc = 0.5; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
+    double diff_conc = 0.05; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1;
     double speed_l = 0.05;//0.05; // speed of a leader cell
@@ -914,11 +914,23 @@ int main() {
 
                 //bool free_position = true; // check if the neighbouring position is free
                 // if a particle is not part of the chain, look for cells that are leaders or part of a chain
-                if (get<chain>(particles[particle_id(j)]) == 0) {
+                //if (get<chain>(particles[particle_id(j)]) == 0) {
+
+                if(get<id>(particles)[particle_id(j)] == 22){
+                    cout << " id 22 " << endl;
+                }
+
+                cout << "current id " << get<id>(particles)[particle_id(j)] << endl;
+
                     for (auto k = euclidean_search(particles.get_query(), x, l_filo); k != false; ++k) {
+
+                        cout << "norm " << k.dx().norm() << endl;
+                        cout << "neighbours id " << get<id>(*k) << endl;
 
                         // if it is close to a follower that is part of the chain
                         if (get<type>(*k) == 1 && get<chain>(*k) == 1) {
+                            cout << "neighbours id fol" << get<id>(*k) << endl;
+
                             //get<direction>(particles[particle_id(j)]) = 0.1 * k.dx(); // move closer
 
                             //get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[1]),
@@ -934,6 +946,7 @@ int main() {
                         }
 
                         if (get<type>(*k) == 0) { // check if it is not the same particle
+                            cout << "neighbours id leader" << get<id>(*k) << endl;
                             //get<direction>(particles[particle_id(j)]) = 0.2 * k.dx();
                             get<direction>(particles)[particle_id(j)] = 1.5 * get<direction>(*k);
                             get<chain>(particles)[particle_id(j)] = 1;
@@ -941,7 +954,7 @@ int main() {
                         }
 
                     }
-                }
+               // }
 
                 x += get<direction>(particles)[particle_id(j)];
 

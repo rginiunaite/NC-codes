@@ -28,14 +28,14 @@ int main() {
     const int length_y = 12;//120;//20;//4;
     double cell_radius = 0.75;//0.5; // radius of a cell
     const double diameter = 2 * cell_radius;//2 // diameter in which there have to be no cells, equivalent to size of the cell
-    const int N_steps = 200; // number of times the cells move up the gradient
+    const int N_steps = 1500; // number of times the cells move up the gradient
     const size_t N = 7; // initial number of cells
     double l_filo = 27.5/10;//2; // sensing radius
     double diff_conc = 0.5; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1;
-    double speed_l = 0.5;//0.05; // speed of a leader cell
-    double speed_f = 0.5;//0.08; // speed of a follower cell
+    double speed_l = 0.05;//0.05; // speed of a leader cell
+    double speed_f = 0.05;//0.08; // speed of a follower cell
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
 
 
@@ -76,7 +76,7 @@ int main() {
 
     double D = 1; // to 10^5 \nu m^2/h diffusion coefficient
     double t = 0; // initialise time, redundant
-    double dt = 0.0001; // time step
+    double dt = 0.000001; // time step
     double dx = 1; // space step in x direction, double to be consistent with other types
     double dy = 1; // space step in y direction
     double kai = 1/100;//0.0001/10; // to 1 /h production rate of chemoattractant

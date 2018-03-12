@@ -67,9 +67,11 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
 //    double constant = 29.12;
 
     double L_0 = 30; // will have to make this consistent with actual initial length
-    double a = 0.001;//0.008;//0.23/10;
+   //double a = 0.001;//0.008;//0.23/10;
+    double a = 0.23/10;
     double L_inf = 86.76;
-    double t_s = 16;//4.31*10;
+    //double t_s = 16;//4.31*10;
+    double t_s = 15.96*10;
     double constant = 29.12;
 
     double domain_len_der = 0; // initialise derivative of the domain growth function
@@ -308,16 +310,61 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
 
         //cout << "old length " << old_length << endl;
         //cout << "domain length " << domain_length << endl;
-        // x column
+
+        /*
+         *  x column, UNIFORM GROWTH
+         *
+         * */
         for (int i = 0; i < length_x * length_y; i++) {
             chemo_3col(i, 0) = chemo_3col_ind(i, 0) * (domain_length / length_x);
         }
-        //cout << "domain length ratio " << domain_length/length_x << endl;
+        cout << "domain length ratio " << domain_length/length_x << endl;
+
+
+
+        /*
+         *  x column, NON-UNIFORM GROWTH
+         *
+         * */
+//        // only the first half grows
+//
+//        // domain does not grow in the final half
+//        // the last element is dependent on how much the domain grew
+//        for (int j=1;j< length_y+1;j++){
+//            chemo_3col(length_x*length_y - j,0) = chemo_3col_ind(length_x*length_y - j,0)*(domain_length / length_x);
+//        }
+//        // since the second half does not grow, the chemo remains fixed
+//        float difference = chemo_3col_ind(length_x*length_y-1,0) - chemo_3col_ind(length_x*length_y-(length_y+1),0);
+//        int count = 0.5*length_x;
+//        int count_12 = 1; // count, so that the change would be at every twelth position
+//        for (int i = 0.5 * length_x * length_y; i < length_x * length_y - length_y; i++) {
+//            chemo_3col(i, 0) = chemo_3col(length_x*length_y -1,0) -difference *count;
+//            count_12 += 1;
+//            cout << " x coord, 2nd half " << chemo_3col(i,0) << endl;
+//
+//            if (count_12 % length_y == 0){
+//                count -= 1;
+//            }
+//        }
+//
+//        // the first half grows
+//        for (int i = 0; i < 0.5 * length_x * length_y; i++) {
+//            chemo_3col(i, 0) = chemo_3col_ind(i, 0) * (chemo_3col(0.5*length_x*length_y,0) / (length_x*0.5));
+//            cout << " x coord, 1st half " << chemo_3col(i,0) << endl;
+//        }
+
+
+
 
         // u column
+
         for (int i = 0; i < length_x * length_y; i++) {
             chemo_3col(i, 3) = chemo(chemo_3col_ind(i, 0), chemo_3col_ind(i, 1));
         }
+
+
+
+
 
 
         // save data to plot chemoattractant concentration
@@ -334,7 +381,11 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
         }
 
 
-        /// update positions uniformly based on the domain growth
+        // update positions
+
+        /*
+         * Uniform growth
+         * */
 
         if (t % freq_growth == 0) {
             for (int i = 0; i < particles.size(); i++) {
@@ -342,6 +393,12 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
             }
             old_length = domain_length;
         }
+
+        /*
+         * Non-uniform growth, second part does not grow
+         * */
+
+
 
 
         /////////////////////////////////////
