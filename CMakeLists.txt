@@ -35,14 +35,20 @@ include_directories(src ${INCLUDES})
 
 #add_executable(one_type_cells one_type_cells.cpp)
 #add_executable(two_types_open_extra two_types_open_extra.cpp)
-add_executable(forced_gradient forced_gradient.cpp)
-#add_executable(two_types_chains two_types_chains.cpp)
+#add_executable(forced_gradient forced_gradient.cpp)
+add_executable(two_types_chains two_types_chains.cpp)
+#add_executable(forced_gradient_non_uniform forced_gradient_non_uniform.cpp)
+#add_executable(one_type_cells_non_uniform one_type_cells_non_uniform.cpp)
+
 
 
 #target_link_libraries(one_type_cells ${LIBRARIES})
 #target_link_libraries(two_types_open_extra ${LIBRARIES})
-target_link_libraries(forced_gradient ${LIBRARIES})
-#target_link_libraries(two_types_chains ${LIBRARIES})
+#target_link_libraries(forced_gradient ${LIBRARIES})
+target_link_libraries(two_types_chains ${LIBRARIES})
+#target_link_libraries(forced_gradient_non_uniform ${LIBRARIES})
+#target_link_libraries(one_type_cells_non_uniform ${LIBRARIES})
+
 
 
 

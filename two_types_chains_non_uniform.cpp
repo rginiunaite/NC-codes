@@ -98,12 +98,12 @@ int main() {
     // initialise internalisation matrix
     MatrixXf intern = MatrixXf::Zero(length_x, length_y);
 
-    // generate initial chemoattractant concentration
     for (int i = 0;i<length_x;i++){
         for (int j = 0; j< length_y; j++){
             chemo(i,j) = 1; // uniform concentration initially
             chemo_new(i,j) = 1; // this is for later updates
-        }
+        }    // generate initial chemoattractant concentration
+
     }
 
 
@@ -320,11 +320,46 @@ int main() {
 
 
 
-        // save the chemoattractant concentration with properly rescaled coordinates
-        for (int i = 0; i < length_x * length_y; i++) {
-            chemo_3col(i, 0) = chemo_3col_ind(i, 0) * (domain_length / length_x);
+        // save the chemoattractant concentration with properly rescaled coordinates, UNIFORM DOMAIN GROWTH
+//        for (int i = 0; i < length_x * length_y; i++) {
+//            chemo_3col(i, 0) = chemo_3col_ind(i, 0) * (domain_length / length_x);
+//        }
+//        //cout << "domain length ratio " << domain_length/length_x << endl;
+
+        /*
+        *  NON-UNIFORM DOMAIN GROWTH
+        * */
+
+
+        // only the first half grows
+
+        // domain does not grow in the final half
+        // the last element is dependent on how much the domain grew
+        for (int j = 1; j < length_y + 1; j++) {
+            chemo_3col(length_x * length_y - j, 0) =
+                    chemo_3col_ind(length_x * length_y - j, 0) * (domain_length / length_x);
         }
-        //cout << "domain length ratio " << domain_length/length_x << endl;
+        // since the second half does not grow, the chemo remains fixed
+        float difference =
+                chemo_3col_ind(length_x * length_y - 1, 0) - chemo_3col_ind(length_x * length_y - (length_y + 1), 0);
+        int count = 0.5 * length_x;
+        int count_12 = 1; // count, so that the change would be at every twelth position
+        for (int i = 0.5 * length_x * length_y; i < length_x * length_y - length_y; i++) {
+            chemo_3col(i, 0) = chemo_3col(length_x * length_y - 1, 0) - difference * count;
+            count_12 += 1;
+            cout << " x coord, 2nd half " << chemo_3col(i, 0) << endl;
+
+            if (count_12 % length_y == 0) {
+                count -= 1;
+            }
+        }
+
+        // the first half grows
+        for (int i = 0; i < 0.5 * length_x * length_y; i++) {
+            chemo_3col(i, 0) = chemo_3col_ind(i, 0) * (chemo_3col(0.5 * length_x * length_y, 0) / (length_x * 0.5));
+            cout << " x coord, 1st half " << chemo_3col(i, 0) << endl;
+        }
+
 
         // u column
         for (int i = 0; i < length_x * length_y; i++) {
@@ -333,6 +368,13 @@ int main() {
 
 
         // update chemoattractant profile
+
+        /*
+        * scaling factors for the same length scale
+        * non uniform domain growth, only the first half grows
+        * */
+
+        double scaling_factor;
 
         // internalisation
         for (int i = 0; i < length_x; i++) {
@@ -343,47 +385,50 @@ int main() {
                     vdouble2 x;
                     x = get<position>(particles[k]);
 
-                    intern(i, j) = intern(i, j) + exp(-(((domain_length / length_x) * i - x[0]) *
-                                                        ((domain_length / length_x) * i - x[0]) +
-                                                        (j - x[1]) * (j - x[1])) /
-                                                      (2 * R * R)); // mapping to fixed domain
+                    if (x[0] > 0 && x[0] < domain_length - 0.5 * length_x) {
+                        scaling_factor = (domain_length - length_x * 0.5) /
+                                         (length_x - length_x * 0.5);//uniform growth in the first part of the domain
+                        intern(i, j) = intern(i, j) + exp(-((scaling_factor * i - x[0]) * (scaling_factor * i - x[0]) +
+                                                            (j - x[1]) * (j - x[1])) /
+                                                          (2 * R * R)); // mapping to fixed domain
+                    }
+                    if (x[0] > domain_length - 0.5 * length_x && x[0] < domain_length) {
+                        scaling_factor = (domain_length - length_x);//uniform growth in the first part of the domain
+                        intern(i, j) = intern(i, j) + exp(-((i + scaling_factor - x[0]) * (i + scaling_factor - x[0]) +
+                                                            (j - x[1]) * (j - x[1])) /
+                                                          (2 * R * R)); // mapping to fixed domain
+                    }
                 }
             }
         }
 
-        for (int i = 1; i < length_x - 1; i++) {
+        // non-uniform growth, changes in reaction diffusion equation
+
+        // final half
+        for (int i = length_x * 0.5; i < length_x - 1; i++) {
             for (int j = 1; j < length_y - 1; j++) {
-
-
-                // logistic production rate
-                chemo_new(i, j) = dt * (D * ((1 / ((domain_length / length_x) * (domain_length / length_x))) *
-                                             (chemo(i + 1, j) - 2 * chemo(i, j) + chemo(i - 1, j)) / (dx * dx) +
+                chemo_new(i, j) = dt * (D * ((chemo(i + 1, j) - 2 * chemo(i, j) + chemo(i - 1, j)) / (dx * dx) +
                                              (chemo(i, j + 1) - 2 * chemo(i, j) + chemo(i, j - 1)) / (dy * dy)) -
                                         (chemo(i, j) * lam / (2 * M_PI * R * R)) * intern(i, j) +
-                                        kai * chemo(i, j) * (1 - chemo(i, j)) -
-                                        double(domain_len_der) / double(domain_length) * chemo(i, j)) + chemo(i, j);
-
-
-                //different production rate, linear
-                //chemo_new(i,j) = dt * (D*((1/((domain_length/length_x)*(domain_length/length_x))) * (chemo(i+1,j)-2*chemo(i,j)+chemo(i-1,j))/(dx*dx) + (chemo(i,j+1)- 2* chemo(i,j)+chemo(i,j-1))/(dy*dy)) - (chemo(i,j)*lam / (2*M_PI*R*R)) * intern(i,j) + kai*chemo(i,j)*(1-chemo(i,j)) - double(domain_len_der)/double(domain_length) * chemo(i,j) ) + chemo(i,j);
-
-                // different production rate, threshold value
-
-                /*if (chemo(i,j)<=1){
-                    chemo_new(i,j) = dt * (D*((1/((domain_length/length_x)*(domain_length/length_x))) * (chemo(i+1,j)-2*chemo(i,j)+chemo(i-1,j))/(dx*dx) + (chemo(i,j+1)- 2* chemo(i,j)+chemo(i,j-1))/(dy*dy)) - (chemo(i,j)*lam / (2*M_PI*R*R)) * intern(i,j) + kai - double(domain_len_der)/double(domain_length) * chemo(i,j) ) + chemo(i,j);
-                }
-                else{
-                    chemo_new(i,j) = dt * (D*((1/((domain_length/length_x)*(domain_length/length_x))) * (chemo(i+1,j)-2*chemo(i,j)+chemo(i-1,j))/(dx*dx) + (chemo(i,j+1)- 2* chemo(i,j)+chemo(i,j-1))/(dy*dy)) - (chemo(i,j)*lam / (2*M_PI*R*R)) * intern(i,j) - double(domain_len_der)/double(domain_length) * chemo(i,j) ) + chemo(i,j);
-                }*/
-
-
-                // no source
-                //chemo_new(i,j) = dt * (D*((1/((domain_length/length_x)*(domain_length/length_x))) * (chemo(i+1,j)-2*chemo(i,j)+chemo(i-1,j))/(dx*dx) + (chemo(i,j+1)- 2* chemo(i,j)+chemo(i,j-1))/(dy*dy)) - (chemo(i,j)*lam / (2*M_PI*R*R)) * intern(i,j)  - double(domain_len_der)/double(domain_length) * chemo(i,j) ) + chemo(i,j);
-
+                                        kai * chemo(i, j) * (1 - chemo(i, j))) + chemo(i, j);
             }
-            //cout << "print the internalisation term " << intern(i,j) << endl;
-            //cout << "new chemo " << chemo_new(i,j) << endl;
         }
+
+        // first half
+        for (int i = 1; i < length_x * 0.5; i++) {
+            for (int j = 1; j < length_y - 1; j++) {
+                chemo_new(i, j) = dt * (D * ((1 / (((domain_length - 0.5 * length_x) / (0.5 * double(length_x))) *
+                                                   ((domain_length - 0.5 * double(length_x)) /
+                                                    (0.5 * double(length_x)))) *
+                                              (chemo(i + 1, j) - 2 * chemo(i, j) + chemo(i - 1, j)) / (dx * dx) +
+                                              (chemo(i, j + 1) - 2 * chemo(i, j) + chemo(i, j - 1)) / (dy * dy)) -
+                                             (chemo(i, j) * lam / (2 * M_PI * R * R)) * intern(i, j) +
+                                             kai * chemo(i, j) * (1 - chemo(i, j)) -
+                                             double(domain_len_der) / (domain_length-0.5 * double(length_x))) * chemo(i, j)) +
+                                  chemo(i, j);
+            }
+        }
+
 
         // zero flux boundary conditions
 
@@ -418,15 +463,28 @@ int main() {
         }
 
 
-        /// update positions uniformly based on the domain growth
+        /// update positions based on the domain growth, NON-uniform
+
 
         if (t % freq_growth == 0) {
-
             for (int i = 0; i < particles.size(); i++) {
-                get<position>(particles)[i] *= vdouble2((domain_length / old_length), 1);
+                vdouble2 x = get<position>(particles)[i]; // so that I could extract x coord
+                // if in the first part of the domain
+                if (x[0] > 0 && x[0] < old_length - 0.5 * length_x) {
+                    get<position>(particles)[i] *= vdouble2(
+                            (domain_length - length_x * 0.5) / (old_length - length_x * 0.5),
+                            1);//uniform growth in the first part of the domain
+                }
+                    //if (x[0] > old_length - 0.5 * length_x && x[0] < old_length){
+                else {
+                    get<position>(particles)[i] += vdouble2(domain_length - old_length,
+                                                            0);//uniform growth in the first part of the domain
+                }
+
             }
             old_length = domain_length;
         }
+
 
 
         /////////////////////////////////////
@@ -484,20 +542,33 @@ int main() {
 
                 vdouble2 x;
                 x = get<position>(particles[particle_id(j)]);
-                //cout << "particles.size " << i << endl;
-                //cout << "print id " << get<id>(particles[i]) << endl;
-                //cout << "x coord " << x[0] << endl;
 
 
                 /*
-                * x_in variable will correspond to the coordinates on the non-updated domain (same as initial)
-                * */
+             * x_in variable will correspond to the coordinates on the non-updated domain (same as initial)
+             * */
 
-                // Uniform domain growth
 
                 double x_in; // x coordinate in initial domain length
 
-                x_in = (length_x / domain_length)*x[0];
+                // Uniform domain growth
+
+                // x_in = (length_x / domain_length)*x[0];
+
+                // Non-uniform domain growth
+
+
+                // Non-uniform domain growth, onl first half grows
+                // if in the first part of the domain
+                if (x[0] > 0 && x[0] < domain_length - 0.5 * length_x) {
+                    x_in = x[0] * ((length_x - length_x * 0.5) /
+                                   (domain_length - length_x * 0.5));//uniform growth in the first part of the domain
+                }
+                if (x[0] > domain_length - 0.5 * length_x && x[0] < domain_length) {
+                    x_in = x[0] - (domain_length - length_x);//uniform growth in the first part of the domain
+                }
+
+
 
 
                 // create an array to store random directions
@@ -543,7 +614,7 @@ int main() {
                 // store variables for concentration at new locations
 
 
-                double old_chemo = chemo(round(x_in), round(x)[1]);
+                double old_chemo = chemo((round(x_in))), round(x)[1]);
 
                 double new_chemo_1 = chemo(round((x_in + sin(random_angle[0]) * l_filo)),
                                            round(x[1] + cos(random_angle[0]) * l_filo));
@@ -563,8 +634,16 @@ int main() {
                     x += speed_l * vdouble2(sin(random_angle[2]), cos(random_angle[2]));
                     //cout << "print id " << id_[x] << endl;
 
-                    // rescaled
-                    x_in = (length_x / domain_length)*x[0];
+                    // Non-uniform domain growth, onl first half grows
+                    // if in the first part of the domain
+                    if (x[0] > 0 && x[0] < domain_length - 0.5 * length_x) {
+                        x_in = x[0] * ((length_x - length_x * 0.5) /
+                                       (domain_length - length_x * 0.5));//uniform growth in the first part of the domain
+                    }
+                    if (x[0] > domain_length - 0.5 * length_x && x[0] < domain_length) {
+                        x_in = x[0] - (domain_length - length_x);//uniform growth in the first part of the domain
+                    }
+
 
                     //cout << "Position "<< x << endl;
 
@@ -588,7 +667,7 @@ int main() {
                         round(x_in) > 0 &&
                         round(x_in) < length_x - 1 &&
                         round(x[1]) > 0 &&
-                        round(x[1]) < length_y - 1) {
+                        round(x[1] ) < length_y - 1) {
                         get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[2]),
                                                                                        cos(random_angle[2])); // update if nothing is in the next position
                         get<direction>(particles)[particle_id(j)] = speed_l * vdouble2(sin(random_angle[2]),
@@ -607,8 +686,19 @@ int main() {
                     x += speed_l * vdouble2(sin(random_angle[0]), cos(random_angle[0]));
                     //cout << "print id " << id_[x] << endl;
 
-                    // rescaled
-                    x_in = (length_x / domain_length)*x[0];
+                    // Non-uniform domain growth
+
+
+                    // Non-uniform domain growth, onl first half grows
+                    // if in the first part of the domain
+                    if (x[0] > 0 && x[0] < domain_length - 0.5 * length_x) {
+                        x_in = x[0] * ((length_x - length_x * 0.5) /
+                                       (domain_length - length_x * 0.5));//uniform growth in the first part of the domain
+                    }
+                    if (x[0] > domain_length - 0.5 * length_x && x[0] < domain_length) {
+                        x_in = x[0] - (domain_length - length_x);//uniform growth in the first part of the domain
+                    }
+
 
                     //cout << "Position "<< x << endl;
                     bool free_position = true; // check if the neighbouring position is free
@@ -630,7 +720,7 @@ int main() {
                         round(x_in) > 0 &&
                         round(x_in) < length_x - 1 &&
                         round(x[1] ) > 0 &&
-                        round(x[1] ) < length_y - 1) {
+                        round(x[1]) < length_y - 1) {
                         get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[0]),
                                                                                        cos(random_angle[0])); // update if nothing is in the next position
                         get<direction>(particles)[particle_id(j)] = speed_l * vdouble2(sin(random_angle[0]),
@@ -651,8 +741,19 @@ int main() {
                     x += speed_l * vdouble2(sin(random_angle[1]), cos(random_angle[1]));
                     //cout << "print id " << id_[x] << endl;
 
-                    // rescaled
-                    x_in = (length_x / domain_length)*x[0];
+                    // Non-uniform domain growth
+
+
+                    // Non-uniform domain growth, onl first half grows
+                    // if in the first part of the domain
+                    if (x[0] > 0 && x[0] < domain_length - 0.5 * length_x) {
+                        x_in = x[0] * ((length_x - length_x * 0.5) /
+                                       (domain_length - length_x * 0.5));//uniform growth in the first part of the domain
+                    }
+                    if (x[0] > domain_length - 0.5 * length_x && x[0] < domain_length) {
+                        x_in = x[0] - (domain_length - length_x);//uniform growth in the first part of the domain
+                    }
+
 
                     //cout << "Position "<< x << endl;
                     bool free_position = true; // check if the neighbouring position is free
@@ -695,9 +796,19 @@ int main() {
                     if (new_chemo_1 > new_chemo_2) {
                         x += speed_l * vdouble2(sin(random_angle[0]), cos(random_angle[0]));
                         //cout << "print id " << id_[x] << endl;
+                        // Non-uniform domain growth
 
-                        // rescaled
-                        x_in = (length_x / domain_length)*x[0];
+
+                        // Non-uniform domain growth, onl first half grows
+                        // if in the first part of the domain
+                        if (x[0] > 0 && x[0] < domain_length - 0.5 * length_x) {
+                            x_in = x[0] * ((length_x - length_x * 0.5) /
+                                           (domain_length - length_x * 0.5));//uniform growth in the first part of the domain
+                        }
+                        if (x[0] > domain_length - 0.5 * length_x && x[0] < domain_length) {
+                            x_in = x[0] - (domain_length - length_x);//uniform growth in the first part of the domain
+                        }
+
 
                         //cout << "Position "<< x << endl;
                         bool free_position = true; // check if the neighbouring position is free
@@ -719,8 +830,8 @@ int main() {
                         if (free_position &&
                             round(x_in) > 0 &&
                             round(x_in) < length_x - 1 &&
-                            round(x[1]) > 0 &&
-                            round(x[1] ) < length_y - 1) {
+                            round(x[1] ) > 0 &&
+                            round(x[1]) < length_y - 1) {
                             get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[0]),
                                                                                            cos(random_angle[0])); // update if nothing is in the next position
                             get<direction>(particles)[particle_id(j)] = speed_l * vdouble2(sin(random_angle[0]),
@@ -733,9 +844,19 @@ int main() {
                     else if (new_chemo_1 < new_chemo_2) {
                         x += speed_l * vdouble2(sin(random_angle[1]), cos(random_angle[1]));
                         //cout << "print id " << id_[x] << endl;
+                        // Non-uniform domain growth
 
-                        // rescaled
-                        x_in = (length_x / domain_length)*x[0];
+
+                        // Non-uniform domain growth, onl first half grows
+                        // if in the first part of the domain
+                        if (x[0] > 0 && x[0] < domain_length - 0.5 * length_x) {
+                            x_in = x[0] * ((length_x - length_x * 0.5) /
+                                           (domain_length - length_x * 0.5));//uniform growth in the first part of the domain
+                        }
+                        if (x[0] > domain_length - 0.5 * length_x && x[0] < domain_length) {
+                            x_in = x[0] - (domain_length - length_x);//uniform growth in the first part of the domain
+                        }
+
 
                         //cout << "Position "<< x << endl;
                         bool free_position = true; // check if the neighbouring position is free
@@ -756,8 +877,8 @@ int main() {
                         if (free_position &&
                             round(x_in) > 0 &&
                             round(x_in) < length_x - 1 &&
-                            round(x[1] ) > 0 &&
-                            round(x[1] ) < length_y - 1) {
+                            round(x[1]) > 0 &&
+                            round(x[1]) < length_y - 1) {
                             get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[1]),
                                                                                            cos(random_angle[1])); // update if nothing is in the next position
                             get<direction>(particles)[particle_id(j)] = speed_l * vdouble2(sin(random_angle[1]),
@@ -921,9 +1042,27 @@ int main() {
                 vdouble2 x;
                 x = get<position>(particles[particle_id(j)]);
 
-                // rescaled
-                double x_in;
-                x_in = (length_x / domain_length)*x[0];
+                /*
+                * x_in variable will correspond to the coordinates on the non-updated domain (same as initial)
+                * */
+
+                double x_in; // x coordinate in initial domain length
+
+
+                // Non-uniform domain growth
+
+
+                // Non-uniform domain growth, onl first half grows
+                // if in the first part of the domain
+                if (x[0] > 0 && x[0] < domain_length - 0.5 * length_x) {
+                    x_in = x[0] * ((length_x - length_x * 0.5) /
+                                   (domain_length - length_x * 0.5));//uniform growth in the first part of the domain
+                }
+                if (x[0] > domain_length - 0.5 * length_x && x[0] < domain_length) {
+                    x_in = x[0] - (domain_length - length_x);//uniform growth in the first part of the domain
+                }
+
+
 
                 get<chain>(particles[particle_id(j)]) = 0;
                 get<attached_to_id>(particles[particle_id(j)]) = -1;
@@ -948,45 +1087,57 @@ int main() {
 
                 cout << "current id " << get<id>(particles)[particle_id(j)] << endl;
 
-                    for (auto k = euclidean_search(particles.get_query(), x, l_filo); k != false; ++k) {
+                for (auto k = euclidean_search(particles.get_query(), x, l_filo); k != false; ++k) {
 
-                        cout << "norm " << k.dx().norm() << endl;
-                        cout << "neighbours id " << get<id>(*k) << endl;
+                    cout << "norm " << k.dx().norm() << endl;
+                    cout << "neighbours id " << get<id>(*k) << endl;
 
-                        // if it is close to a follower that is part of the chain
-                        if (get<type>(*k) == 1 && get<chain>(*k) == 1) {
-                            cout << "neighbours id fol" << get<id>(*k) << endl;
+                    // if it is close to a follower that is part of the chain
+                    if (get<type>(*k) == 1 && get<chain>(*k) == 1) {
+                        cout << "neighbours id fol" << get<id>(*k) << endl;
 
-                            //get<direction>(particles[particle_id(j)]) = 0.1 * k.dx(); // move closer
+                        //get<direction>(particles[particle_id(j)]) = 0.1 * k.dx(); // move closer
 
-                            //get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[1]),
-                                                                                          //cos(random_angle[1])); // update if nothing is in the next position
-                            // check that it is not the same cell
-                            if (get<id>(*k) != get<id>(particles[particle_id(j)])){
-                                get<direction>(particles)[particle_id(j)] = get<direction>(*k);
-                                get<chain>(particles)[particle_id(j)] = 1;
-                                get<attached_to_id>(particles)[particle_id(j)] = get<id>(*k);
-                            }
-
-
-                        }
-
-                        if (get<type>(*k) == 0) { // check if it is not the same particle
-                            cout << "neighbours id leader" << get<id>(*k) << endl;
-                            //get<direction>(particles[particle_id(j)]) = 0.2 * k.dx();
-                            get<direction>(particles)[particle_id(j)] = 1.5 * get<direction>(*k);
+                        //get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[1]),
+                        //cos(random_angle[1])); // update if nothing is in the next position
+                        // check that it is not the same cell
+                        if (get<id>(*k) != get<id>(particles[particle_id(j)])){
+                            get<direction>(particles)[particle_id(j)] = get<direction>(*k);
                             get<chain>(particles)[particle_id(j)] = 1;
                             get<attached_to_id>(particles)[particle_id(j)] = get<id>(*k);
                         }
 
-                    }
-               // }
 
+                    }
+
+                    if (get<type>(*k) == 0) { // check if it is not the same particle
+                        cout << "neighbours id leader" << get<id>(*k) << endl;
+                        //get<direction>(particles[particle_id(j)]) = 0.2 * k.dx();
+                        get<direction>(particles)[particle_id(j)] = 1.5 * get<direction>(*k);
+                        get<chain>(particles)[particle_id(j)] = 1;
+                        get<attached_to_id>(particles)[particle_id(j)] = get<id>(*k);
+                    }
+
+                }
+                // }
+
+                // if part of the chain, same direction as the one that it follows, if not part of the chain, (0,0)
                 vdouble2 x_chain = x + get<direction>(particles)[particle_id(j)];
 
+                // Non-uniform domain growth
+                double x_in_chain;
 
-                // rescaled
-                double x_in_chain = (length_x / domain_length)*x_chain[0];
+                // Non-uniform domain growth, onl first half grows
+                // if in the first part of the domain
+                if (x_chain[0] > 0 && x_chain[0] < domain_length - 0.5 * length_x) {
+                    x_in_chain = x_chain[0] * ((length_x - length_x * 0.5) /
+                                   (domain_length - length_x * 0.5));//uniform growth in the first part of the domain
+                }
+                if (x_chain[0] > domain_length - 0.5 * length_x && x_chain[0] < domain_length) {
+                    x_in_chain = x_chain[0] - (domain_length - length_x);//uniform growth in the first part of the domain
+                }
+
+
 
                 bool free_position = true;
 
@@ -994,7 +1145,7 @@ int main() {
                 //particles.update_positions();
 
 
-                for (auto pos = euclidean_search(particles.get_query(), x, diameter); pos != false; ++pos) {
+                for (auto pos = euclidean_search(particles.get_query(), x_chain, diameter); pos != false; ++pos) {
 
                     //for (int i=0; i < particles.size(); i++) {
                     if (get<id>(*pos) != get<id>(particles[particle_id(j)])) { // check if it is not the same particle
@@ -1010,8 +1161,8 @@ int main() {
 
                 // check that the position they want to move to is free and not out of bounds
                 if (dir[0] != 0 && dir[1] != 0 && free_position && get<chain>(particles)[particle_id(j)] ==1 && round(x_in_chain) >= 0 &&
-                                                                                  round(x_in_chain) < length_x - 1 && round(x_chain[1]) >= 0 &&
-                                                                                  round(x_chain[1]) < length_y - 1 ) {
+                    round(x_in_chain) < length_x - 1 && round(x_chain[1]) >= 0 &&
+                    round(x_chain[1]) < length_y - 1 ) {
                     cout << "direction " << get<direction>(particles[particle_id(j)]) << endl;
                     get<position>(particles)[particle_id(j)] += get<direction>(particles[particle_id(j)]);
                 }
@@ -1035,9 +1186,19 @@ int main() {
                     }
 
                     x +=   speed_f * vdouble2(sin(random_angle), cos(random_angle));
+                    // Non-uniform domain growth
 
-                    // rescaled
-                    x_in = (length_x / domain_length)*x[0];
+
+                    // Non-uniform domain growth, onl first half grows
+                    // if in the first part of the domain
+                    if (x[0] > 0 && x[0] < domain_length - 0.5 * length_x) {
+                        x_in = x[0] * ((length_x - length_x * 0.5) /
+                                       (domain_length - length_x * 0.5));//uniform growth in the first part of the domain
+                    }
+                    if (x[0] > domain_length - 0.5 * length_x && x[0] < domain_length) {
+                        x_in = x[0] - (domain_length - length_x);//uniform growth in the first part of the domain
+                    }
+
 
                     bool free_position = true; // check if the neighbouring position is free
 

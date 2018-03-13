@@ -31,7 +31,7 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
     const int length_y = 12;//120;//20;//4;
     double cell_radius = 0.75;//0.5; // radius of a cell
     const double diameter = 2 * cell_radius;//2 // diameter in which there have to be no cells, equivalent to size of the cell
-    const int N_steps = 800; // number of times the cells move up the gradient
+    const int N_steps = 400; // number of times the cells move up the gradient
     const size_t N = 7; // initial number of cells
     double l_filo = 27.5/10;//2; // sensing radius
     //double diff_conc = 0.05; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
@@ -67,7 +67,7 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
 //    double constant = 29.12;
 
     double L_0 = 30; // will have to make this consistent with actual initial length
-   //double a = 0.001;//0.008;//0.23/10;
+    //double a = 0.001;//0.008;//0.23/10;
     double a = 0.23/20;
     double L_inf = 86.76;
     //double t_s = 16;//4.31*10;
@@ -315,11 +315,11 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
          *  x column, UNIFORM GROWTH
          *
          * */
-        for (int i = 0; i < length_x * length_y; i++) {
-            chemo_3col(i, 0) = chemo_3col_ind(i, 0) * (domain_length / length_x);
-        }
-        cout << "domain length ratio " << domain_length/length_x << endl;
-
+//        for (int i = 0; i < length_x * length_y; i++) {
+//            chemo_3col(i, 0) = chemo_3col_ind(i, 0) * (domain_length / length_x);
+//        }
+//        cout << "domain length ratio " << domain_length/length_x << endl;
+//
 
 
         /*
@@ -330,28 +330,28 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
 
         // domain does not grow in the final half
         // the last element is dependent on how much the domain grew
-//        for (int j=1;j< length_y+1;j++){
-//            chemo_3col(length_x*length_y - j,0) = chemo_3col_ind(length_x*length_y - j,0)*(domain_length / length_x);
-//        }
-//        // since the second half does not grow, the chemo remains fixed
-//        float difference = chemo_3col_ind(length_x*length_y-1,0) - chemo_3col_ind(length_x*length_y-(length_y+1),0);
-//        int count = 0.5*length_x;
-//        int count_12 = 1; // count, so that the change would be at every twelth position
-//        for (int i = 0.5 * length_x * length_y; i < length_x * length_y - length_y; i++) {
-//            chemo_3col(i, 0) = chemo_3col(length_x*length_y -1,0) -difference *count;
-//            count_12 += 1;
-//            cout << " x coord, 2nd half " << chemo_3col(i,0) << endl;
-//
-//            if (count_12 % length_y == 0){
-//                count -= 1;
-//            }
-//        }
-//
-//        // the first half grows
-//        for (int i = 0; i < 0.5 * length_x * length_y; i++) {
-//            chemo_3col(i, 0) = chemo_3col_ind(i, 0) * (chemo_3col(0.5*length_x*length_y,0) / (length_x*0.5));
-//            cout << " x coord, 1st half " << chemo_3col(i,0) << endl;
-//        }
+        for (int j=1;j< length_y+1;j++){
+            chemo_3col(length_x*length_y - j,0) = chemo_3col_ind(length_x*length_y - j,0)*(domain_length / length_x);
+        }
+        // since the second half does not grow, the chemo remains fixed
+        float difference = chemo_3col_ind(length_x*length_y-1,0) - chemo_3col_ind(length_x*length_y-(length_y+1),0);
+        int count = 0.5*length_x;
+        int count_12 = 1; // count, so that the change would be at every twelth position
+        for (int i = 0.5 * length_x * length_y; i < length_x * length_y - length_y; i++) {
+            chemo_3col(i, 0) = chemo_3col(length_x*length_y -1,0) -difference *count;
+            count_12 += 1;
+            cout << " x coord, 2nd half " << chemo_3col(i,0) << endl;
+
+            if (count_12 % length_y == 0){
+                count -= 1;
+            }
+        }
+
+        // the first half grows
+        for (int i = 0; i < 0.5 * length_x * length_y; i++) {
+            chemo_3col(i, 0) = chemo_3col_ind(i, 0) * (chemo_3col(0.5*length_x*length_y,0) / (length_x*0.5));
+            cout << " x coord, 1st half " << chemo_3col(i,0) << endl;
+        }
 
 
 
@@ -387,32 +387,32 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
          * Uniform growth
          * */
 
-        if (t % freq_growth == 0) {
-            for (int i = 0; i < particles.size(); i++) {
-                get<position>(particles)[i] *= vdouble2((domain_length / old_length), 1);
-            }
-            old_length = domain_length;
-        }
+//        if (t % freq_growth == 0) {
+//            for (int i = 0; i < particles.size(); i++) {
+//                get<position>(particles)[i] *= vdouble2((domain_length / old_length), 1);
+//            }
+//            old_length = domain_length;
+//        }
 
         /*
          * Non-uniform growth, second part does not grow
          * */
 
-//        if (t % freq_growth == 0) {
-//            for (int i = 0; i < particles.size(); i++) {
-//                vdouble2 x = get<position>(particles)[i]; // so that I could extract x coord
-//                // if in the first part of the domain
-//                if (x[0] > 0 && x[0] < old_length - 0.5 * length_x){
-//                    get<position>(particles)[i] *= vdouble2((domain_length - length_x*0.5)/(old_length - length_x*0.5),1);//uniform growth in the first part of the domain
-//                }
-//                //if (x[0] > old_length - 0.5 * length_x && x[0] < old_length){
-//                    else{
-//                    get<position>(particles)[i] += vdouble2(domain_length - old_length,0);//uniform growth in the first part of the domain
-//                }
-//
-//            }
-//            old_length = domain_length;
-//        }
+        if (t % freq_growth == 0) {
+            for (int i = 0; i < particles.size(); i++) {
+                vdouble2 x = get<position>(particles)[i]; // so that I could extract x coord
+                // if in the first part of the domain
+                if (x[0] > 0 && x[0] < old_length - 0.5 * length_x){
+                    get<position>(particles)[i] *= vdouble2((domain_length - length_x*0.5)/(old_length - length_x*0.5),1);//uniform growth in the first part of the domain
+                }
+                    //if (x[0] > old_length - 0.5 * length_x && x[0] < old_length){
+                else{
+                    get<position>(particles)[i] += vdouble2(domain_length - old_length,0);//uniform growth in the first part of the domain
+                }
+
+            }
+            old_length = domain_length;
+        }
 
 
 
@@ -510,20 +510,20 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
 
             double x_in; // x coordinate in initial domain length
 
-            x_in = (length_x / domain_length)*x[0];
+            // x_in = (length_x / domain_length)*x[0];
 
             // Non-uniform domain growth
 
 
 
-           // Non-uniform domain growth, onl first half grows
+            // Non-uniform domain growth, onl first half grows
             // if in the first part of the domain
-//            if (x[0] > 0 && x[0] < domain_length - 0.5 * length_x){
-//                x_in = x[0]*((length_x - length_x*0.5)/(domain_length - length_x*0.5));//uniform growth in the first part of the domain
-//            }
-//            if (x[0] > domain_length - 0.5 * length_x && x[0] < domain_length){
-//                x_in = x[0]- (domain_length - length_x);//uniform growth in the first part of the domain
-//            }
+            if (x[0] > 0 && x[0] < domain_length - 0.5 * length_x){
+                x_in = x[0]*((length_x - length_x*0.5)/(domain_length - length_x*0.5));//uniform growth in the first part of the domain
+            }
+            if (x[0] > domain_length - 0.5 * length_x && x[0] < domain_length){
+                x_in = x[0]- (domain_length - length_x);//uniform growth in the first part of the domain
+            }
 
 
 
@@ -587,13 +587,19 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
             if ((new_chemo_1 - old_chemo) / sqrt(old_chemo) < diff_conc &&
                 (new_chemo_2 - old_chemo) / sqrt(old_chemo) < diff_conc) {
 
-                if (get<id>(particles)[particle_id(j)] == 75){
-                    cout << "how often does it enter here in the end? " << endl;
-                }
-
                 x += speed_l * vdouble2(sin(random_angle[2]), cos(random_angle[2]));
                 //cout << "print id " << id_[x] << endl;
-                x_in = (length_x / domain_length)*x[0];
+
+
+                // update the position in fixed domain
+                // Non-uniform domain growth, onl first half grows
+                // if in the first part of the domain
+                if (x[0] > 0 && x[0] < domain_length - 0.5 * length_x){
+                    x_in = x[0]*((length_x - length_x*0.5)/(domain_length - length_x*0.5));//uniform growth in the first part of the domain
+                }
+                if (x[0] > domain_length - 0.5 * length_x && x[0] < domain_length){
+                    x_in = x[0]- (domain_length - length_x);//uniform growth in the first part of the domain
+                }
 
 
                 //cout << "Position "<< x << endl;
@@ -607,9 +613,6 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
                     if (get<id>(*k) != get<id>(particles[particle_id(j)])) { // check if it is not the same particle
                         //cout << "reject step " << 1 << endl;
                         free_position = false;
-                        if (get<id>(particles)[particle_id(j)] == 75){
-                            cout << "the reason is false neighbouring position " << endl;
-                        }
                     }
                     //break;
                 }
@@ -618,14 +621,11 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
                 //cout << "print position " << count_position << endl;
 
                 // check that the position they want to move to is free and not out of bounds
-                if (free_position && round(x_in) > 0 &&
+                if (free_position == true && round(x_in) > 0 &&
                     round(x_in) < length_x - 1 && round(x[1]) > 0 &&
                     round(x[1]) < length_y - 1) {
                     get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[2]),
-                                                                               cos(random_angle[2])); // update if nothing is in the next position
-                    if (get<id>(particles)[particle_id(j)] == 75){
-                        cout << "does it perform this step " << endl;
-                    }
+                                                                                   cos(random_angle[2])); // update if nothing is in the next position
                 }
 
             }
@@ -641,7 +641,17 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
 
                 x += speed_l * vdouble2(sin(random_angle[0]), cos(random_angle[0]));
                 //cout << "print id " << id_[x] << endl;
-                x_in = (length_x / domain_length)*x[0];
+
+
+                // update the position in fixed domain
+                // Non-uniform domain growth, onl first half grows
+                // if in the first part of the domain
+                if (x[0] > 0 && x[0] < domain_length - 0.5 * length_x){
+                    x_in = x[0]*((length_x - length_x*0.5)/(domain_length - length_x*0.5));//uniform growth in the first part of the domain
+                }
+                if (x[0] > domain_length - 0.5 * length_x && x[0] < domain_length){
+                    x_in = x[0]- (domain_length - length_x);//uniform growth in the first part of the domain
+                }
 
 
                 //cout << "Position "<< x << endl;
@@ -662,7 +672,7 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
 
                 //cout << "print position " << count_position << endl;
                 // check that the position they want to move to is free and not out of bounds
-                if (free_position && round(x_in) > 0 &&
+                if (free_position == true && round(x_in) > 0 &&
                     round(x_in) < length_x - 1 && round(x[1]) > 0 &&
                     round(x[1]) < length_y - 1) {
                     get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[0]),
@@ -682,7 +692,17 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
 
                 x += speed_l * vdouble2(sin(random_angle[1]), cos(random_angle[1]));
                 //cout << "print id " << id_[x] << endl;
-                x_in = (length_x / domain_length)*x[0];
+
+                // update the position in fixed domain
+                // Non-uniform domain growth, onl first half grows
+                // if in the first part of the domain
+                if (x[0] > 0 && x[0] < domain_length - 0.5 * length_x){
+                    x_in = x[0]*((length_x - length_x*0.5)/(domain_length - length_x*0.5));//uniform growth in the first part of the domain
+                }
+                if (x[0] > domain_length - 0.5 * length_x && x[0] < domain_length){
+                    x_in = x[0]- (domain_length - length_x);//uniform growth in the first part of the domain
+                }
+
 
                 //cout << "Position "<< x << endl;
                 int count_position = 0;
@@ -702,7 +722,7 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
 
                 //cout << "print position " << count_position << endl;
                 // check that the position they want to move to is free and not out of bounds
-                if (free_position && round(x_in) > 0 &&
+                if (free_position == true && round(x_in) > 0 &&
                     round(x_in) < length_x - 1 && round(x[1]) > 0 &&
                     round(x[1]) < length_y - 1) {
                     get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[1]),
@@ -722,9 +742,20 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
 
                 // if first is greater than the second
                 if (new_chemo_1 > new_chemo_2) {
+
                     x += speed_l * vdouble2(sin(random_angle[0]), cos(random_angle[0]));
                     //cout << "print id " << id_[x] << endl;
-                    x_in = (length_x / domain_length)*x[0];
+
+                    // update the position in fixed domain
+                    // Non-uniform domain growth, onl first half grows
+                    // if in the first part of the domain
+                    if (x[0] > 0 && x[0] < domain_length - 0.5 * length_x){
+                        x_in = x[0]*((length_x - length_x*0.5)/(domain_length - length_x*0.5));//uniform growth in the first part of the domain
+                    }
+                    if (x[0] > domain_length - 0.5 * length_x && x[0] < domain_length){
+                        x_in = x[0]- (domain_length - length_x);//uniform growth in the first part of the domain
+                    }
+
 
                     //cout << "Position "<< x << endl;
                     int count_position = 0;
@@ -742,7 +773,7 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
                     }
                     //cout << "print position " << count_position << endl;
                     // check that the position they want to move to is free and not out of bounds
-                    if (free_position && round(x_in) > 0 &&
+                    if (free_position == true && round(x_in) > 0 &&
                         round(x_in) < length_x - 1 && round(x[1]) > 0 &&
                         round(x[1]) < length_y - 1) {
                         get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[0]),
@@ -752,9 +783,19 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
                 }
                     // if second is greater than the first
                 else if (new_chemo_1 < new_chemo_2) {
+
                     x += speed_l * vdouble2(sin(random_angle[1]), cos(random_angle[1]));
                     //cout << "print id " << id_[x] << endl;
-                    x_in = (length_x / domain_length)*x[0];
+
+                    // update the position in fixed domain
+                    // Non-uniform domain growth, onl first half grows
+                    // if in the first part of the domain
+                    if (x[0] > 0 && x[0] < domain_length - 0.5 * length_x){
+                        x_in = x[0]*((length_x - length_x*0.5)/(domain_length - length_x*0.5));//uniform growth in the first part of the domain
+                    }
+                    if (x[0] > domain_length - 0.5 * length_x && x[0] < domain_length){
+                        x_in = x[0]- (domain_length - length_x);//uniform growth in the first part of the domain
+                    }
 
                     //cout << "Position "<< x << endl;
                     int count_position = 0;
@@ -773,7 +814,7 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
 
                     //cout << "print position " << count_position << endl;
                     // check that the position they want to move to is free and not out of bounds
-                    if (free_position  && round(x_in) > 0 &&
+                    if (free_position == true && round(x_in) > 0 &&
                         round(x_in) < length_x - 1 && round(x[1]) > 0 &&
                         round(x[1]) < length_y - 1) {
                         get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[1]),
@@ -880,14 +921,14 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
 
     for (int i = 0; i < domain_partition; i++){
 
-            for (int j = 0; j < particles.size(); j++){
-                vdouble2 x = get<position>(particles[j]);
-                //cout<< "domain partition " << i*one_part << endl;
-                //cout << "x coordinate " << x[0] << endl;
-                if (i*one_part < x[0] && x[0] < (i+1)* one_part){
-                    proportions(i) += 1;
-                }
+        for (int j = 0; j < particles.size(); j++){
+            vdouble2 x = get<position>(particles[j]);
+            //cout<< "domain partition " << i*one_part << endl;
+            //cout << "x coordinate " << x[0] << endl;
+            if (i*one_part < x[0] && x[0] < (i+1)* one_part){
+                proportions(i) += 1;
             }
+        }
 
     }
 
@@ -1067,7 +1108,7 @@ int main(){
 
 
         for (int i = 0; i < number_parameters; i++) {
-            threshold[i] = 0.5;
+            threshold[i] = 0.005;
             //threshold[i] = 0.005 * (i + 1);// 0.01;
             //cout << "slope " << slope[i] << endl;
 

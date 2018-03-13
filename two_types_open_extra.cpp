@@ -490,9 +490,10 @@ VectorXi func(double diff_conc, double lam, int n_seed){
 
                 vdouble2 x;
                 x = get<position>(particles[particle_id(j)]);
-                //cout << "particles.size " << i << endl;
-                //cout << "print id " << get<id>(particles[i]) << endl;
-                //cout << "x coord " << x[0] << endl;
+
+                double x_in;
+                // rescaled
+                x_in = (length_x / domain_length)*x[0];
 
 
                 // create an array to store random directions
@@ -504,8 +505,8 @@ VectorXi func(double diff_conc, double lam, int n_seed){
                     double random_angle_tem = uniformpi(gen1);
 //                int sign_x_tem, sign_y_tem;
 
-                    while (round((x[0] * (length_x / domain_length) + sin(random_angle_tem) * l_filo)) < 0 ||
-                           round((x[0] * (length_x / domain_length) + sin(random_angle_tem) * l_filo)) >
+                    while (round((x_in + sin(random_angle_tem) * l_filo)) < 0 ||
+                           round((x_in + sin(random_angle_tem) * l_filo)) >
                            length_x - 1 || round(x[1] + cos(random_angle_tem) * l_filo) < 0 ||
                            round(x[1] + cos(random_angle_tem) * l_filo) > length_y - 1) {
                         random_angle_tem = uniformpi(gen1);
@@ -534,12 +535,12 @@ VectorXi func(double diff_conc, double lam, int n_seed){
                 // store variables for concentration at new locations
 
 
-                double old_chemo = chemo((round((x)[0] * (length_x / domain_length))), round(x)[1]);
+                double old_chemo = chemo(round(x_in), round(x)[1]);
 
-                double new_chemo_1 = chemo(round((x[0] * (length_x / domain_length) + sin(random_angle[0]) * l_filo)),
+                double new_chemo_1 = chemo(round((x_in+ sin(random_angle[0]) * l_filo)),
                                            round(x[1] + cos(random_angle[0]) * l_filo));
 
-                double new_chemo_2 = chemo(round((x[0] * (length_x / domain_length) + sin(random_angle[1]) * l_filo)),
+                double new_chemo_2 = chemo(round((x_in + sin(random_angle[1]) * l_filo)),
                                            round(x[1] + cos(random_angle[1]) * l_filo));
 
 
@@ -555,6 +556,10 @@ VectorXi func(double diff_conc, double lam, int n_seed){
                                              cos(random_angle[2])); /// THERE IS A BIG ASSUMPTION HERE, I DO NOT
 /// CHECK THE POSITION WHERE I WANT TO MOVE BUT FURTHER AWAY. THIS IS TO AVOID CELLS BEIGN TOO CLOSE TO THE particles THAT ARE BEHIND THEM
                     //cout << "print id " << id_[x] << endl;
+
+
+                    // rescaled
+                    x_in = (length_x / domain_length)*x[0];
 
 
                     //cout << "Position "<< x << endl;
@@ -578,10 +583,10 @@ VectorXi func(double diff_conc, double lam, int n_seed){
 
 
                     // check that the position they want to move to is free and not out of bounds
-                    if (free_position && round((x[0] * (length_x / domain_length) + sin(random_angle[2]))) > 0 &&
-                        round((x[0] * (length_x / domain_length) + sin(random_angle[2]))) < length_x - 1 &&
-                        round(x[1] + cos(random_angle[2])) > 0 &&
-                        round(x[1] + cos(random_angle[2])) < length_y - 1) {
+                    if (free_position && round(x_in) > 0 &&
+                        round(x_in) < length_x - 1 &&
+                        round(x[1]) > 0 &&
+                        round(x[1]) < length_y - 1) {
                         get<position>(particles)[particle_id(j)] += 0.5 *speed_l * vdouble2(sin(random_angle[2]),
                                                                                             cos(random_angle[2])); // update if nothing is in the next position
                     }
@@ -598,6 +603,8 @@ VectorXi func(double diff_conc, double lam, int n_seed){
                     x +=  speed_l * vdouble2(sin(random_angle[0]), cos(random_angle[0]));
                     //cout << "print id " << id_[x] << endl;
 
+                    // rescaled
+                    x_in = (length_x / domain_length)*x[0];
 
                     //cout << "Position "<< x << endl;
                     bool free_position = true; // check if the neighbouring position is free
@@ -619,10 +626,10 @@ VectorXi func(double diff_conc, double lam, int n_seed){
 
                     // check that the position they want to move to is free and not out of bounds
                     if (free_position == true &&
-                        round((x[0] * (length_x / domain_length) + sin(random_angle[0]))) > 0 &&
-                        round((x[0] * (length_x / domain_length) + sin(random_angle[0]))) < length_x - 1 &&
-                        round(x[1] + cos(random_angle[0])) > 0 &&
-                        round(x[1] + cos(random_angle[0])) < length_y - 1) {
+                        round(x_in) > 0 &&
+                        round(x_in) < length_x - 1 &&
+                        round(x[1] ) > 0 &&
+                        round(x[1] ) < length_y - 1) {
                         get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[0]),
                                                                                        cos(random_angle[0])); // update if nothing is in the next position
 
@@ -642,6 +649,8 @@ VectorXi func(double diff_conc, double lam, int n_seed){
                     x +=  speed_l * vdouble2(sin(random_angle[1]), cos(random_angle[1]));
                     //cout << "print id " << id_[x] << endl;
 
+                    // rescaled
+                    x_in = (length_x / domain_length)*x[0];
 
                     //cout << "Position "<< x << endl;
                     bool free_position = true; // check if the neighbouring position is free
@@ -662,10 +671,10 @@ VectorXi func(double diff_conc, double lam, int n_seed){
 
                     // check that the position they want to move to is free and not out of bounds
                     if (free_position &&
-                        round((x[0] * (length_x / domain_length) + sin(random_angle[1]))) > 0 &&
-                        round((x[0] * (length_x / domain_length) + sin(random_angle[1]))) < length_x - 1 &&
-                        round(x[1] + cos(random_angle[1])) > 0 &&
-                        round(x[1] + cos(random_angle[1])) < length_y - 1) {
+                        round(x_in) > 0 &&
+                        round(x_in) < length_x - 1 &&
+                        round(x[1]) > 0 &&
+                        round(x[1]) < length_y - 1) {
                         get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[1]),
                                                                                        cos(random_angle[1])); // update if nothing is in the next position
 
@@ -686,6 +695,8 @@ VectorXi func(double diff_conc, double lam, int n_seed){
                         x +=  speed_l * vdouble2(sin(random_angle[0]), cos(random_angle[0]));
                         //cout << "print id " << id_[x] << endl;
 
+                        // rescaled
+                        x_in = (length_x / domain_length)*x[0];
 
                         //cout << "Position "<< x << endl;
                         bool free_position = true; // check if the neighbouring position is free
@@ -708,10 +719,10 @@ VectorXi func(double diff_conc, double lam, int n_seed){
 
                         // check that the position they want to move to is free and not out of bounds
                         if (free_position  &&
-                            round((x[0] * (length_x / domain_length) + sin(random_angle[0]))) > 0 &&
-                            round((x[0] * (length_x / domain_length) + sin(random_angle[0]))) < length_x - 1 &&
-                            round(x[1] + cos(random_angle[0])) > 0 &&
-                            round(x[1] + cos(random_angle[0])) < length_y - 1) {
+                            round(x_in) > 0 &&
+                            round(x_in) < length_x - 1 &&
+                            round(x[1]) > 0 &&
+                            round(x[1]) < length_y - 1) {
                             get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[0]),
                                                                                            cos(random_angle[0])); // update if nothing is in the next position
 
@@ -723,6 +734,8 @@ VectorXi func(double diff_conc, double lam, int n_seed){
                         x +=  speed_l * vdouble2(sin(random_angle[1]), cos(random_angle[1]));
                         //cout << "print id " << id_[x] << endl;
 
+                        // rescaled
+                        x_in = (length_x / domain_length)*x[0];
 
                         //cout << "Position "<< x << endl;
                         bool free_position = true; // check if the neighbouring position is free
@@ -744,10 +757,10 @@ VectorXi func(double diff_conc, double lam, int n_seed){
 
                         // check that the position they want to move to is free and not out of bounds
                         if (free_position  &&
-                            round((x[0] * (length_x / domain_length) + sin(random_angle[1]))) > 0 &&
-                            round((x[0] * (length_x / domain_length) + sin(random_angle[1]))) < length_x - 1 &&
-                            round(x[1] + cos(random_angle[1])) > 0 &&
-                            round(x[1] + cos(random_angle[1])) < length_y - 1) {
+                            round(x_in) > 0 &&
+                            round(x_in) < length_x - 1 &&
+                            round(x[1]) > 0 &&
+                            round(x[1] ) < length_y - 1) {
                             get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[1]),
                                                                                            cos(random_angle[1])); // update if nothing is in the next position
 
@@ -764,6 +777,10 @@ VectorXi func(double diff_conc, double lam, int n_seed){
                 cout << "next time attached to " << get<attached_leader_nr>(particles[particle_id(j)]) << endl;
                 vdouble2 x;
                 x = get<position>(particles[particle_id(j)]);
+
+                vdouble x_in;
+                // rescaled
+                x_in = (length_x / domain_length)*x[0];
 
                 // check what the closest neighbour is
 
@@ -823,6 +840,10 @@ VectorXi func(double diff_conc, double lam, int n_seed){
 
                 vdouble2 x_can = track_position[get<attached_at_time_step>(particles[particle_id(j)])][get<attached_leader_nr>(particles[particle_id(j)])]; //position where the cell wants to move
 
+
+                // rescaled
+                double x_can_in = (length_x / domain_length)*x_can[0];
+
                 // check if that position is free
                 //cout << "Position "<< x << endl;
 
@@ -858,8 +879,8 @@ VectorXi func(double diff_conc, double lam, int n_seed){
                 }
 
                 // if the cell is part of the chain update its position
-                if (get<chain>(particles[particle_id(j)]) == 1 && free_position && round((x_can[0] * (length_x / domain_length)  )) > 0 &&
-                    round((x_can[0] * (length_x / domain_length) )) < length_x - 1 && round(x_can[1] ) > 0 &&
+                if (get<chain>(particles[particle_id(j)]) == 1 && free_position && round(x_can_in) > 0 &&
+                    round(x_can_in) < length_x - 1 && round(x_can[1] ) > 0 &&
                     round(x_can[1] ) < length_y - 1){
                     //cout << "does it come in here " << endl;
                     get<position>(particles[particle_id(j)]) = track_position[get<attached_at_time_step>(particles[particle_id(j)])][get<attached_leader_nr>(particles[particle_id(j)])];
@@ -872,8 +893,8 @@ VectorXi func(double diff_conc, double lam, int n_seed){
                     double random_angle = uniformpi(gen1);
 
 
-                    while (round((x[0] * (length_x / domain_length) + sin(random_angle) * l_filo)) < 0 ||
-                           round((x[0] * (length_x / domain_length) + sin(random_angle) * l_filo)) >
+                    while (round((x_in + sin(random_angle) * l_filo)) < 0 ||
+                           round((x_in + sin(random_angle) * l_filo)) >
                            length_x - 1 || round(x[1] + cos(random_angle)  * l_filo) < 0 ||
                            round(x[1] + cos(random_angle) * l_filo) > length_y - 1) {
                         random_angle = uniformpi(gen1);
@@ -883,6 +904,9 @@ VectorXi func(double diff_conc, double lam, int n_seed){
                     }
 
                     x +=   speed_f * vdouble2(sin(random_angle), cos(random_angle));
+
+                    // rescaled
+                    x_in = (length_x / domain_length)*x[0];
 
                     bool free_position = true; // check if the neighbouring position is free
 
@@ -911,8 +935,8 @@ VectorXi func(double diff_conc, double lam, int n_seed){
 
 
                     // check that the position they want to move to is free and not out of bounds
-                    if (free_position && round((x[0] * (length_x / domain_length))) >= 0 &&
-                        round((x[0] * (length_x / domain_length))) < length_x - 1 && round(x[1]) >= 0 &&
+                    if (free_position && round(x_in) >= 0 &&
+                        round(x_in) < length_x - 1 && round(x[1]) >= 0 &&
                         round(x[1]) < length_y - 1) {
                         //cout << " moves " << endl;
                         //cout << "how frequently come in here " << endl;

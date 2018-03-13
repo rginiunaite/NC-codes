@@ -28,14 +28,14 @@ int main() {
     const int length_y = 12;//120;//20;//4;
     double cell_radius = 0.75;//0.5; // radius of a cell
     const double diameter = 2 * cell_radius;//2 // diameter in which there have to be no cells, equivalent to size of the cell
-    const int N_steps = 1500; // number of times the cells move up the gradient
+    const int N_steps = 500; // number of times the cells move up the gradient
     const size_t N = 7; // initial number of cells
     double l_filo = 27.5/10;//2; // sensing radius
     double diff_conc = 0.5; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1;
-    double speed_l = 0.05;//0.05; // speed of a leader cell
-    double speed_f = 0.05;//0.08; // speed of a follower cell
+    double speed_l = 0.5;//0.05; // speed of a leader cell
+    double speed_f = 0.5;//0.08; // speed of a follower cell
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
 
 
@@ -76,7 +76,7 @@ int main() {
 
     double D = 1; // to 10^5 \nu m^2/h diffusion coefficient
     double t = 0; // initialise time, redundant
-    double dt = 0.000001; // time step
+    double dt = 0.0001; // time step
     double dx = 1; // space step in x direction, double to be consistent with other types
     double dy = 1; // space step in y direction
     double kai = 1/100;//0.0001/10; // to 1 /h production rate of chemoattractant
@@ -85,7 +85,7 @@ int main() {
     // parameters for internalisation
 
     double R = cell_radius;//7.5/10; // \nu m cell radius
-    double lam = 500;//(100)/10; // to 1000 /h chemoattractant internalisation
+    double lam = 50;//(100)/10; // to 1000 /h chemoattractant internalisation
 
 
     // matrix that stores the values of concentration of chemoattractant
@@ -475,6 +475,16 @@ int main() {
                 //cout << "print id " << get<id>(particles[i]) << endl;
                 //cout << "x coord " << x[0] << endl;
 
+            /*
+            * x_in variable will correspond to the coordinates on the non-updated domain (same as initial)
+            * */
+
+            // Uniform domain growth
+
+            double x_in; // x coordinate in initial domain length
+
+            x_in = (length_x / domain_length)*x[0];
+
 
                 // create an array to store random directions
                 std::array<double, 3> random_angle;
@@ -485,8 +495,8 @@ int main() {
                     double random_angle_tem = uniformpi(gen1);
 //                int sign_x_tem, sign_y_tem;
 
-                    while (round((x[0] * (length_x / domain_length) + sin(random_angle_tem) * l_filo)) < 0 ||
-                           round((x[0] * (length_x / domain_length) + sin(random_angle_tem) * l_filo)) >
+                    while (round(x_in + sin(random_angle_tem) * l_filo) < 0 ||
+                           round(x_in + sin(random_angle_tem) * l_filo) >
                            length_x - 1 || round(x[1] + cos(random_angle_tem) * l_filo) < 0 ||
                            round(x[1] + cos(random_angle_tem) * l_filo) > length_y - 1) {
                         random_angle_tem = uniformpi(gen1);
@@ -515,12 +525,12 @@ int main() {
                 // store variables for concentration at new locations
 
 
-                double old_chemo = chemo((round((x)[0] * (length_x / domain_length))), round(x)[1]);
+                double old_chemo = chemo(round(x_in), round(x)[1]);
 
-                double new_chemo_1 = chemo(round((x[0] * (length_x / domain_length) + sin(random_angle[0]) * l_filo)),
+                double new_chemo_1 = chemo(round((x_in + sin(random_angle[0]) * l_filo)),
                                            round(x[1] + cos(random_angle[0]) * l_filo));
 
-                double new_chemo_2 = chemo(round((x[0] * (length_x / domain_length) + sin(random_angle[1]) * l_filo)),
+                double new_chemo_2 = chemo(round((x_in + sin(random_angle[1]) * l_filo)),
                                            round(x[1] + cos(random_angle[1]) * l_filo));
 
 
@@ -536,6 +546,9 @@ int main() {
                                   cos(random_angle[2])); /// THERE IS A BIG ASSUMPTION HERE, I DO NOT
 /// CHECK THE POSITION WHERE I WANT TO MOVE BUT FURTHER AWAY. THIS IS TO AVOID CELLS BEIGN TOO CLOSE TO THE particles THAT ARE BEHIND THEM
                     //cout << "print id " << id_[x] << endl;
+
+
+                    x_in = (length_x / domain_length)*x[0];
 
 
                     //cout << "Position "<< x << endl;
@@ -562,10 +575,10 @@ int main() {
 
 
                     // check that the position they want to move to is free and not out of bounds
-                    if (free_position && round((x[0] * (length_x / domain_length) + sin(random_angle[2]))) > 0 &&
-                        round((x[0] * (length_x / domain_length) + sin(random_angle[2]))) < length_x - 1 &&
-                        round(x[1] + cos(random_angle[2])) > 0 &&
-                        round(x[1] + cos(random_angle[2])) < length_y - 1) {
+                    if (free_position && round(x_in) > 0 &&
+                        round(x_in) < length_x - 1 &&
+                        round(x[1]) > 0 &&
+                        round(x[1] ) < length_y - 1) {
                         get<position>(particles)[particle_id(j)] += 0.5 *speed_l * vdouble2(sin(random_angle[2]),
                                                                                             cos(random_angle[2])); // update if nothing is in the next position
                     }
@@ -581,7 +594,7 @@ int main() {
 
                     x += speed_l * vdouble2(sin(random_angle[0]), cos(random_angle[0]));
                     //cout << "print id " << id_[x] << endl;
-
+                    x_in = (length_x / domain_length)*x[0];
 
                     //cout << "Position "<< x << endl;
                     bool free_position = true; // check if the neighbouring position is free
@@ -605,10 +618,10 @@ int main() {
 
                     // check that the position they want to move to is free and not out of bounds
                     if (free_position  &&
-                        round((x[0] * (length_x / domain_length) + sin(random_angle[0]))) > 0 &&
-                        round((x[0] * (length_x / domain_length) + sin(random_angle[0]))) < length_x - 1 &&
-                        round(x[1] + cos(random_angle[0])) > 0 &&
-                        round(x[1] + cos(random_angle[0])) < length_y - 1) {
+                        round(x_in) > 0 &&
+                        round(x_in) < length_x - 1 &&
+                        round(x[1] ) > 0 &&
+                        round(x[1]) < length_y - 1) {
                         get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[0]),
                                                                                        cos(random_angle[0])); // update if nothing is in the next position
 
@@ -627,7 +640,7 @@ int main() {
 
                     x += speed_l * vdouble2(sin(random_angle[1]), cos(random_angle[1]));
                     //cout << "print id " << id_[x] << endl;
-
+                    x_in = (length_x / domain_length)*x[0];
 
                     //cout << "Position "<< x << endl;
                     bool free_position = true; // check if the neighbouring position is free
@@ -651,10 +664,10 @@ int main() {
 
                     // check that the position they want to move to is free and not out of bounds
                     if (free_position == true &&
-                        round((x[0] * (length_x / domain_length) + sin(random_angle[1]))) > 0 &&
-                        round((x[0] * (length_x / domain_length) + sin(random_angle[1]))) < length_x - 1 &&
-                        round(x[1] + cos(random_angle[1])) > 0 &&
-                        round(x[1] + cos(random_angle[1])) < length_y - 1) {
+                        round(x_in) > 0 &&
+                        round(x_in) < length_x - 1 &&
+                        round(x[1]) > 0 &&
+                        round(x[1]) < length_y - 1) {
                         get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[1]),
                                                                                        cos(random_angle[1])); // update if nothing is in the next position
 
@@ -674,7 +687,7 @@ int main() {
                     if (new_chemo_1 > new_chemo_2) {
                         x += speed_l * vdouble2(sin(random_angle[0]), cos(random_angle[0]));
                         //cout << "print id " << id_[x] << endl;
-
+                        x_in = (length_x / domain_length)*x[0];
 
                         //cout << "Position "<< x << endl;
                         bool free_position = true; // check if the neighbouring position is free
@@ -699,10 +712,10 @@ int main() {
 
                         // check that the position they want to move to is free and not out of bounds
                         if (free_position  &&
-                            round((x[0] * (length_x / domain_length) + sin(random_angle[0]))) > 0 &&
-                            round((x[0] * (length_x / domain_length) + sin(random_angle[0]))) < length_x - 1 &&
-                            round(x[1] + cos(random_angle[0])) > 0 &&
-                            round(x[1] + cos(random_angle[0])) < length_y - 1) {
+                            round(x_in) > 0 &&
+                            round(x_in) < length_x - 1 &&
+                            round(x[1]) > 0 &&
+                            round(x[1] ) < length_y - 1) {
                             get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[0]),
                                                                                            cos(random_angle[0])); // update if nothing is in the next position
 
@@ -713,7 +726,7 @@ int main() {
                     else if (new_chemo_1 < new_chemo_2) {
                         x += speed_l * vdouble2(sin(random_angle[1]), cos(random_angle[1]));
                         //cout << "print id " << id_[x] << endl;
-
+                        x_in = (length_x / domain_length)*x[0];
 
                         //cout << "Position "<< x << endl;
                         bool free_position = true; // check if the neighbouring position is free
@@ -738,10 +751,10 @@ int main() {
 
                         // check that the position they want to move to is free and not out of bounds
                         if (free_position == true &&
-                            round((x[0] * (length_x / domain_length) + sin(random_angle[1]))) > 0 &&
-                            round((x[0] * (length_x / domain_length) + sin(random_angle[1]))) < length_x - 1 &&
-                            round(x[1] + cos(random_angle[1])) > 0 &&
-                            round(x[1] + cos(random_angle[1])) < length_y - 1) {
+                            round(x_in) > 0 &&
+                            round(x_in) < length_x - 1 &&
+                            round(x[1]) > 0 &&
+                            round(x[1] ) < length_y - 1) {
                             get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[1]),
                                                                                            cos(random_angle[1])); // update if nothing is in the next position
 
