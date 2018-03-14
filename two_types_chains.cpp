@@ -23,6 +23,7 @@ using namespace Eigen; // objects VectorXf, MatrixXf
 int main() {
 
 
+
     // model parameters
 
     int length_x = 30;//240;//40;//4; // length of the chemoattractant vector, for fixed domain
@@ -32,9 +33,9 @@ int main() {
     double cell_radius = 0.75;//0.5; // radius of a cell
     const double diameter = 2 * cell_radius;//2 // diameter in which there have to be no cells, equivalent to size of the cell
     const int N_steps = 1600; // number of times the cells move up the gradient
-    const size_t N = 7; // initial number of cells
-    double l_filo = 27.5/10;//2; // sensing radius
-    double diff_conc = 0.05; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
+    const size_t N = 1; // initial number of cells
+    double l_filo = 2.75;//2; // sensing radius
+    double diff_conc = 0.5; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1;
     double speed_l = 0.05;//0.05; // speed of a leader cell
@@ -199,7 +200,7 @@ int main() {
         get<type>(particles[i]) = 0; // initially all cells are leaders
 
         //get<position>(p) = vdouble2(cell_radius,(i+1)*diameter); // x=2, uniformly in y
-        get<position>(particles[i]) = vdouble2(cell_radius,(i+1)*double(length_y)/double(N)-0.5 * double(length_y)/double(N)); // x=2, uniformly in y
+        get<position>(particles[i]) = vdouble2(cell_radius,(i+1)*double(length_y-1)/double(N)-0.5 * double(length_y-1)/double(N)); // x=2, uniformly in y
 
 
     }
@@ -266,7 +267,7 @@ int main() {
             /*
              * loop over all neighbouring leaders within "dem_diameter" distance
              */
-            for (auto tpl = euclidean_search(particles.get_query(), get<position>(f), diameter); tpl != false; ++tpl) {
+            for (auto tpl = euclidean_search(particles.get_query(), get<position>(f), 2*diameter); tpl != false; ++tpl) {
 
                 vdouble2 diffx = tpl.dx();
 
@@ -443,30 +444,49 @@ int main() {
          */
 
 
-        int check_rep = 0; // check for repetitions, 0 no rep, 1 rep
+//        int check_rep = 0; // check for repetitions, 0 no rep, 1 rep
+//
+//        //for (int j=0; j<N_steps;j++){
+//
+//        std::default_random_engine gen2;
+//        gen2.seed(t); // different seeds
+//        std::uniform_real_distribution<double> uniform_particles(0, particles.size()); // can only move forward
+//
+//        VectorXi particle_id = VectorXi::Zero(particles.size());
+//
+//        for (int i = 0; i < particles.size(); i++) {
+//
+//            check_rep = 1; // set to 1 to enter the while loop
+//            while (check_rep == 1) {
+//                check_rep = 0; // it is initially zero and then will be changed to 1 if it is equivalent to others
+//                particle_id(i) = uniform_particles(gen2);
+//
+//
+//                for (int j = 0; j < i; j++) {
+//                    if (particle_id(i) == particle_id(j)) { check_rep = 1; }
+//                }
+//            }
+//            //cout << "ids " << particle_id(i) << endl;
+//        }
 
-        //for (int j=0; j<N_steps;j++){
 
-        std::default_random_engine gen2;
-        gen2.seed(t); // different seeds
-        std::uniform_real_distribution<double> uniform_particles(0, particles.size()); // can only move forward
+        /*
+         * ordered list
+         */
+
+        //        int check_rep = 0; // check for repetitions, 0 no rep, 1 rep
+
 
         VectorXi particle_id = VectorXi::Zero(particles.size());
 
         for (int i = 0; i < particles.size(); i++) {
 
-            check_rep = 1; // set to 1 to enter the while loop
-            while (check_rep == 1) {
-                check_rep = 0; // it is initially zero and then will be changed to 1 if it is equivalent to others
-                particle_id(i) = uniform_particles(gen2);
-
-
-                for (int j = 0; j < i; j++) {
-                    if (particle_id(i) == particle_id(j)) { check_rep = 1; }
-                }
-            }
+                particle_id(i) = i;
             //cout << "ids " << particle_id(i) << endl;
         }
+
+
+
 
 
         // move all the leaders
@@ -716,11 +736,8 @@ int main() {
 
 
                         // check that the position they want to move to is free and not out of bounds
-                        if (free_position &&
-                            round(x_in) > 0 &&
-                            round(x_in) < length_x - 1 &&
-                            round(x[1]) > 0 &&
-                            round(x[1] ) < length_y - 1) {
+                        if (free_position && round(x_in) > 0 && round(x_in) < length_x - 1 &&
+                            round(x[1]) > 0 && round(x[1] ) < length_y - 1) {
                             get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[0]),
                                                                                            cos(random_angle[0])); // update if nothing is in the next position
                             get<direction>(particles)[particle_id(j)] = speed_l * vdouble2(sin(random_angle[0]),
@@ -753,11 +770,8 @@ int main() {
 
 
                         // check that the position they want to move to is free and not out of bounds
-                        if (free_position &&
-                            round(x_in) > 0 &&
-                            round(x_in) < length_x - 1 &&
-                            round(x[1] ) > 0 &&
-                            round(x[1] ) < length_y - 1) {
+                        if (free_position && round(x_in) > 0 && round(x_in) < length_x - 1 &&
+                            round(x[1] ) > 0 && round(x[1] ) < length_y - 1) {
                             get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[1]),
                                                                                            cos(random_angle[1])); // update if nothing is in the next position
                             get<direction>(particles)[particle_id(j)] = speed_l * vdouble2(sin(random_angle[1]),
@@ -925,7 +939,7 @@ int main() {
                 double x_in;
                 x_in = (length_x / domain_length)*x[0];
 
-                get<chain>(particles[particle_id(j)]) = 0;
+                //get<chain>(particles[particle_id(j)]) = 0;
                 get<attached_to_id>(particles[particle_id(j)]) = -1;
 
                 // initially set direction to zero, if not attached to a leader
@@ -942,16 +956,31 @@ int main() {
                 // if a particle is not part of the chain, look for cells that are leaders or part of a chain
                 //if (get<chain>(particles[particle_id(j)]) == 0) {
 
-                if(get<id>(particles)[particle_id(j)] == 22){
-                    cout << " id 22 " << endl;
-                }
 
                 cout << "current id " << get<id>(particles)[particle_id(j)] << endl;
 
-                    for (auto k = euclidean_search(particles.get_query(), x, l_filo); k != false; ++k) {
+                // try to find a close leader
+                for (auto k = euclidean_search(particles.get_query(), x, l_filo); k != false; ++k) {
 
-                        cout << "norm " << k.dx().norm() << endl;
-                        cout << "neighbours id " << get<id>(*k) << endl;
+                    cout << "norm " << k.dx().norm() << endl;
+                    cout << "neighbours id " << get<id>(*k) << endl;
+                    cout << "type " << get<type>(*k) << endl;
+
+                    if (get<type>(*k) == 0) { // check if it is not the same particle
+                        cout << "neighbours id leader" << get<id>(*k) << endl;
+                        //get<direction>(particles[particle_id(j)]) = 0.2 * k.dx();
+                        get<direction>(particles)[particle_id(j)] = get<direction>(*k);
+                        get<chain>(particles)[particle_id(j)] = 1;
+                        get<attached_to_id>(particles)[particle_id(j)] = get<id>(*k);
+                    }
+
+                }
+
+
+
+                // try to find a close follower as well
+                if (get<chain>(particles)[particle_id(j)] == 0) {
+                    for (auto k = euclidean_search(particles.get_query(), x, l_filo); k != false; ++k) {
 
                         // if it is close to a follower that is part of the chain
                         if (get<type>(*k) == 1 && get<chain>(*k) == 1) {
@@ -960,10 +989,10 @@ int main() {
                             //get<direction>(particles[particle_id(j)]) = 0.1 * k.dx(); // move closer
 
                             //get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[1]),
-                                                                                          //cos(random_angle[1])); // update if nothing is in the next position
+                            //cos(random_angle[1])); // update if nothing is in the next position
                             // check that it is not the same cell
-                            if (get<id>(*k) != get<id>(particles[particle_id(j)])){
-                                get<direction>(particles)[particle_id(j)] = get<direction>(*k);
+                            if (get<id>(*k) > get<id>(particles[particle_id(j)])) {
+                                get<direction>(particles)[particle_id(j)] =  get<direction>(*k);
                                 get<chain>(particles)[particle_id(j)] = 1;
                                 get<attached_to_id>(particles)[particle_id(j)] = get<id>(*k);
                             }
@@ -971,16 +1000,11 @@ int main() {
 
                         }
 
-                        if (get<type>(*k) == 0) { // check if it is not the same particle
-                            cout << "neighbours id leader" << get<id>(*k) << endl;
-                            //get<direction>(particles[particle_id(j)]) = 0.2 * k.dx();
-                            get<direction>(particles)[particle_id(j)] = 1.5 * get<direction>(*k);
-                            get<chain>(particles)[particle_id(j)] = 1;
-                            get<attached_to_id>(particles)[particle_id(j)] = get<id>(*k);
-                        }
-
                     }
-               // }
+                }
+                // }
+                particles.update_positions();
+
 
                 vdouble2 x_chain = x + get<direction>(particles)[particle_id(j)];
 
@@ -994,7 +1018,7 @@ int main() {
                 //particles.update_positions();
 
 
-                for (auto pos = euclidean_search(particles.get_query(), x, diameter); pos != false; ++pos) {
+                for (auto pos = euclidean_search(particles.get_query(), x,  diameter); pos != false; ++pos) {
 
                     //for (int i=0; i < particles.size(); i++) {
                     if (get<id>(*pos) != get<id>(particles[particle_id(j)])) { // check if it is not the same particle
@@ -1007,11 +1031,12 @@ int main() {
 
                 vdouble2 dir = get<direction>(particles[particle_id(j)]);
 
+                cout << "chain here " << get<chain>(particles[particle_id(j)]) << endl;
 
                 // check that the position they want to move to is free and not out of bounds
                 if (dir[0] != 0 && dir[1] != 0 && free_position && get<chain>(particles)[particle_id(j)] ==1 && round(x_in_chain) >= 0 &&
-                                                                                  round(x_in_chain) < length_x - 1 && round(x_chain[1]) >= 0 &&
-                                                                                  round(x_chain[1]) < length_y - 1 ) {
+                    round(x_in_chain) < length_x - 1 && round(x_chain[1]) >= 0 &&
+                    round(x_chain[1]) < length_y - 1 ) {
                     cout << "direction " << get<direction>(particles[particle_id(j)]) << endl;
                     get<position>(particles)[particle_id(j)] += get<direction>(particles[particle_id(j)]);
                 }
