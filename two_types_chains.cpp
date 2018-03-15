@@ -32,14 +32,14 @@ int main() {
     const int length_y = 12;//120;//20;//4;
     double cell_radius = 0.75;//0.5; // radius of a cell
     const double diameter = 2 * cell_radius;//2 // diameter in which there have to be no cells, equivalent to size of the cell
-    const int N_steps = 1600; // number of times the cells move up the gradient
-    const size_t N = 1; // initial number of cells
+    const int N_steps = 1500; // number of times the cells move up the gradient
+    const size_t N = 4; // initial number of cells
     double l_filo = 2.75;//2; // sensing radius
     double diff_conc = 0.5; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1;
-    double speed_l = 0.05;//0.05; // speed of a leader cell
-    double speed_f = 0.05;//0.08; // speed of a follower cell
+    double speed_l = 0.1;//0.05; // speed of a leader cell
+    double speed_f = 0.2;//0.08; // speed of a follower cell
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
 
 
@@ -267,14 +267,15 @@ int main() {
             /*
              * loop over all neighbouring leaders within "dem_diameter" distance
              */
-            for (auto tpl = euclidean_search(particles.get_query(), get<position>(f), 2*diameter); tpl != false; ++tpl) {
+            for (auto tpl = euclidean_search(particles.get_query(), get<position>(f), 1.5 * diameter); tpl != false; ++tpl) {
 
-                vdouble2 diffx = tpl.dx();
-
-                if (diffx.norm() <  diameter) {
-                    free_position = false;
-                    break;
-                }
+                free_position = false;
+//                vdouble2 diffx = tpl.dx();
+//
+//                if (diffx.norm() <  diameter) {
+//                    free_position = false;
+//                    break;
+//                }
             }
 
             get<type>(f) = 1; // new cells are followers
@@ -444,30 +445,30 @@ int main() {
          */
 
 
-//        int check_rep = 0; // check for repetitions, 0 no rep, 1 rep
-//
-//        //for (int j=0; j<N_steps;j++){
-//
-//        std::default_random_engine gen2;
-//        gen2.seed(t); // different seeds
-//        std::uniform_real_distribution<double> uniform_particles(0, particles.size()); // can only move forward
-//
-//        VectorXi particle_id = VectorXi::Zero(particles.size());
-//
-//        for (int i = 0; i < particles.size(); i++) {
-//
-//            check_rep = 1; // set to 1 to enter the while loop
-//            while (check_rep == 1) {
-//                check_rep = 0; // it is initially zero and then will be changed to 1 if it is equivalent to others
-//                particle_id(i) = uniform_particles(gen2);
-//
-//
-//                for (int j = 0; j < i; j++) {
-//                    if (particle_id(i) == particle_id(j)) { check_rep = 1; }
-//                }
-//            }
-//            //cout << "ids " << particle_id(i) << endl;
-//        }
+        int check_rep = 0; // check for repetitions, 0 no rep, 1 rep
+
+        //for (int j=0; j<N_steps;j++){
+
+        std::default_random_engine gen2;
+        gen2.seed(t); // different seeds
+        std::uniform_real_distribution<double> uniform_particles(0, particles.size()); // can only move forward
+
+        VectorXi particle_id = VectorXi::Zero(particles.size());
+
+        for (int i = 0; i < particles.size(); i++) {
+
+            check_rep = 1; // set to 1 to enter the while loop
+            while (check_rep == 1) {
+                check_rep = 0; // it is initially zero and then will be changed to 1 if it is equivalent to others
+                particle_id(i) = uniform_particles(gen2);
+
+
+                for (int j = 0; j < i; j++) {
+                    if (particle_id(i) == particle_id(j)) { check_rep = 1; }
+                }
+            }
+            //cout << "ids " << particle_id(i) << endl;
+        }
 
 
         /*
@@ -477,17 +478,14 @@ int main() {
         //        int check_rep = 0; // check for repetitions, 0 no rep, 1 rep
 
 
-        VectorXi particle_id = VectorXi::Zero(particles.size());
-
-        for (int i = 0; i < particles.size(); i++) {
-
-                particle_id(i) = i;
-            //cout << "ids " << particle_id(i) << endl;
-        }
-
-
-
-
+//        VectorXi particle_id = VectorXi::Zero(particles.size());
+//
+//        for (int i = 0; i < particles.size(); i++) {
+//
+//                particle_id(i) = i;
+//            //cout << "ids " << particle_id(i) << endl;
+//        }
+//
 
         // move all the leaders
 
@@ -604,10 +602,7 @@ int main() {
 
 
                     // check that the position they want to move to is free and not out of bounds
-                    if (free_position &&
-                        round(x_in) > 0 &&
-                        round(x_in) < length_x - 1 &&
-                        round(x[1]) > 0 &&
+                    if (free_position && round(x_in) > 0 && round(x_in) < length_x - 1 && round(x[1]) > 0 &&
                         round(x[1]) < length_y - 1) {
                         get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[2]),
                                                                                        cos(random_angle[2])); // update if nothing is in the next position
@@ -646,11 +641,8 @@ int main() {
 
 
                     // check that the position they want to move to is free and not out of bounds
-                    if (free_position &&
-                        round(x_in) > 0 &&
-                        round(x_in) < length_x - 1 &&
-                        round(x[1] ) > 0 &&
-                        round(x[1] ) < length_y - 1) {
+                    if (free_position && round(x_in) > 0 && round(x_in) < length_x - 1 &&
+                        round(x[1] ) > 0 && round(x[1] ) < length_y - 1) {
                         get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[0]),
                                                                                        cos(random_angle[0])); // update if nothing is in the next position
                         get<direction>(particles)[particle_id(j)] = speed_l * vdouble2(sin(random_angle[0]),
@@ -690,10 +682,7 @@ int main() {
 
 
                     // check that the position they want to move to is free and not out of bounds
-                    if (free_position &&
-                        round(x_in) > 0 &&
-                        round(x_in) < length_x - 1 &&
-                        round(x[1]) > 0 &&
+                    if (free_position && round(x_in) > 0 && round(x_in) < length_x - 1 && round(x[1]) > 0 &&
                         round(x[1]) < length_y - 1) {
                         get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[1]),
                                                                                        cos(random_angle[1])); // update if nothing is in the next position
@@ -931,6 +920,8 @@ int main() {
             //go through all the followers
             if (get<type>(particles[particle_id(j)]) == 1){
 
+                get<chain>(particles)[particle_id(j)] =0;
+
 
                 vdouble2 x;
                 x = get<position>(particles[particle_id(j)]);
@@ -969,7 +960,7 @@ int main() {
                     if (get<type>(*k) == 0) { // check if it is not the same particle
                         cout << "neighbours id leader" << get<id>(*k) << endl;
                         //get<direction>(particles[particle_id(j)]) = 0.2 * k.dx();
-                        get<direction>(particles)[particle_id(j)] = get<direction>(*k);
+                        get<direction>(particles)[particle_id(j)] = 1.5*get<direction>(*k);
                         get<chain>(particles)[particle_id(j)] = 1;
                         get<attached_to_id>(particles)[particle_id(j)] = get<id>(*k);
                     }
@@ -982,19 +973,26 @@ int main() {
                 if (get<chain>(particles)[particle_id(j)] == 0) {
                     for (auto k = euclidean_search(particles.get_query(), x, l_filo); k != false; ++k) {
 
+                        cout << "is it ever here " << endl;
+                        cout << "type " << get<type>(*k) << endl;
+                        cout << "get<chain>" << get<chain>(*k) << endl;
+
                         // if it is close to a follower that is part of the chain
-                        if (get<type>(*k) == 1 && get<chain>(*k) == 1) {
-                            cout << "neighbours id fol" << get<id>(*k) << endl;
+                        if (get<type>(*k) == 1 && get<chain>(*k) != 0) {
+                            cout << "neighbours id fol " << get<id>(*k) << endl;
+                            cout << "id of the current cell" << get<id>(particles[particle_id(j)]) << endl;
 
                             //get<direction>(particles[particle_id(j)]) = 0.1 * k.dx(); // move closer
 
                             //get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[1]),
                             //cos(random_angle[1])); // update if nothing is in the next position
                             // check that it is not the same cell
-                            if (get<id>(*k) > get<id>(particles[particle_id(j)])) {
+                            if (get<id>(*k) < get<id>(particles[particle_id(j)])) {
+                                cout << "does it enter here " << endl;
                                 get<direction>(particles)[particle_id(j)] =  get<direction>(*k);
-                                get<chain>(particles)[particle_id(j)] = 1;
+                                get<chain>(particles)[particle_id(j)] = get<chain>(particles[particle_id(j)]) + 1;
                                 get<attached_to_id>(particles)[particle_id(j)] = get<id>(*k);
+
                             }
 
 
@@ -1034,14 +1032,16 @@ int main() {
                 cout << "chain here " << get<chain>(particles[particle_id(j)]) << endl;
 
                 // check that the position they want to move to is free and not out of bounds
-                if (dir[0] != 0 && dir[1] != 0 && free_position && get<chain>(particles)[particle_id(j)] ==1 && round(x_in_chain) >= 0 &&
+                if (dir[0] != 0 && dir[1] != 0 && free_position && get<chain>(particles)[particle_id(j)] != 0 && round(x_in_chain) >= 0 &&
                     round(x_in_chain) < length_x - 1 && round(x_chain[1]) >= 0 &&
                     round(x_chain[1]) < length_y - 1 ) {
                     cout << "direction " << get<direction>(particles[particle_id(j)]) << endl;
                     get<position>(particles)[particle_id(j)] += get<direction>(particles[particle_id(j)]);
+
                 }
                 else{
-                    get<chain>(particles)[particle_id(j)] = 0; // it becomes dettached
+                    //get<chain>(particles)[particle_id(j)] = 0; // it becomes dettached
+                    cout << "how often is it here, random " << endl;
                     //get<attached_to_id>(particles)[particle_id(j)] = 0;
 
                     //if(get<chain>(particles)[particle_id(j)] == 0 || (free_position == false && get<chain>(particles)[particle_id(j)] == 1)){
@@ -1049,17 +1049,15 @@ int main() {
                     double random_angle = uniformpi(gen1);
 
 
-                    while (round((x_in + sin(random_angle) * l_filo)) < 0 ||
-                           round((x_in + sin(random_angle)  * l_filo)) >
+                    while (round((x_in + sin(random_angle) * l_filo)) < 0 || round((x_in + sin(random_angle)  * l_filo)) >
                            length_x - 1 || round(x[1] + cos(random_angle) * l_filo) < 0 ||
                            round(x[1] + cos(random_angle)  * l_filo) > length_y - 1) {
 
                         random_angle = uniformpi(gen1);
 
-
                     }
 
-                    x +=   speed_f * vdouble2(sin(random_angle), cos(random_angle));
+                    x += speed_f * vdouble2(sin(random_angle), cos(random_angle));
 
                     // rescaled
                     x_in = (length_x / domain_length)*x[0];
@@ -1070,13 +1068,12 @@ int main() {
 
                     for (auto k = euclidean_search(particles.get_query(), x, diameter); k != false; ++k) {
 
-
-
                         //for (int i=0; i < particles.size(); i++) {
                         if (get<id>(*k) != get<id>(particles[particle_id(j)])) { // check if it is not the same particle
                             //cout << "reject step " << 1 << endl;
                             free_position = false;
                         }
+
                     }
 //                cout << " x coord " << round((x[0] * (length_x / domain_length))) << endl;
 //                cout << "y coord " <<  round(x[1]) << endl;
@@ -1091,12 +1088,12 @@ int main() {
 
 
                     // check that the position they want to move to is free and not out of bounds
-                    if (free_position && round(x_in) >= 0 &&
-                        round(x_in) < length_x - 1 && round(x[1]) >= 0 &&
+                    if (free_position && round(x_in) >= 0 && round(x_in) < length_x - 1 && round(x[1]) >= 0 &&
                         round(x[1]) < length_y - 1) {
                         //cout << " moves " << endl;
                         //cout << "how frequently come in here " << endl;
                         get<position>(particles)[particle_id(j)] += speed_f * vdouble2(sin(random_angle), cos(random_angle)); // update if nothing is in the next position
+                        get<direction>(particles)[particle_id(j)] = speed_f * vdouble2(sin(random_angle), cos(random_angle));
                     }
                 }
 
