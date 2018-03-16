@@ -1,3 +1,4 @@
+
 //
 // similar to chemical trail but only one Aboria variable, with type true (leader), false (follower)
 //
@@ -38,7 +39,7 @@ int main() {
     double speed_l = 0.5;//0.05; // speed of a leader cell
     double speed_f = 0.5;//0.08; // speed of a follower cell
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
-
+    double non_growing_part = 0.7; // part of the domain that does not grow
 
     // distance to the track parameters
     double dist_thres = 1;
@@ -195,15 +196,13 @@ int main() {
      * compact initialisation
      */
 
-    for (int i=0; i<N; ++i) {
+    for (int i = 0; i < N; ++i) {
 
 
         get<radius>(particles[i]) = cell_radius;
-        get<type>(particles[i]) = 0; // initially all cells are leaders
 
-        //get<position>(p) = vdouble2(cell_radius,(i+1)*diameter); // x=2, uniformly in y
-        get<position>(particles[i]) = vdouble2(cell_radius,(i+1)*double(length_y-1)/double(N)-0.5 * double(length_y-1)/double(N)); // x=2, uniformly in y
 
+        get<position>(particles[i]) = vdouble2(cell_radius, (i + 1) * diameter); // x=2, uniformly in y
 
     }
 
@@ -349,9 +348,9 @@ int main() {
         // since the second half does not grow, the chemo remains fixed
         float difference =
                 chemo_3col_ind(length_x * length_y - 1, 0) - chemo_3col_ind(length_x * length_y - (length_y + 1), 0);
-        int count = 0.5 * length_x;
+        int count = ( 1-non_growing_part ) * length_x;
         int count_12 = 1; // count, so that the change would be at every twelth position
-        for (int i = 0.5 * length_x * length_y; i < length_x * length_y - length_y; i++) {
+        for (int i = (1-non_growing_part ) * length_x * length_y; i < length_x * length_y - length_y; i++) {
             chemo_3col(i, 0) = chemo_3col(length_x * length_y - 1, 0) - difference * count;
             count_12 += 1;
             cout << " x coord, 2nd half " << chemo_3col(i, 0) << endl;
@@ -362,14 +361,10 @@ int main() {
         }
 
         // the first half grows
-        for (int i = 0; i < 0.5 * length_x * length_y; i++) {
-            chemo_3col(i, 0) = chemo_3col_ind(i, 0) * (chemo_3col(0.5 * length_x * length_y, 0) / (length_x * 0.5));
+        for (int i = 0; i < (1-non_growing_part ) * length_x * length_y; i++) {
+            chemo_3col(i, 0) = chemo_3col_ind(i, 0) * (chemo_3col((1-non_growing_part ) * length_x * length_y, 0) / (length_x * (1-non_growing_part )));
             cout << " x coord, 1st half " << chemo_3col(i, 0) << endl;
         }
-
-
-
-
 
 
 
@@ -401,14 +396,14 @@ int main() {
                     vdouble2 x;
                     x = get<position>(particles[k]);
 
-                    if (x[0] > 0 && x[0] < domain_length - 0.5 * length_x) {
-                        scaling_factor = (domain_length - length_x * 0.5) /
-                                         (length_x - length_x * 0.5);//uniform growth in the first part of the domain
+                    if (x[0] > 0 && x[0] < domain_length - non_growing_part * length_x) {
+                        scaling_factor = (domain_length - length_x * non_growing_part) /
+                                         (length_x - length_x * non_growing_part);//uniform growth in the first part of the domain
                         intern(i, j) = intern(i, j) + exp(-((scaling_factor * i - x[0]) * (scaling_factor * i - x[0]) +
                                                             (j - x[1]) * (j - x[1])) /
                                                           (2 * R * R)); // mapping to fixed domain
                     }
-                    if (x[0] > domain_length - 0.5 * length_x && x[0] < domain_length) {
+                    if (x[0] > domain_length - non_growing_part * length_x && x[0] < domain_length) {
                         scaling_factor = (domain_length - length_x);//uniform growth in the first part of the domain
                         intern(i, j) = intern(i, j) + exp(-((i + scaling_factor - x[0]) * (i + scaling_factor - x[0]) +
                                                             (j - x[1]) * (j - x[1])) /
@@ -424,11 +419,10 @@ int main() {
         }
 
 
-
         // non-uniform growth, changes in reaction diffusion equation
 
         // final half
-        for (int i = length_x * 0.5; i < length_x - 1; i++) {
+        for (int i = length_x * non_growing_part; i < length_x - 1; i++) {
             for (int j = 1; j < length_y - 1; j++) {
                 chemo_new(i, j) = dt * (D * ((chemo(i + 1, j) - 2 * chemo(i, j) + chemo(i - 1, j)) / (dx * dx) +
                                              (chemo(i, j + 1) - 2 * chemo(i, j) + chemo(i, j - 1)) / (dy * dy)) -
@@ -438,17 +432,17 @@ int main() {
         }
 
         // first half
-        for (int i = 1; i < length_x * 0.5; i++) {
+        for (int i = 1; i < length_x * non_growing_part; i++) {
             for (int j = 1; j < length_y - 1; j++) {
-                chemo_new(i, j) = dt * (D * ((1 / (((domain_length - 0.5 * length_x) / (0.5 * double(length_x))) *
-                                                   ((domain_length - 0.5 * double(length_x)) /
-                                                    (0.5 * double(length_x)))) *
+                chemo_new(i, j) = dt * (D * ((1 / (((domain_length - non_growing_part * length_x) / (non_growing_part * double(length_x))) *
+                                                   ((domain_length - non_growing_part * double(length_x)) /
+                                                    (non_growing_part * double(length_x)))) *
                                               (chemo(i + 1, j) - 2 * chemo(i, j) + chemo(i - 1, j)) / (dx * dx) +
                                               (chemo(i, j + 1) - 2 * chemo(i, j) + chemo(i, j - 1)) / (dy * dy)) -
                                              (chemo(i, j) * lam / (2 * M_PI * R * R)) * intern(i, j) +
                                              kai * chemo(i, j) * (1 - chemo(i, j)) -
-                                             double(domain_len_der) / (domain_length-0.5 * double(length_x))) * chemo(i, j)) +
-                                        chemo(i, j);
+                                             double(domain_len_der) / (domain_length-non_growing_part * double(length_x))) * chemo(i, j)) +
+                                  chemo(i, j);
             }
         }
 
@@ -541,12 +535,12 @@ int main() {
             for (int i = 0; i < particles.size(); i++) {
                 vdouble2 x = get<position>(particles)[i]; // so that I could extract x coord
                 // if in the first part of the domain
-                if (x[0] > 0 && x[0] < old_length - 0.5 * length_x) {
+                if (x[0] > 0 && x[0] < old_length - non_growing_part * length_x) {
                     get<position>(particles)[i] *= vdouble2(
-                            (domain_length - length_x * 0.5) / (old_length - length_x * 0.5),
+                            (domain_length - length_x * non_growing_part) / (old_length - length_x * non_growing_part),
                             1);//uniform growth in the first part of the domain
                 }
-                    //if (x[0] > old_length - 0.5 * length_x && x[0] < old_length){
+                    //if (x[0] > old_length - non_growing_part * length_x && x[0] < old_length){
                 else {
                     get<position>(particles)[i] += vdouble2(domain_length - old_length,
                                                             0);//uniform growth in the first part of the domain
@@ -634,14 +628,14 @@ int main() {
             // Non-uniform domain growth
 
 
-            // Non-uniform domain growth, onl first half grows
+            // Non-uniform domain growth, only a part of the domain grows
             // if in the first part of the domain
-            if (x[0] > 0 && x[0] < domain_length - 0.5 * length_x) {
-                x_in = x[0] * ((length_x - length_x * 0.5) /
-                               (domain_length - length_x * 0.5));//uniform growth in the first part of the domain
+            if (x[0] > 0 && x[0] < domain_length - non_growing_part * length_x) {
+                x_in = x[0] * ((length_x - length_x * non_growing_part) /
+                               (domain_length - length_x * non_growing_part));//uniform growth in the first part of the domain
             }
-            if (x[0] > domain_length - 0.5 * length_x && x[0] < domain_length) {
-                x_in = x[0] - (domain_length - length_x);//uniform growth in the first part of the domain
+            if (x[0] > domain_length - non_growing_part * length_x && x[0] < domain_length) {
+                x_in = x[0] - (domain_length - length_x);//no growth in the second part of the domain
             }
 
 
@@ -677,7 +671,6 @@ int main() {
 //                sign_x[j] = sign_x_tem;
 //                sign_y[j] = sign_y_tem;
 
-
             }
 
 
@@ -710,11 +703,11 @@ int main() {
 
                 // Non-uniform domain growth, onl first half grows
                 // if in the first part of the domain
-                if (x[0] > 0 && x[0] < domain_length - 0.5 * length_x) {
-                    x_in = x[0] * ((length_x - length_x * 0.5) /
-                                   (domain_length - length_x * 0.5));//uniform growth in the first part of the domain
+                if (x[0] > 0 && x[0] < domain_length - non_growing_part * length_x) {
+                    x_in = x[0] * ((length_x - length_x * non_growing_part) /
+                                   (domain_length - length_x * non_growing_part));//uniform growth in the first part of the domain
                 }
-                if (x[0] > domain_length - 0.5 * length_x && x[0] < domain_length) {
+                if (x[0] > domain_length - non_growing_part * length_x && x[0] < domain_length) {
                     x_in = x[0] - (domain_length - length_x);//uniform growth in the first part of the domain
                 }
 
@@ -766,11 +759,11 @@ int main() {
 
                 // Non-uniform domain growth, onl first half grows
                 // if in the first part of the domain
-                if (x[0] > 0 && x[0] < domain_length - 0.5 * length_x) {
-                    x_in = x[0] * ((length_x - length_x * 0.5) /
-                                   (domain_length - length_x * 0.5));//uniform growth in the first part of the domain
+                if (x[0] > 0 && x[0] < domain_length - non_growing_part * length_x) {
+                    x_in = x[0] * ((length_x - length_x * non_growing_part) /
+                                   (domain_length - length_x * non_growing_part));//uniform growth in the first part of the domain
                 }
-                if (x[0] > domain_length - 0.5 * length_x && x[0] < domain_length) {
+                if (x[0] > domain_length - non_growing_part * length_x && x[0] < domain_length) {
                     x_in = x[0] - (domain_length - length_x);//uniform growth in the first part of the domain
                 }
 
@@ -822,11 +815,11 @@ int main() {
 
                 // Non-uniform domain growth, onl first half grows
                 // if in the first part of the domain
-                if (x[0] > 0 && x[0] < domain_length - 0.5 * length_x) {
-                    x_in = x[0] * ((length_x - length_x * 0.5) /
-                                   (domain_length - length_x * 0.5));//uniform growth in the first part of the domain
+                if (x[0] > 0 && x[0] < domain_length - non_growing_part * length_x) {
+                    x_in = x[0] * ((length_x - length_x * non_growing_part) /
+                                   (domain_length - length_x * non_growing_part));//uniform growth in the first part of the domain
                 }
-                if (x[0] > domain_length - 0.5 * length_x && x[0] < domain_length) {
+                if (x[0] > domain_length - non_growing_part * length_x && x[0] < domain_length) {
                     x_in = x[0] - (domain_length - length_x);//uniform growth in the first part of the domain
                 }
 
@@ -879,11 +872,11 @@ int main() {
 
                     // Non-uniform domain growth, onl first half grows
                     // if in the first part of the domain
-                    if (x[0] > 0 && x[0] < domain_length - 0.5 * length_x) {
-                        x_in = x[0] * ((length_x - length_x * 0.5) /
-                                       (domain_length - length_x * 0.5));//uniform growth in the first part of the domain
+                    if (x[0] > 0 && x[0] < domain_length - non_growing_part * length_x) {
+                        x_in = x[0] * ((length_x - length_x * non_growing_part) /
+                                       (domain_length - length_x * non_growing_part));//uniform growth in the first part of the domain
                     }
-                    if (x[0] > domain_length - 0.5 * length_x && x[0] < domain_length) {
+                    if (x[0] > domain_length - non_growing_part * length_x && x[0] < domain_length) {
                         x_in = x[0] - (domain_length - length_x);//uniform growth in the first part of the domain
                     }
 
@@ -980,4 +973,3 @@ int main() {
 
 
 }
-
