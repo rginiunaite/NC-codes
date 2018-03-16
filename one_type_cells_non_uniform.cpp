@@ -587,7 +587,7 @@ int main() {
                 for (int j = 0; j < i; j++) {
                     if (particle_id(i) == particle_id(j)) { check_rep = 1; }
                 }
-                cout << "particle id before " << particle_id(i) << endl;
+
             }
             //cout << "ids " << particle_id(i) << endl;
         }

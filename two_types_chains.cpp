@@ -498,25 +498,25 @@ int main() {
              * phenotypic switching, based on chemoattractant concentration in front, +0.5
              * */
 
-//            vdouble2 coord = get<position>(particles[particle_id(j)]);
-//
-//            // rescaled coord
-//
-//            double rescaled_coord;
-//
-//            rescaled_coord = (length_x / domain_length)*coord[0];
-//
-//            double old_chemo = chemo(round(rescaled_coord)+1, round(coord[1]));
-//            cout << "chemo in front " << old_chemo << endl;
-//
-//            // if high concentration cells become leaders
-//            if (old_chemo > chemo_leader){
-//
-//                get<type>(particles[particle_id(j)]) = 0;
-//            }
-//            else{
-//                get<type>(particles[particle_id(j)]) = 1;
-//            }
+            vdouble2 coord = get<position>(particles[particle_id(j)]);
+
+            // rescaled coord
+
+            double rescaled_coord;
+
+            rescaled_coord = (length_x / domain_length)*coord[0];
+
+            double old_chemo = chemo(round(rescaled_coord)+1, round(coord[1]));
+            cout << "chemo in front " << old_chemo << endl;
+
+            // if high concentration cells become leaders
+            if (old_chemo > chemo_leader){
+
+                get<type>(particles[particle_id(j)]) = 0;
+            }
+            else{
+                get<type>(particles[particle_id(j)]) = 1;
+            }
 
 
 
