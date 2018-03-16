@@ -203,16 +203,18 @@ VectorXi func(double diff_conc, double lam, int n_seed){
      */
 
     for (int i=0; i<N; ++i) {
-        get<radius>(particles)[i] = cell_radius;
-        get<type>(particles)[i] = 0; // initially all cells are leaders
+
+
+        get<radius>(particles[i]) = cell_radius;
+        get<type>(particles[i]) = 0; // initially all cells are leaders
 
         //get<position>(p) = vdouble2(cell_radius,(i+1)*diameter); // x=2, uniformly in y
-        get<position>(particles)[i] = vdouble2(cell_radius,(i+1)*double(length_y)/double(N)-0.5 * double(length_y)/double(N)); // x=2, uniformly in y
-        cout << "initial position " << get<position>(particles)[i] << endl;
-        /*
-         * loop over all neighbouring particles within "diameter=2*radius" distance
-         */
+        get<position>(particles[i]) = vdouble2(cell_radius,(i+1)*double(length_y-1)/double(N)-0.5 * double(length_y-1)/double(N)); // x=2, uniformly in y
+
+
     }
+
+
     particles.init_neighbour_search(vdouble2(0,0), 5*vdouble2(length_x,length_y), vbool2(false,false));
 
 
@@ -778,7 +780,7 @@ VectorXi func(double diff_conc, double lam, int n_seed){
                 vdouble2 x;
                 x = get<position>(particles[particle_id(j)]);
 
-                vdouble x_in;
+                double x_in;
                 // rescaled
                 x_in = (length_x / domain_length)*x[0];
 

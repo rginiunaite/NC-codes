@@ -39,6 +39,7 @@ include_directories(src ${INCLUDES})
 add_executable(two_types_chains two_types_chains.cpp)
 #add_executable(forced_gradient_non_uniform forced_gradient_non_uniform.cpp)
 #add_executable(one_type_cells_non_uniform one_type_cells_non_uniform.cpp)
+#add_executable(check check.cpp)
 
 
 
@@ -48,6 +49,7 @@ add_executable(two_types_chains two_types_chains.cpp)
 target_link_libraries(two_types_chains ${LIBRARIES})
 #target_link_libraries(forced_gradient_non_uniform ${LIBRARIES})
 #target_link_libraries(one_type_cells_non_uniform ${LIBRARIES})
+#target_link_libraries(check ${LIBRARIES})
 
 
 

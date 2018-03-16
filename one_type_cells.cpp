@@ -188,9 +188,10 @@ int main() {
 
 
         get<radius>(particles[i]) = cell_radius;
+        //get<type>(particles[i]) = 0; // initially all cells are leaders
 
-
-        get<position>(particles[i]) = vdouble2(cell_radius,(i+1)*diameter); // x=2, uniformly in y
+        //get<position>(p) = vdouble2(cell_radius,(i+1)*diameter); // x=2, uniformly in y
+        get<position>(particles[i]) = vdouble2(cell_radius,(i+1)*double(length_y-1)/double(N)-0.5 * double(length_y-1)/double(N)); // x=2, uniformly in y
 
     }
 
@@ -239,8 +240,6 @@ int main() {
 
 
     for (int t = 0; t < N_steps; t++){
-
-
 
         // insert new cells at the start of the domain at insertion time (have to think about this insertion time)
 
@@ -493,10 +492,16 @@ int main() {
                 for (int j = 0; j < 3; j++) {
 
                     double random_angle_tem = uniformpi(gen1);
+
+//                    // polarised movement
+//                    if (random_angle_tem > M_PI){
+//                        random_angle_tem = uniformpi(gen1);
+//                    }
+
+
 //                int sign_x_tem, sign_y_tem;
 
-                    while (round(x_in + sin(random_angle_tem) * l_filo) < 0 ||
-                           round(x_in + sin(random_angle_tem) * l_filo) >
+                    while (round(x_in + sin(random_angle_tem) * l_filo) < 0 || round(x_in + sin(random_angle_tem) * l_filo) >
                            length_x - 1 || round(x[1] + cos(random_angle_tem) * l_filo) < 0 ||
                            round(x[1] + cos(random_angle_tem) * l_filo) > length_y - 1) {
                         random_angle_tem = uniformpi(gen1);
