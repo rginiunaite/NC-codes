@@ -39,7 +39,7 @@ int main() {
     double speed_l = 0.5;//0.05; // speed of a leader cell
     double speed_f = 0.5;//0.08; // speed of a follower cell
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
-    double non_growing_part = 0.7; // part of the domain that does not grow
+    double non_growing_part = 0.5; // part of the domain that does not grow
 
     // distance to the track parameters
     double dist_thres = 1;
@@ -361,8 +361,9 @@ int main() {
         }
 
         // the first half grows
+        // here it is not only rescaled by the domain growth in that part
         for (int i = 0; i < (1-non_growing_part ) * length_x * length_y; i++) {
-            chemo_3col(i, 0) = chemo_3col_ind(i, 0) * (chemo_3col((1-non_growing_part ) * length_x * length_y, 0) / (length_x * (1-non_growing_part )));
+            chemo_3col(i, 0) = chemo_3col_ind(i, 0) * ( (domain_length-non_growing_part*length_x) )/ (length_x- non_growing_part * length_x);
             cout << " x coord, 1st half " << chemo_3col(i, 0) << endl;
         }
 
@@ -421,8 +422,8 @@ int main() {
 
         // non-uniform growth, changes in reaction diffusion equation
 
-        // final half
-        for (int i = length_x * non_growing_part; i < length_x - 1; i++) {
+        // second part
+        for (int i = length_x * (1-non_growing_part); i < length_x - 1; i++) {
             for (int j = 1; j < length_y - 1; j++) {
                 chemo_new(i, j) = dt * (D * ((chemo(i + 1, j) - 2 * chemo(i, j) + chemo(i - 1, j)) / (dx * dx) +
                                              (chemo(i, j + 1) - 2 * chemo(i, j) + chemo(i, j - 1)) / (dy * dy)) -
@@ -431,12 +432,12 @@ int main() {
             }
         }
 
-        // first half
-        for (int i = 1; i < length_x * non_growing_part; i++) {
+        // first part
+        for (int i = 1; i < (length_x -1) * (1-non_growing_part); i++) {
             for (int j = 1; j < length_y - 1; j++) {
-                chemo_new(i, j) = dt * (D * ((1 / (((domain_length - non_growing_part * length_x) / (non_growing_part * double(length_x))) *
+                chemo_new(i, j) = dt * (D * ((1 / (((domain_length - non_growing_part * length_x) / ((1 - non_growing_part) * double(length_x))) *
                                                    ((domain_length - non_growing_part * double(length_x)) /
-                                                    (non_growing_part * double(length_x)))) *
+                                                    ((1-non_growing_part) * double(length_x)))) *
                                               (chemo(i + 1, j) - 2 * chemo(i, j) + chemo(i - 1, j)) / (dx * dx) +
                                               (chemo(i, j + 1) - 2 * chemo(i, j) + chemo(i, j - 1)) / (dy * dy)) -
                                              (chemo(i, j) * lam / (2 * M_PI * R * R)) * intern(i, j) +
@@ -587,7 +588,7 @@ int main() {
                 for (int j = 0; j < i; j++) {
                     if (particle_id(i) == particle_id(j)) { check_rep = 1; }
                 }
-
+                cout << "particle id before " << particle_id(i) << endl;
             }
             //cout << "ids " << particle_id(i) << endl;
         }
