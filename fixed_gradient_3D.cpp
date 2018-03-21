@@ -22,8 +22,9 @@ using namespace Eigen; // objects VectorXf, MatrixXf
 int main(){
 
     //double diff_conc=0.08;
-    double slope = 0.1;
-    int n_seed = 1;
+    double slope = 0.0333;
+    int n_seed_y = 1;
+    int n_seed_z = 2;
 
     // model parameters
 
@@ -35,10 +36,10 @@ int main(){
     double cell_radius = 0.75;//0.5; // radius of a cell
     const double diameter =
             2 * cell_radius;//2 // diameter in which there have to be no cells, equivalent to size of the cell
-    const int N_steps = 100; // number of times the cells move up the gradient
-    const size_t N = 1; // initial number of cells
-    double l_filo = 27.5 / 10;//2; // sensing radius
-    double diff_conc = 0.05; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
+    const int N_steps = 800; // number of times the cells move up the gradient
+    const size_t N = 7; // initial number of cells
+    double l_filo = 4.75;//2; // sensing radius
+    double diff_conc = 0.005; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1;
     double speed_l = 0.5;//0.05; // speed of a leader cell
@@ -96,7 +97,7 @@ int main(){
     double R = cell_radius;//7.5/10; // \nu m cell radius
     //double lam = 500;//(100)/10; // to 1000 /h chemoattractant internalisation
     // matrix that stores the values of concentration of chemoattractant
-    int chemo[length_x][length_y][length_z];
+    double chemo[length_x][length_y][length_z];
 
 
 
@@ -178,12 +179,12 @@ int main(){
     particle_type particles(N);
     // uniformly in y
     std::default_random_engine gen;
-    gen.seed(n_seed);
+    gen.seed(n_seed_y);
     std::uniform_real_distribution<double> uniform(2, length_y - 1);
 
     // uniformly in z
     std::default_random_engine genz;
-    genz.seed(n_seed);
+    genz.seed(n_seed_z);
     std::uniform_real_distribution<double> uniformz(2, length_z - 1);
 
 
@@ -442,6 +443,8 @@ int main(){
 
         // SEARCH MULTIPLE TIMES
 
+        // Random ordering
+
         int no_replacements = particles.size(); // to store the number of cells that have already been picked randomly
 
         int check_rep = 0; // check for repetitions, 0 no rep, 1 rep
@@ -470,6 +473,16 @@ int main(){
             //cout << "ids " << particle_id(i) << endl;
         }
 
+
+
+
+        // ordered list
+
+//        for (int i = 0; i < particles.size(); i++) {
+//
+//                particle_id(i) = i;
+//
+//        }
 
 
 //            // find a particle with particle_id
@@ -559,9 +572,9 @@ int main(){
                        round((x_in + cos(random_angle_tem) * sin(random_angle_tem_phi) * l_filo)) >
                        length_x - 1 || round(x[1] + sin(random_angle_tem) * sin(random_angle_tem_phi) * l_filo) < 0 ||
                        round(x[1] + cos(random_angle_tem) * sin(random_angle_tem_phi) * l_filo) > length_y - 1 ||
-                       round(x_in + cos(random_angle_tem_phi) * l_filo) < 0 ||
-                       round(x_in + cos(random_angle_tem_phi) * l_filo) >
-                       length_x - 1) {
+                       round(x[2] + cos(random_angle_tem_phi) * l_filo) < 0 ||
+                       round(x[2] + cos(random_angle_tem_phi) * l_filo) >
+                       length_z - 1) {
                     random_angle_tem = uniformpi(gen1);
                     random_angle_tem_phi = uniformphi(genphi);
 
@@ -576,6 +589,9 @@ int main(){
                 }
 
                 random_angle[i] = random_angle_tem;
+                random_angle_phi[i] = random_angle_tem_phi;
+                cout << "theta " << random_angle[i] << endl;
+                cout << "phi " << random_angle_phi[i] << endl;
 
 //                sign_x[i] = sign_x_tem;
 //                sign_y[i] = sign_y_tem;
@@ -585,6 +601,19 @@ int main(){
 
 
             // choose which direction to move
+
+
+            cout << "chemo coef x before " << int(round(x_in)) << endl;
+            cout << "chemo coef x after " << int(round(x_in + cos(random_angle[0]) * sin(random_angle_phi[0]) * l_filo)) << endl;
+
+            cout << "chemo coef y before " << int(round(x[1])) << endl;
+            cout << "chemo coef y after " << int(round(x[1]+ cos(random_angle[0]) * sin(random_angle_phi[0]) * l_filo)) << endl;
+
+            cout << "chemo coef z before " << int(round(x[2])) << endl;
+            cout << "chemo coef z after " << int(round(x[2] + cos(random_angle[0]) * sin(random_angle_phi[0]) * l_filo)) << endl;
+
+
+
 
             // store variables for concentration at new locations
             double old_chemo = chemo[int(round(x_in))][int(round(x)[1])][int(round(x)[2])];
@@ -603,57 +632,12 @@ int main(){
                     round(x[2] + cos(random_angle_phi[1]) * l_filo))];
 
 
-cout << "new_chemo_2 " << new_chemo_2 << endl;
+            cout << "new_chemo_2 " << new_chemo_2 << endl;
             cout << "new_chemo_1 " << new_chemo_1 << endl;
             cout << "old " << old_chemo << endl;
 
 
-            //if both smaller, move random direction
-            //absolute
-            //if (new_chemo_1 - old_chemo < diff_conc && new_chemo_2 - old_chemo < diff_conc) {
 
-
-            // relative
-            if ((new_chemo_1 - old_chemo) / sqrt(old_chemo) < diff_conc &&
-                (new_chemo_2 - old_chemo) / sqrt(old_chemo) < diff_conc) {
-
-                cout << "is it ever here " << endl;
-                x += speed_l * vdouble3(cos(random_angle[2]) * sin(random_angle_phi[2]),
-                                        sin(random_angle[2]) * sin(random_angle_phi[2]), cos(random_angle_phi[2]));
-                //cout << "print id " << id_[x] << endl;
-                x_in = (length_x / domain_length) * x[0];
-
-
-                //cout << "Position "<< x << endl;
-                int count_position = 0;
-                bool free_position = true; // check if the neighbouring position is free
-
-                // if this loop is entered, it means that there is another cell where I want to move
-                for (auto k = euclidean_search(particles.get_query(), x, diameter); k != false; k++) {
-
-
-                    if (get<id>(*k) != get<id>(particles[particle_id(j)])) { // check if it is not the same particle
-                        //cout << "reject step " << 1 << endl;
-                        free_position = false;
-                    }
-                    //break;
-                }
-
-
-                //cout << "print position " << count_position << endl;
-
-                // check that the position they want to move to is free and not out of bounds
-                if (free_position && round(x_in) > 0 &&
-                    round(x_in) < length_x - 1 && round(x[1]) > 0 &&
-                    round(x[1]) < length_y - 1 && round(x[2]) > 0 &&
-                    round(x[2]) < length_y - 1) {
-                    get<position>(particles)[particle_id(j)] +=
-                            speed_l * vdouble3(cos(random_angle[2]) * sin(random_angle_phi[2]),
-                                               sin(random_angle[2]) * sin(random_angle_phi[2]),
-                                               cos(random_angle_phi[2])); // update if nothing is in the next position
-                }
-
-            }
             //cout << "stops here " << endl;
             // if first direction greater, second smaller
             //absolute
@@ -831,6 +815,58 @@ cout << "new_chemo_2 " << new_chemo_2 << endl;
 
                 }
 
+            }
+
+
+
+            //if both smaller, move random direction
+            //absolute
+            //if (new_chemo_1 - old_chemo < diff_conc && new_chemo_2 - old_chemo < diff_conc) {
+
+
+            // relative
+            else{
+
+                cout << "is it ever here " << endl;
+                x += speed_l * vdouble3(cos(random_angle[2]) * sin(random_angle_phi[2]),
+                                        sin(random_angle[2]) * sin(random_angle_phi[2]), cos(random_angle_phi[2]));
+                //cout << "print id " << id_[x] << endl;
+                x_in = (length_x / domain_length) * x[0];
+
+
+                //cout << "Position "<< x << endl;
+                int count_position = 0;
+                bool free_position = true; // check if the neighbouring position is free
+
+                // if this loop is entered, it means that there is another cell where I want to move
+                for (auto k = euclidean_search(particles.get_query(), x, diameter); k != false; k++) {
+
+
+                    if (get<id>(*k) != get<id>(particles[particle_id(j)])) { // check if it is not the same particle
+                        //cout << "reject step " << 1 << endl;
+                        free_position = false;
+                    }
+                    //break;
+                }
+
+
+                //cout << "print position " << count_position << endl;
+
+                cout << " position before the update " << get<position>(particles)[particle_id(j)] << endl;
+                // check that the position they want to move to is free and not out of bounds
+                if (free_position && round(x_in) > 0 &&
+                    round(x_in) < length_x - 1 && round(x[1]) > 0 &&
+                    round(x[1]) < length_y - 1 && round(x[2]) > 0 &&
+                    round(x[2]) < length_y - 1) {
+                    cout << " and here " << endl;
+                    get<position>(particles)[particle_id(j)] +=
+                            speed_l * vdouble3(cos(random_angle[2]) * sin(random_angle_phi[2]),
+                                               sin(random_angle[2]) * sin(random_angle_phi[2]),
+                                               cos(random_angle_phi[2])); // update if nothing is in the next position
+
+                    cout << " position after the update " << get<position>(particles)[particle_id(j)] << endl;
+
+                }
 
             }
 
@@ -868,9 +904,7 @@ cout << "new_chemo_2 " << new_chemo_2 << endl;
         cout << " end of a time step " << endl;
     }//all time steps
 
-    for (int i = 0; i < particles.size(); i++) {
-        cout << "Positions = " << get<position>(particles[i]) << "\n";
-    }
+
 
 
     // count the number of particles that are at the last 10% of the domain
