@@ -108,8 +108,8 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
     // four columns for x, y, z, u (z is necessaty for paraview)
 
     // form a matrix which would store x,y,z,u
-    MatrixXf chemo_3col = MatrixXf::Zero(length_x*length_y,4);
-    MatrixXf chemo_3col_ind = MatrixXf::Zero(length_x*length_y,2); // need for because that is how paraview accepts data, third dimension is just zeros
+    MatrixXf chemo_3col = MatrixXf::Zero(length_x*length_y,4); // need for because that is how paraview accepts data, third dimension is just zeros
+    MatrixXf chemo_3col_ind = MatrixXf::Zero(length_x*length_y,2); // this one is necessary for the domain growth when indexing changes
 
 
     // x, y coord, 1st and 2nd columns respectively
@@ -214,7 +214,6 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
 
 
         get<radius>(particles[i]) = cell_radius;
-        get<type>(particles[i]) = 0; // initially all cells are leaders
 
         //get<position>(p) = vdouble2(cell_radius,(i+1)*diameter); // x=2, uniformly in y
         get<position>(particles[i]) = vdouble2(cell_radius,(i+1)*double(length_y-1)/double(N)-0.5 * double(length_y-1)/double(N)); // x=2, uniformly in y
@@ -252,14 +251,9 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
              * loop over all neighbouring particles within "dem_diameter" distance
              */
             //particle_type::value_type closest_neighbour;
-            for (auto tpl = euclidean_search(particles.get_query(), get<position>(p), diameter); tpl != false; ++tpl) {
+            for (auto tpl = euclidean_search(particles.get_query(), get<position>(p), 1.5 *diameter); tpl != false; ++tpl) {
 
-                vdouble2 diffx = tpl.dx();
-
-                if (diffx.norm() <  diameter) {
-                    free_position = false;
-                    break;
-                }
+                free_position = false;
             }
             //cout << "position from j " << get<id>(closest_neighbour) << endl;
             if (free_position == true) {
@@ -578,57 +572,7 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
                                        round(x[1] + cos(random_angle[1]) * l_filo));
 
 
-            //if both smaller, move random direction
-            //absolute
-            //if (new_chemo_1 - old_chemo < diff_conc && new_chemo_2 - old_chemo < diff_conc) {
 
-
-            // relative
-            if ((new_chemo_1 - old_chemo) / sqrt(old_chemo) < diff_conc &&
-                (new_chemo_2 - old_chemo) / sqrt(old_chemo) < diff_conc) {
-
-                if (get<id>(particles)[particle_id(j)] == 75){
-                    cout << "how often does it enter here in the end? " << endl;
-                }
-
-                x += speed_l * vdouble2(sin(random_angle[2]), cos(random_angle[2]));
-                //cout << "print id " << id_[x] << endl;
-                x_in = (length_x / domain_length)*x[0];
-
-
-                //cout << "Position "<< x << endl;
-                int count_position = 0;
-                bool free_position = true; // check if the neighbouring position is free
-
-                // if this loop is entered, it means that there is another cell where I want to move
-                for (auto k = euclidean_search(particles.get_query(), x, diameter); k != false; k++) {
-
-
-                    if (get<id>(*k) != get<id>(particles[particle_id(j)])) { // check if it is not the same particle
-                        //cout << "reject step " << 1 << endl;
-                        free_position = false;
-                        if (get<id>(particles)[particle_id(j)] == 75){
-                            cout << "the reason is false neighbouring position " << endl;
-                        }
-                    }
-                    //break;
-                }
-
-
-                //cout << "print position " << count_position << endl;
-
-                // check that the position they want to move to is free and not out of bounds
-                if (free_position && round(x_in) > 0 &&
-                    round(x_in) < length_x - 1 && round(x[1]) > 0 &&
-                    round(x[1]) < length_y - 1) {
-                    get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[2]),
-                                                                               cos(random_angle[2])); // update if nothing is in the next position
-                    if (get<id>(particles)[particle_id(j)] == 75){
-                        cout << "does it perform this step " << endl;
-                    }
-                }
-
-            }
             //cout << "stops here " << endl;
             // if first direction greater, second smaller
             //absolute
@@ -662,8 +606,8 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
 
                 //cout << "print position " << count_position << endl;
                 // check that the position they want to move to is free and not out of bounds
-                if (free_position && round(x_in) > 0 &&
-                    round(x_in) < length_x - 1 && round(x[1]) > 0 &&
+                if (free_position && round(x_in) >= 0 &&
+                    round(x_in) < length_x - 1 && round(x[1]) >= 0 &&
                     round(x[1]) < length_y - 1) {
                     get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[0]),
                                                                                    cos(random_angle[0])); // update if nothing is in the next position
@@ -702,8 +646,8 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
 
                 //cout << "print position " << count_position << endl;
                 // check that the position they want to move to is free and not out of bounds
-                if (free_position && round(x_in) > 0 &&
-                    round(x_in) < length_x - 1 && round(x[1]) > 0 &&
+                if (free_position && round(x_in) >= 0 &&
+                    round(x_in) < length_x - 1 && round(x[1]) >= 0 &&
                     round(x[1]) < length_y - 1) {
                     get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[1]),
                                                                                    cos(random_angle[1])); // update if nothing is in the next position
@@ -773,14 +717,83 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
 
                     //cout << "print position " << count_position << endl;
                     // check that the position they want to move to is free and not out of bounds
-                    if (free_position  && round(x_in) > 0 &&
-                        round(x_in) < length_x - 1 && round(x[1]) > 0 &&
+                    if (free_position  && round(x_in) >= 0 &&
+                        round(x_in) < length_x - 1 && round(x[1]) >= 0 &&
                         round(x[1]) < length_y - 1) {
                         get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[1]),
                                                                                        cos(random_angle[1])); // update if nothing is in the next position
                     }
 
                 }
+
+
+
+
+            } // go through all ids in a random vector, thus all the particles
+
+
+            //if both smaller, move random direction
+            //absolute
+            //if (new_chemo_1 - old_chemo < diff_conc && new_chemo_2 - old_chemo < diff_conc) {
+
+
+            // relative
+           // if ((new_chemo_1 - old_chemo) / sqrt(old_chemo) < diff_conc &&
+             //   (new_chemo_2 - old_chemo) / sqrt(old_chemo) < diff_conc) {
+
+             else{
+
+
+
+
+                x += speed_l * vdouble2(sin(random_angle[2]), cos(random_angle[2]));
+                //cout << "print id " << id_[x] << endl;
+                x_in = (length_x / domain_length)*x[0];
+
+
+                if (get<id>(particles)[particle_id(j)] == 41){
+                    cout << "x coordi " <<  x_in << endl;
+                    cout << "y coordi " <<  x[1] << endl;
+                }
+
+
+                //cout << "Position "<< x << endl;
+                int count_position = 0;
+                bool free_position = true; // check if the neighbouring position is free
+
+                // if this loop is entered, it means that there is another cell where I want to move
+                for (auto k = euclidean_search(particles.get_query(), x, diameter); k != false; k++) {
+
+
+                    if (get<id>(*k) != get<id>(particles[particle_id(j)])) { // check if it is not the same particle
+                        //cout << "reject step " << 1 << endl;
+                        free_position = false;
+                        if (get<id>(particles)[particle_id(j)] == 41){
+                            cout << "id 41, free position false " << endl;
+                            cout << "id of neighbour " << get<id>(*k) << endl;
+                        }
+                    }
+                    //break;
+                }
+
+
+                //cout << "print position " << count_position << endl;
+
+                // check that the position they want to move to is free and not out of bounds
+                if (free_position && round(x_in) >= 0 &&
+                    round(x_in) < length_x - 1 && round(x[1]) >= 0 &&
+                    round(x[1]) < length_y - 1) {
+                    get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[2]),
+                                                                                   cos(random_angle[2])); // update if nothing is in the next position
+
+                    if (get<id>(particles)[particle_id(j)] == 41){
+                        cout << "id 41 moves " << endl;
+                    }
+
+                }
+
+            }
+
 
 
             }
@@ -798,9 +811,6 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
             //rand_num_count += 3; // update random number count
 
             //}// go through all the particles
-
-        } // go through all ids in a random vector, thus all the particles
-
 
 
         particles.update_positions();

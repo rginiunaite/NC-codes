@@ -24,7 +24,7 @@ int main(){
     //double diff_conc=0.08;
     double slope = 0.0333;
     int n_seed_y = 1;
-    int n_seed_z = 2;
+    int n_seed_z = 5;
 
     // model parameters
 
@@ -179,12 +179,12 @@ int main(){
     particle_type particles(N);
     // uniformly in y
     std::default_random_engine gen;
-    gen.seed(n_seed_y);
+     gen.seed(n_seed_y);
     std::uniform_real_distribution<double> uniform(2, length_y - 1);
 
     // uniformly in z
     std::default_random_engine genz;
-    genz.seed(n_seed_z);
+     genz.seed(n_seed_z);
     std::uniform_real_distribution<double> uniformz(2, length_z - 1);
 
 
@@ -195,32 +195,22 @@ int main(){
 
     // particles.init_neighbour_search(vdouble2(0, 0), vdouble2(5*length_x, length_y), vbool2(false, false));
 
+// only needed here if not compact initialisation
+    particles.init_neighbour_search(vdouble3(0, 0, 0), 5 * vdouble3(length_x, length_y, length_z),
+                                    vbool3(false, false, false));
+
     /*
      * random initialisation
      */
 
-//    for (int i = 0; i < N; ++i) {
-//        bool free_position = false;
-//        particle_type::value_type p;
-//        get<radius>(p) = cell_radius;
-//        while (free_position == false) {
-//            get<position>(p) = vdouble2(cell_radius, uniform(gen)); // x=2, uniformly in y
-//            free_position = true;
-//            /*
-//             * loop over all neighbouring particles within "diameter=2*radius" distance
-//             */
-//            for (auto tpl = euclidean_search(particles.get_query(), get<position>(p), 2*diameter); tpl != false; ++tpl) {
-//
-//                vdouble2 diffx = tpl.dx();
-//
-//                if (diffx.norm() <  diameter) {
-//                    free_position = false;
-//                    break;
-//                }
-//            }
-//        }
-//        particles.push_back(p);
-//    }
+    for (int i = 0; i < N; ++i) {
+        bool free_position = false;
+        get<radius>(particles[i]) = cell_radius;
+
+        get<position>(particles[i]) = vdouble3(cell_radius, uniform(gen),uniformz(genz)); // x=2, uniformly in y
+
+
+    }
 
 
 
@@ -228,24 +218,22 @@ int main(){
      * compact initialisation
      */
 
-    for (int i = 0; i < N; ++i) {
+//    for (int i = 0; i < N; ++i) {
+//
+//
+//        get<radius>(particles[i]) = cell_radius;
+//        //get<type>(particles[i]) = 0; // initially all cells are leaders
+//
+//        //get<position>(p) = vdouble2(cell_radius,(i+1)*diameter); // x=2, uniformly in y
+//        get<position>(particles[i]) = vdouble3(cell_radius, (i + 1) * double(length_y - 1) / double(N) -
+//                                                            0.5 * double(length_y - 1) /
+//                                                            double(N), (i + 1) * double(length_y - 1) / double(N) -
+//                                                                       0.5 * double(length_y - 1) /
+//                                                                       double(N)); // x=2, uniformly in y
+//
+//
+//    }
 
-
-        get<radius>(particles[i]) = cell_radius;
-        //get<type>(particles[i]) = 0; // initially all cells are leaders
-
-        //get<position>(p) = vdouble2(cell_radius,(i+1)*diameter); // x=2, uniformly in y
-        get<position>(particles[i]) = vdouble3(cell_radius, (i + 1) * double(length_y - 1) / double(N) -
-                                                            0.5 * double(length_y - 1) /
-                                                            double(N), (i + 1) * double(length_y - 1) / double(N) -
-                                                                       0.5 * double(length_y - 1) /
-                                                                       double(N)); // x=2, uniformly in y
-
-
-    }
-
-    particles.init_neighbour_search(vdouble3(0, 0, 0), 5 * vdouble3(length_x, length_y, length_z),
-                                    vbool3(false, false, false));
 
 
     // save particles before they move
@@ -719,9 +707,9 @@ int main(){
                 //cout << "print position " << count_position << endl;
                 // check that the position they want to move to is free and not out of bounds
                 // check that the position they want to move to is free and not out of bounds
-                if (free_position && round(x_in) > 0 &&
-                    round(x_in) < length_x - 1 && round(x[1]) > 0 &&
-                    round(x[1]) < length_y - 1 && round(x[2]) > 0 &&
+                if (free_position && round(x_in) >= 0 &&
+                    round(x_in) < length_x - 1 && round(x[1]) >= 0 &&
+                    round(x[1]) < length_y - 1 && round(x[2]) >= 0 &&
                     round(x[2]) < length_y - 1) {
                     get<position>(particles)[particle_id(j)] +=
                             speed_l * vdouble3(cos(random_angle[1]) * sin(random_angle_phi[1]),
@@ -766,9 +754,9 @@ int main(){
                     //cout << "print position " << count_position << endl;
                     // check that the position they want to move to is free and not out of bounds
                     // check that the position they want to move to is free and not out of bounds
-                    if (free_position && round(x_in) > 0 &&
-                        round(x_in) < length_x - 1 && round(x[1]) > 0 &&
-                        round(x[1]) < length_y - 1 && round(x[2]) > 0 &&
+                    if (free_position && round(x_in) >= 0 &&
+                        round(x_in) < length_x - 1 && round(x[1]) >= 0 &&
+                        round(x[1]) < length_y - 1 && round(x[2]) >= 0 &&
                         round(x[2]) < length_y - 1) {
                         get<position>(particles)[particle_id(j)] +=
                                 speed_l * vdouble3(cos(random_angle[0]) * sin(random_angle_phi[0]),
@@ -803,9 +791,9 @@ int main(){
                     //cout << "print position " << count_position << endl;
                     // check that the position they want to move to is free and not out of bounds
                     // check that the position they want to move to is free and not out of bounds
-                    if (free_position && round(x_in) > 0 &&
-                        round(x_in) < length_x - 1 && round(x[1]) > 0 &&
-                        round(x[1]) < length_y - 1 && round(x[2]) > 0 &&
+                    if (free_position && round(x_in) >= 0 &&
+                        round(x_in) < length_x - 1 && round(x[1]) >= 0 &&
+                        round(x[1]) < length_y - 1 && round(x[2]) >= 0 &&
                         round(x[2]) < length_y - 1) {
                         get<position>(particles)[particle_id(j)] +=
                                 speed_l * vdouble3(cos(random_angle[1]) * sin(random_angle_phi[1]),
@@ -854,9 +842,9 @@ int main(){
 
                 cout << " position before the update " << get<position>(particles)[particle_id(j)] << endl;
                 // check that the position they want to move to is free and not out of bounds
-                if (free_position && round(x_in) > 0 &&
-                    round(x_in) < length_x - 1 && round(x[1]) > 0 &&
-                    round(x[1]) < length_y - 1 && round(x[2]) > 0 &&
+                if (free_position && round(x_in) >= 0 &&
+                    round(x_in) < length_x - 1 && round(x[1]) >= 0 &&
+                    round(x[1]) < length_y - 1 && round(x[2]) >= 0 &&
                     round(x[2]) < length_y - 1) {
                     cout << " and here " << endl;
                     get<position>(particles)[particle_id(j)] +=
