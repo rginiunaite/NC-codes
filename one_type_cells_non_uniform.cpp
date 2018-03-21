@@ -738,9 +738,9 @@ int main() {
 
 
                 // check that the position they want to move to is free and not out of bounds
-                if (free_position && round(x_in) > 0 &&
+                if (free_position && round(x_in) >= 0 &&
                     round(x_in) < length_x - 1 &&
-                    round(x[1]) > 0 &&
+                    round(x[1]) >= 0 &&
                     round(x[1]) < length_y - 1) {
                     get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[2]),
                                                                                    cos(random_angle[2])); // update if nothing is in the next position
@@ -791,9 +791,9 @@ int main() {
 
                 // check that the position they want to move to is free and not out of bounds
                 if (free_position &&
-                    round(x_in) > 0 &&
+                    round(x_in) >= 0 &&
                     round(x_in) < length_x - 1 &&
-                    round(x[1] ) > 0 &&
+                    round(x[1] ) >= 0 &&
                     round(x[1]) < length_y - 1) {
                     get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[0]),
                                                                                    cos(random_angle[0])); // update if nothing is in the next position
@@ -847,9 +847,9 @@ int main() {
 
                 // check that the position they want to move to is free and not out of bounds
                 if (free_position &&
-                    round(x_in) > 0 &&
+                    round(x_in) >= 0 &&
                     round(x_in) < length_x - 1 &&
-                    round(x[1] ) > 0 &&
+                    round(x[1] ) >= 0 &&
                     round(x[1]) < length_y - 1) {
                     get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[1]),
                                                                                    cos(random_angle[1])); // update if nothing is in the next position
@@ -906,9 +906,9 @@ int main() {
 
                     // check that the position they want to move to is free and not out of bounds
                     if (free_position &&
-                        round((x_in + sin(random_angle[0]))) > 0 &&
+                        round((x_in + sin(random_angle[0]))) >= 0 &&
                         round((x_in + sin(random_angle[0]))) < length_x - 1 &&
-                        round(x[1] + cos(random_angle[0])) > 0 &&
+                        round(x[1] + cos(random_angle[0])) >= 0 &&
                         round(x[1] + cos(random_angle[0])) < length_y - 1) {
                         get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[0]),
                                                                                        cos(random_angle[0])); // update if nothing is in the next position
@@ -945,9 +945,9 @@ int main() {
 
                     // check that the position they want to move to is free and not out of bounds
                     if (free_position == true &&
-                        round(x_in) > 0 &&
+                        round(x_in) >= 0 &&
                         round(x_in) < length_x - 1 &&
-                        round(x[1]) > 0 &&
+                        round(x[1]) >= 0 &&
                         round(x[1]) < length_y - 1) {
                         get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[1]),
                                                                                        cos(random_angle[1])); // update if nothing is in the next position
