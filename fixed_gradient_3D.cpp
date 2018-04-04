@@ -41,7 +41,7 @@ int main(){
     double l_filo = 4.75;//2; // sensing radius
     double diff_conc = 0.005; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
-    int insertion_freq = 1;
+    int insertion_freq = 5;
     double speed_l = 0.5;//0.05; // speed of a leader cell
     double speed_f = 0.5;//0.08; // speed of a follower cell
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
@@ -663,10 +663,10 @@ int main(){
                 //cout << "print position " << count_position << endl;
                 // check that the position they want to move to is free and not out of bounds
                 // check that the position they want to move to is free and not out of bounds
-                if (free_position && round(x_in) > 0 &&
-                    round(x_in) < length_x - 1 && round(x[1]) > 0 &&
-                    round(x[1]) < length_y - 1 && round(x[2]) > 0 &&
-                    round(x[2]) < length_y - 1) {
+                if (free_position && round(x_in) >= 0 &&
+                    round(x_in) <= length_x - 1 && round(x[1]) >= 0 &&
+                    round(x[1]) <= length_y - 1 && round(x[2]) >= 0 &&
+                    round(x[2]) <= length_y - 1) {
                     get<position>(particles)[particle_id(j)] +=
                             speed_l * vdouble3(cos(random_angle[0]) * sin(random_angle_phi[0]),
                                                sin(random_angle[0]) * sin(random_angle_phi[0]),
@@ -708,9 +708,9 @@ int main(){
                 // check that the position they want to move to is free and not out of bounds
                 // check that the position they want to move to is free and not out of bounds
                 if (free_position && round(x_in) >= 0 &&
-                    round(x_in) < length_x - 1 && round(x[1]) >= 0 &&
-                    round(x[1]) < length_y - 1 && round(x[2]) >= 0 &&
-                    round(x[2]) < length_y - 1) {
+                    round(x_in) <= length_x - 1 && round(x[1]) >= 0 &&
+                    round(x[1]) <= length_y - 1 && round(x[2]) >= 0 &&
+                    round(x[2]) <= length_y - 1) {
                     get<position>(particles)[particle_id(j)] +=
                             speed_l * vdouble3(cos(random_angle[1]) * sin(random_angle_phi[1]),
                                                sin(random_angle[1]) * sin(random_angle_phi[1]),
@@ -755,9 +755,9 @@ int main(){
                     // check that the position they want to move to is free and not out of bounds
                     // check that the position they want to move to is free and not out of bounds
                     if (free_position && round(x_in) >= 0 &&
-                        round(x_in) < length_x - 1 && round(x[1]) >= 0 &&
-                        round(x[1]) < length_y - 1 && round(x[2]) >= 0 &&
-                        round(x[2]) < length_y - 1) {
+                        round(x_in) <= length_x - 1 && round(x[1]) >= 0 &&
+                        round(x[1]) <= length_y - 1 && round(x[2]) >= 0 &&
+                        round(x[2]) <= length_y - 1) {
                         get<position>(particles)[particle_id(j)] +=
                                 speed_l * vdouble3(cos(random_angle[0]) * sin(random_angle_phi[0]),
                                                    sin(random_angle[0]) * sin(random_angle_phi[0]),
@@ -792,9 +792,9 @@ int main(){
                     // check that the position they want to move to is free and not out of bounds
                     // check that the position they want to move to is free and not out of bounds
                     if (free_position && round(x_in) >= 0 &&
-                        round(x_in) < length_x - 1 && round(x[1]) >= 0 &&
-                        round(x[1]) < length_y - 1 && round(x[2]) >= 0 &&
-                        round(x[2]) < length_y - 1) {
+                        round(x_in) <= length_x - 1 && round(x[1]) >= 0 &&
+                        round(x[1]) <= length_y - 1 && round(x[2]) >= 0 &&
+                        round(x[2]) <= length_y - 1) {
                         get<position>(particles)[particle_id(j)] +=
                                 speed_l * vdouble3(cos(random_angle[1]) * sin(random_angle_phi[1]),
                                                    sin(random_angle[1]) * sin(random_angle_phi[1]),
@@ -843,9 +843,9 @@ int main(){
                 cout << " position before the update " << get<position>(particles)[particle_id(j)] << endl;
                 // check that the position they want to move to is free and not out of bounds
                 if (free_position && round(x_in) >= 0 &&
-                    round(x_in) < length_x - 1 && round(x[1]) >= 0 &&
-                    round(x[1]) < length_y - 1 && round(x[2]) >= 0 &&
-                    round(x[2]) < length_y - 1) {
+                    round(x_in) <= length_x - 1 && round(x[1]) >= 0 &&
+                    round(x[1]) <= length_y - 1 && round(x[2]) >= 0 &&
+                    round(x[2]) <= length_y - 1) {
                     cout << " and here " << endl;
                     get<position>(particles)[particle_id(j)] +=
                             speed_l * vdouble3(cos(random_angle[2]) * sin(random_angle_phi[2]),
