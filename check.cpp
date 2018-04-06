@@ -40,7 +40,7 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
     double speed_l = 0.1;//0.05; // speed of a leader cell
     double speed_f = 0.1;//0.08; // speed of a follower cell
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
-    double non_growing_part = 1.0/6.0; // part of the domain that does not grow. It has to be a factor of length_y
+    double non_growing_part = 2.0/6.0; // part of the domain that does not grow. It has to be a factor of length_y
 
 
     // distance to the track parameters
@@ -372,7 +372,7 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
         cout << "length " << length_x << endl;
         cout << "1- non_growing_part " << count << endl;
         int count_12 = 0; // count, so that the change would be at every twelth position
-        for (int i = ( 1-non_growing_part ) * length_x * length_y; i < length_x * length_y - (length_y+1); i++) {
+        for (int i = ( 1-non_growing_part ) * length_x * length_y; i < length_x * length_y - (length_y); i++) {
             chemo_3col(i, 0) = chemo_3col(length_x * length_y - 1,0) - difference * count;
             count_12 += 1;
             //cout << " x coord, 2nd half " << chemo_3col(i,0) << endl;

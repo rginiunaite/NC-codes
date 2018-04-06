@@ -39,9 +39,9 @@ int main() {
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1;
     double speed_l = 0.1;//0.05; // speed of a leader cell
-    double speed_f = 0.5;//0.08; // speed of a follower cell
+    double speed_f = 0.2;//0.08; // speed of a follower cell
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
-    double chemo_leader = 0.95; //0.5; // phenotypic switching happens when the concentration of chemoattractant is higher than this
+    double chemo_leader = 0.95; //0.5; // phenotypic switching happens when the concentration of chemoattractant is higher than this (presentation video 0.95), no phenotypic switching
 
 
     // distance to the track parameters
@@ -498,28 +498,30 @@ int main() {
              * phenotypic switching, based on chemoattractant concentration in front, +0.5
              * */
 
-            vdouble2 coord = get<position>(particles[particle_id(j)]);
+//            vdouble2 coord = get<position>(particles[particle_id(j)]);
+//
+//            // rescaled coord
+//
+//            double rescaled_coord;
+//
+//            rescaled_coord = (length_x / domain_length)*coord[0];
+//
+//            double old_chemo = chemo(round(rescaled_coord)+1, round(coord[1]));
+//            cout << "chemo in front " << old_chemo << endl;
+//
+//            // if high concentration cells become leaders
+//            if (old_chemo > chemo_leader){
+//
+//                get<type>(particles[particle_id(j)]) = 0;
+//            }
+//            else{
+//                get<type>(particles[particle_id(j)]) = 1;
+//            }
+//
 
-            // rescaled coord
-
-            double rescaled_coord;
-
-            rescaled_coord = (length_x / domain_length)*coord[0];
-
-            double old_chemo = chemo(round(rescaled_coord)+1, round(coord[1]));
-            cout << "chemo in front " << old_chemo << endl;
-
-            // if high concentration cells become leaders
-            if (old_chemo > chemo_leader){
-
-                get<type>(particles[particle_id(j)]) = 0;
-            }
-            else{
-                get<type>(particles[particle_id(j)]) = 1;
-            }
-
-
-
+            /*
+             * end of phenotypic switching
+             * */
 
             //go through all the leaders
             if (get<type>(particles[particle_id(j)]) == 0) {

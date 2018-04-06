@@ -36,10 +36,11 @@ int main() {
     double diff_conc = 0.5; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1;
+    int growth_start = 0;
     double speed_l = 0.5;//0.05; // speed of a leader cell
     double speed_f = 0.5;//0.08; // speed of a follower cell
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
-    double non_growing_part = 0.5; // part of the domain that does not grow
+    double non_growing_part = 0.2; // part of the domain that does not grow
 
     // distance to the track parameters
     double dist_thres = 1;
@@ -288,7 +289,7 @@ int main() {
             }
 
 
-            if (free_position == true) {
+            if (free_position ) {
                 particles.push_back(f);
             }
 
@@ -299,27 +300,28 @@ int main() {
         /////////////////////////////////////
         // grow domain
 
+        if (t>growth_start) {
+            if (t % freq_growth == 0) {
 
-        if (t % freq_growth == 0) {
+                //domain_length = domain_length + 1.0;
 
-            //domain_length = domain_length + 1.0;
+                // no time delay
+                //domain_length = ((L_inf*exp(a*t))/ (L_inf/L_0 + exp(a*t) - 1) );
 
-            // no time delay
-            //domain_length = ((L_inf*exp(a*t))/ (L_inf/L_0 + exp(a*t) - 1) );
+                //domain_len_der = ((a*L_inf*exp(a*t))/ (L_inf/L_0 + exp(a*t) - 1) - (a*L_inf*exp(2*a*t))/(L_inf/L_0 + exp(a*t) - 1) );
 
-            //domain_len_der = ((a*L_inf*exp(a*t))/ (L_inf/L_0 + exp(a*t) - 1) - (a*L_inf*exp(2*a*t))/(L_inf/L_0 + exp(a*t) - 1) );
+                // from the paper
+                //domain_length = ((L_inf*exp(a*(t-t_s)))/ (L_inf/L_0 + exp(a*(t-t_s)) - 1) ) + constant;
 
-            // from the paper
-            //domain_length = ((L_inf*exp(a*(t-t_s)))/ (L_inf/L_0 + exp(a*(t-t_s)) - 1) ) + constant;
+                //domain_len_der = ((a*L_inf*exp(a*(t-t_s)))/ (L_inf/L_0 + exp(a*(t-t_s)) - 1) - (a*L_inf*exp(2*a*(t-t_s)))/(L_inf/L_0 + exp(a*(t-t_s)) - 1) );
 
-            //domain_len_der = ((a*L_inf*exp(a*(t-t_s)))/ (L_inf/L_0 + exp(a*(t-t_s)) - 1) - (a*L_inf*exp(2*a*(t-t_s)))/(L_inf/L_0 + exp(a*(t-t_s)) - 1) );
+                // with time delay and constant to make the initial conditions consistent
+                domain_length = ((L_inf * exp(a * (t - t_s))) / (L_inf / L_0 + exp(a * (t - t_s)) - 1)) + constant;
 
-            // with time delay and constant to make the initial conditions consistent
-            domain_length = ((L_inf * exp(a * (t - t_s))) / (L_inf / L_0 + exp(a * (t - t_s)) - 1)) + constant;
+                domain_len_der = ((a * L_inf * exp(a * (t - t_s))) / (L_inf / L_0 + exp(a * (t - t_s)) - 1) -
+                                  (a * L_inf * exp(2 * a * (t - t_s))) / (L_inf / L_0 + exp(a * (t - t_s)) - 1));
 
-            domain_len_der = ((a * L_inf * exp(a * (t - t_s))) / (L_inf / L_0 + exp(a * (t - t_s)) - 1) -
-                              (a * L_inf * exp(2 * a * (t - t_s))) / (L_inf / L_0 + exp(a * (t - t_s)) - 1));
-
+            }
         }
         //cout << "diff domain outside " << diff_domain << endl;
 
@@ -360,7 +362,7 @@ int main() {
             }
         }
 
-        // the first half grows
+        // the first part grows
         // here it is not only rescaled by the domain growth in that part
         for (int i = 0; i < (1-non_growing_part ) * length_x * length_y; i++) {
             chemo_3col(i, 0) = chemo_3col_ind(i, 0) * ( (domain_length-non_growing_part*length_x) )/ (length_x- non_growing_part * length_x);
@@ -423,7 +425,7 @@ int main() {
         // non-uniform growth, changes in reaction diffusion equation
 
         // second part
-        for (int i = length_x * (1-non_growing_part); i < length_x - 1; i++) {
+        for (int i = (length_x-1) * (1-non_growing_part); i < length_x - 1; i++) {
             for (int j = 1; j < length_y - 1; j++) {
                 chemo_new(i, j) = dt * (D * ((chemo(i + 1, j) - 2 * chemo(i, j) + chemo(i - 1, j)) / (dx * dx) +
                                              (chemo(i, j + 1) - 2 * chemo(i, j) + chemo(i, j - 1)) / (dy * dy)) -
@@ -941,10 +943,8 @@ int main() {
                     }
 
 
-
-
                     // check that the position they want to move to is free and not out of bounds
-                    if (free_position == true &&
+                    if (free_position &&
                         round(x_in) >= 0 &&
                         round(x_in) < length_x - 1 &&
                         round(x[1]) >= 0 &&
@@ -954,9 +954,7 @@ int main() {
 
                     }
                 }
-
             }
-
         }// go through all the particles-leaders
 
         particles.update_positions();

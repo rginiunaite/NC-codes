@@ -28,7 +28,7 @@ int main() {
     const int length_y = 12;//120;//20;//4;
     double cell_radius = 0.75;//0.5; // radius of a cell
     const double diameter = 2 * cell_radius;//2 // diameter in which there have to be no cells, equivalent to size of the cell
-    const int N_steps = 500; // number of times the cells move up the gradient
+    const int N_steps = 1500; // number of times the cells move up the gradient
     const size_t N = 7; // initial number of cells
     double l_filo = 27.5/10;//2; // sensing radius
     double diff_conc = 0.5; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
@@ -275,7 +275,7 @@ int main() {
             }
 
 
-            if (free_position == true){
+            if (free_position){
                 particles.push_back(f);}
 
         }
