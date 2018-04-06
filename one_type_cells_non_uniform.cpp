@@ -40,7 +40,7 @@ int main() {
     double speed_l = 0.5;//0.05; // speed of a leader cell
     double speed_f = 0.5;//0.08; // speed of a follower cell
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
-    double non_growing_part = 0.2; // part of the domain that does not grow
+    double non_growing_part = 5.0/6.0; // part of the domain that does not grow. It has to be a factor of length_y
 
     // distance to the track parameters
     double dist_thres = 1;
@@ -339,34 +339,45 @@ int main() {
          * */
 
 
-        // only the first half grows
+        // only the first part grows
 
-        // domain does not grow in the final half
+        // domain does not grow in the second part
         // the last element is dependent on how much the domain grew
-        for (int j = 1; j < length_y + 1; j++) {
-            chemo_3col(length_x * length_y - j, 0) =
-                    chemo_3col_ind(length_x * length_y - j, 0) * (domain_length / length_x);
+        for (int j=1; j< length_y + 1; j++){
+            chemo_3col(length_x*length_y - j,0) = chemo_3col_ind(length_x*length_y - j,0)*(domain_length / length_x);
         }
         // since the second half does not grow, the chemo remains fixed
-        float difference =
-                chemo_3col_ind(length_x * length_y - 1, 0) - chemo_3col_ind(length_x * length_y - (length_y + 1), 0);
-        int count = ( 1-non_growing_part ) * length_x;
-        int count_12 = 1; // count, so that the change would be at every twelth position
-        for (int i = (1-non_growing_part ) * length_x * length_y; i < length_x * length_y - length_y; i++) {
-            chemo_3col(i, 0) = chemo_3col(length_x * length_y - 1, 0) - difference * count;
+        float difference = chemo_3col_ind(length_x*length_y-1,0) - chemo_3col_ind(length_x*length_y-(length_y+1),0);// length_y +1, so that I would get different values
+        cout << "difference " << difference << endl;
+        int count = non_growing_part * length_x; //
+        cout << "length " << length_x << endl;
+        cout << "1- non_growing_part " << count << endl;
+        int count_12 = 0; // count, so that the change would be at every twelth position
+        for (int i = ( 1-non_growing_part ) * length_x * length_y; i < length_x * length_y - (length_y); i++) {
+            chemo_3col(i, 0) = chemo_3col(length_x * length_y - 1,0) - difference * count;
             count_12 += 1;
-            cout << " x coord, 2nd half " << chemo_3col(i, 0) << endl;
+            //cout << " x coord, 2nd half " << chemo_3col(i,0) << endl;
 
-            if (count_12 % length_y == 0) {
+            if (count_12 % length_y == 0){
                 count -= 1;
+                cout << "how many times in here " << endl;
             }
         }
 
-        // the first part grows
-        // here it is not only rescaled by the domain growth in that part
-        for (int i = 0; i < (1-non_growing_part ) * length_x * length_y; i++) {
-            chemo_3col(i, 0) = chemo_3col_ind(i, 0) * ( (domain_length-non_growing_part*length_x) )/ (length_x- non_growing_part * length_x);
-            cout << " x coord, 1st half " << chemo_3col(i, 0) << endl;
+        // the first half grows
+        // when non_growing_domain (x/6) * 6 is even and odd separate cases
+
+        if (int(non_growing_part*6.0) % 2 == 0 ){
+            for (int i = 0; i < (1-non_growing_part ) * length_x * length_y-1; i++) {
+                chemo_3col(i,0) = chemo_3col_ind(i, 0) * ( (domain_length-non_growing_part*length_x) ) / (length_x- non_growing_part * length_x);
+                cout << " x coord, 1st half " << chemo_3col(i,0) << endl;
+            }
+        }
+        else{
+            for (int i = 0; i < (1-non_growing_part ) * length_x * length_y; i++) {
+                chemo_3col(i,0) = chemo_3col_ind(i, 0) * ( (domain_length-non_growing_part*length_x) ) / (length_x- non_growing_part * length_x);
+                cout << " x coord, 1st half " << chemo_3col(i,0) << endl;
+            }
         }
 
 
