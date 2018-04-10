@@ -108,13 +108,13 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
 
     // half half, just for checking
 
-    for (int i = 0; i < (1 - non_growing_part) * length_x; i++) {
+    for (int i = 0; i < non_growing_part * length_x; i++) {
         for (int j = 0; j < length_y; j++) {
             chemo(i, j) = 1;//i*i;//log(double(i+1)); // concentration grows linearly/ quadratic/ logistic
         }
     }
 
-    for (int i = (1 - non_growing_part) * length_x; i < length_x; i++) {
+    for (int i = non_growing_part * length_x; i < length_x; i++) {
         for (int j = 0; j < length_y; j++) {
             chemo(i, j) = 0;//i*i;//log(double(i+1)); // concentration grows linearly/ quadratic/ logistic
         }
@@ -362,42 +362,43 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
 
         // domain does not grow in the second part
         // the last element is dependent on how much the domain grew
-        for (int j=1; j< length_y + 1; j++){
-            chemo_3col(length_x*length_y - j,0) = chemo_3col_ind(length_x*length_y - j,0)*(domain_length / length_x);
-        }
-        // since the second half does not grow, the chemo remains fixed
-        float difference = chemo_3col_ind(length_x*length_y-1,0) - chemo_3col_ind(length_x*length_y-(length_y+1),0);// length_y +1, so that I would get different values
-        cout << "difference " << difference << endl;
-        int count = non_growing_part * length_x; //
-        cout << "length " << length_x << endl;
-        cout << "1- non_growing_part " << count << endl;
-        int count_12 = 0; // count, so that the change would be at every twelth position
-        for (int i = ( 1-non_growing_part ) * length_x * length_y; i < length_x * length_y - (length_y); i++) {
-            chemo_3col(i, 0) = chemo_3col(length_x * length_y - 1,0) - difference * count;
-            count_12 += 1;
-            //cout << " x coord, 2nd half " << chemo_3col(i,0) << endl;
-
-            if (count_12 % length_y == 0){
-                count -= 1;
-                cout << "how many times in here " << endl;
-            }
-        }
+//        for (int j=1; j< length_y + 1; j++){
+//            chemo_3col(non_growing_part * length_x*length_y - j,0) = chemo_3col_ind(non_growing_part*length_x*length_y - j,0);
+//        }
+//
+//        // since the second half does not grow, the chemo remains fixed
+//        float difference = chemo_3col_ind(non_growing_part*length_x*length_y-1,0) - chemo_3col_ind(non_growing_part*length_x*length_y-(length_y+1),0);// length_y +1, so that I would get different values
+//        cout << "difference " << difference << endl;
+//        int count = non_growing_part * length_x; //
+//        cout << "length " << length_x << endl;
+//        cout << "1- non_growing_part " << count << endl;
+//        int count_12 = 0; // count, so that the change would be at every twelth position
+//        for (int i = 0; i < non_growing_part*length_x * length_y - (length_y); i++) {
+//            chemo_3col(i, 0) = chemo_3col(non_growing_part*length_x * length_y - 1,0) - difference * count;
+//            count_12 += 1;
+//            //cout << " x coord, 2nd half " << chemo_3col(i,0) << endl;
+//
+//            if (count_12 % length_y == 0){
+//                count -= 1;
+//                cout << "how many times in here " << endl;
+//            }
+//        }
 
         // the first half grows
         // when non_growing_domain (x/6) * 6 is even and odd separate cases
 
-        if (int(non_growing_part*6.0) % 2 == 0 ){
-            for (int i = 0; i < (1-non_growing_part ) * length_x * length_y-1; i++) {
+//        if (int(non_growing_part*6.0) % 2 == 0 ){
+//            for (int i = non_growing_part*length_x*length_y; i < length_x * length_y-1; i++) {
+//                chemo_3col(i,0) = chemo_3col_ind(i, 0) * ( (domain_length-non_growing_part*length_x) ) / (length_x- non_growing_part * length_x);
+//                cout << " x coord, 1st half " << chemo_3col(i,0) << endl;
+//            }
+//        }
+//        else{
+            for (int i = non_growing_part*length_x*length_y; i < length_x * length_y; i++) {
                 chemo_3col(i,0) = chemo_3col_ind(i, 0) * ( (domain_length-non_growing_part*length_x) ) / (length_x- non_growing_part * length_x);
                 cout << " x coord, 1st half " << chemo_3col(i,0) << endl;
             }
-        }
-        else{
-            for (int i = 0; i < (1-non_growing_part ) * length_x * length_y; i++) {
-                chemo_3col(i,0) = chemo_3col_ind(i, 0) * ( (domain_length-non_growing_part*length_x) ) / (length_x- non_growing_part * length_x);
-                cout << " x coord, 1st half " << chemo_3col(i,0) << endl;
-            }
-        }
+//        }
 
 
 
@@ -435,13 +436,10 @@ VectorXi func(double diff_conc, double slope, int n_seed) {
             for (int i = 0; i < particles.size(); i++) {
                 vdouble2 x = get<position>(particles)[i]; // so that I could extract x coord
                 // if in the first part of the domain
-                if (x[0] > 0 && x[0] < old_length - non_growing_part * length_x){
+                if (x[0] > non_growing_part ){
                     get<position>(particles)[i] *= vdouble2((domain_length - length_x*non_growing_part)/(old_length - length_x*non_growing_part),1);//uniform growth in the first part of the domain
                 }
                     //if (x[0] > old_length - 0.5 * length_x && x[0] < old_length){
-                else{
-                    get<position>(particles)[i] += vdouble2(domain_length - old_length,0);//uniform growth in the first part of the domain
-                }
 
             }
             old_length = domain_length;
