@@ -29,14 +29,14 @@ int main() {
     double cell_radius = 0.75;//0.5; // radius of a cell
     const double diameter = 2 * cell_radius;//2 // diameter in which there have to be no cells, equivalent to size of the cell
     const int N_steps = 800; // number of times the cells move up the gradient
-    const size_t N = 7; // initial number of cells
+    const size_t N = 2; // initial number of cells
     double l_filo = 27.5/10;//2; // sensing radius
     double diff_conc = 0.05; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1;
     double speed_l = 0.5;//0.05; // speed of a leader cell
-    double speed_f = 0.5;//0.08; // speed of a follower cell
-    double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
+    double speed_f = 0.2;//0.08; // speed of a follower cell
+    double dettach_prob = 1; // probability that a follower cell which is on trail does not loose the trail
 
 
     // distance to the track parameters
@@ -889,11 +889,15 @@ int main() {
 
                 // if the cell is part of the chain update its position
                 if (get<chain>(particles[particle_id(j)]) == 1 && free_position && round((x_can[0] * (length_x / domain_length)  )) >= 0 &&
-                    round((x_can[0] * (length_x / domain_length) )) <= length_x - 1 && round(x_can[1] ) >= 0 &&
-                    round(x_can[1] ) <= length_y - 1){
+                    round((x_can[0] * (length_x / domain_length) )) < length_x - 1 && round(x_can[1] ) >= 0 &&
+                    round(x_can[1] ) < length_y - 1){
                     //cout << "does it come in here " << endl;
                     get<position>(particles[particle_id(j)]) = track_position[get<attached_at_time_step>(particles[particle_id(j)])][get<attached_leader_nr>(particles[particle_id(j)])];
                     get<attached_at_time_step>(particles[particle_id(j)]) += 1;
+                }
+                else
+                {
+                    get<chain>(particles[particle_id(j)]) = 0;
                 }
 
                 // if it is not part of a chain, move a random direction
@@ -948,8 +952,8 @@ int main() {
 
                     // check that the position they want to move to is free and not out of bounds
                     if (free_position && round((x[0] * (length_x / domain_length))) >= 0 &&
-                        round((x[0] * (length_x / domain_length))) <= length_x - 1 && round(x[1]) >= 0 &&
-                        round(x[1]) <= length_y - 1) {
+                        round((x[0] * (length_x / domain_length))) < length_x - 1 && round(x[1]) >= 0 &&
+                        round(x[1]) < length_y - 1) {
                         //cout << " moves " << endl;
                         //cout << "how frequently come in here " << endl;
                         get<position>(particles)[particle_id(j)] += speed_f * vdouble2(sin(random_angle), cos(random_angle)); // update if nothing is in the next position
