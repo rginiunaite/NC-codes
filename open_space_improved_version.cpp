@@ -28,7 +28,7 @@ int main() {
     const int length_y = 12;//120;//20;//4;
     double cell_radius = 0.75;//0.5; // radius of a cell
     const double diameter = 2 * cell_radius;//2 // diameter in which there have to be no cells, equivalent to size of the cell
-    const int N_steps = 10; // number of times the cells move up the gradient
+    const int N_steps = 800; // number of times the cells move up the gradient
     const size_t N = 4; // initial number of cells
     double l_filo = 27.5/10;//2; // sensing radius
     double diff_conc = 0.05; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
@@ -179,6 +179,7 @@ int main() {
     // create an array to keep track of all the positions of leader cells
 
     vdouble2 track_position [N_steps][N];
+    int track_time[N] = {0}; // vector that stores the time values for each leader when there was a sufficiently big change in the position
 
     /*for (int i=0; i<N; ++i) {
         array<vdouble2, N_steps> track_distance[i];
@@ -210,6 +211,8 @@ int main() {
         //get<position>(p) = vdouble2(cell_radius,(i+1)*diameter); // x=2, uniformly in y
         get<position>(particles[i]) = vdouble2(cell_radius,(i+1)*double(length_y-1)/double(N)-0.5 * double(length_y-1)/double(N)); // x=2, uniformly in y
 
+        track_position[0][i] = get<position>(particles[i]);
+        cout << "track position " << track_position[0][i] << endl;
 
     }
 
@@ -507,9 +510,9 @@ int main() {
         for (int j = 0; j < particles.size(); j++ ) {
 
 
-                        /*
- * phenotypic switching, based on chemoattractant concentration in front, +0.5
- * */
+            /*
+* phenotypic switching, based on chemoattractant concentration in front, +0.5
+* */
 
 //            vdouble2 coord = get<position>(particles[particle_id(j)]);
 //
@@ -831,9 +834,11 @@ int main() {
                  but make sure I do not
                  */
                 if (get<chain>(particles[particle_id(j)]) == 0) {
-                    for (int i = 0; i < t - 1; i++) {
+
                         for (int k = 0; k < N; k++) {
+                            for (int i = 0; i < track_time[k]; i++) {
                             diff = x - track_position[i][k];
+                                cout << "diff here before " << diff << endl;
                             if (diff.norm() < dist_thres) {
                                 //cout << "previous diff " << previous_diff << endl;
                                 if (diff.norm() < previous_diff) {
@@ -869,6 +874,8 @@ int main() {
                     }
                 }
 
+
+                //cout << 'value here' <<track_position[get<attached_at_time_step>(particles[particle_id(j)])][get<attached_leader_nr>(particles[particle_id(j)])] << endl; //position where the cell wants to move
 
                 //cout <<  " attached to a leader " << get<attached_leader_nr>(particles[i]) << endl;
 
@@ -1003,13 +1010,21 @@ int main() {
         particles.update_positions();
 
 
-        // store positions of all the leaders
-        for (int i = 0; i < particles.size(); i++){
-            track_position[t][i] = get<position>(particles[i]);
-        }
+        // store positions of all the leaders if the distance is sufficiently big
 
+        cout << "track position " << track_position[0][1] << endl;
 
-
+            for (int i = 0; i < N; i++){
+                //cout << 'track time ' << track_time[i] << endl;
+                // check if new position is sufficiently far, but also not too far
+                vdouble2 diff = track_position[track_time[i]][i] - get<position>(particles[i]);
+                //cout << 'norm difference ' << diff.norm() << endl;
+                if ( diff.norm() > 1.5) {
+                    track_time[i] += 1; // update time steps
+                    track_position[track_time[i]][i] = get<position>(particles[i]); // update positions
+                }
+                cout << "track time " << track_time[i]<< endl;
+            }
 
 
 
