@@ -38,7 +38,8 @@ int main() {
     double speed_f = 0.5;//0.08; // speed of a follower cell
     double dettach_prob = 1; // probability that a follower cell which is on trail looses the trail
     double chemo_leader = 0.9; //0.5; // phenotypic switching happens when the concentration of chemoattractant is higher than this (presentation video 0.95), no phenotypic switching
-
+    double track_spacing = speed_f; // spacing between positions on the track
+    double eps = 0.2; // for phenotypic switching, the distance has to be that much higher
 
     // distance to the track parameters
     double dist_thres = 1;
@@ -178,9 +179,14 @@ int main() {
 
     // create an array to keep track of all the positions of leader cells
 
-    vdouble2 track_position [N_steps][N];
+    vdouble2 track_position [N_steps][N] = {vdouble2(0,0)};
+    for (int i =0; i < N_steps; i++){
+        for(int j = 0; j < N; j++){
+            track_position[i][j] = vdouble2(0,0);
+        }
+    }
     int track_time[N] = {0}; // vector that stores the time values for each leader when there was a sufficiently big change in the position
-
+    cout << "track time " << track_time[2] << endl;
     /*for (int i=0; i<N; ++i) {
         array<vdouble2, N_steps> track_distance[i];
     }*/
@@ -816,7 +822,7 @@ int main() {
 
             }
 
-            //particles
+            //particles - followers
             if (get<type>(particles[particle_id(j)]) == 1){
 
 
@@ -924,6 +930,8 @@ int main() {
                     round((x_can[0] * (length_x / domain_length) )) < length_x - 1 && round(x_can[1] ) > 0 &&
                     round(x_can[1] ) < length_y - 1){
                     //cout << "does it come in here " << endl;
+                    get<attached_at_time_step>(particles[particle_id(j)]) += 1;
+
                     get<position>(particles[particle_id(j)]) = track_position[get<attached_at_time_step>(particles[particle_id(j)])][get<attached_leader_nr>(particles[particle_id(j)])];
 
                     //int one = 1;
@@ -931,12 +939,11 @@ int main() {
 //                        one = -1;
 //                    }
 
-                    get<attached_at_time_step>(particles[particle_id(j)]) += 1;
                 }
-//                else
-//                {
-//                    get<chain>(particles[particle_id(j)]) = 0;
-//                }
+                else
+                {
+                    get<chain>(particles[particle_id(j)]) = 0;
+                }
 
                 // if it is not part of a chain, move a random direction
                 if (get<chain>(particles[particle_id(j)]) == 0){
@@ -999,6 +1006,26 @@ int main() {
                 }
 
 
+                /*
+ * Alternative phenotypic switching if a follower over takes a leader it becomes a leader and that leader follower.
+ * I will have to be careful when there will be channels because I will have to choose the closest leader
+ * */
+
+
+//                // find the closest leader
+//
+//                for (auto k = euclidean_search(particles.get_query(), get<position>(particles[particle_id(j)]), 2*diameter); k != false; ++k) {
+//
+//                    if (get<type>(*k) == 0 && get<position>(particles[particle_id(j)])[0] > get<position>(*k)[0] + eps){
+//                        get<type>(particles[particle_id(j)]) = 0; // that particle becomes a leader
+//                        get<type>(*k) = 1; // leader becomes a follower
+//                        // their ids swap as well
+//                        int temp_id = get<id>(*k);
+//                        get<id>(*k) = get<id>(particles[particle_id(j)]);
+//                        get<id>(particles[particle_id(j)]) = temp_id;
+//                    }
+//                }
+
 
             }
 
@@ -1019,7 +1046,7 @@ int main() {
                 // check if new position is sufficiently far, but also not too far
                 vdouble2 diff = track_position[track_time[i]][i] - get<position>(particles[i]);
                 //cout << 'norm difference ' << diff.norm() << endl;
-                if ( diff.norm() > 1.5) {
+                if ( diff.norm() > track_spacing) {
                     track_time[i] += 1; // update time steps
                     track_position[track_time[i]][i] = get<position>(particles[i]); // update positions
                 }
