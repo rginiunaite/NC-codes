@@ -20,7 +20,7 @@ using namespace std;
 using namespace Aboria;
 using namespace Eigen; // objects VectorXf, MatrixXf
 
-double distance_function(double speed_l) {
+int main() {
 
 
     // model parameters
@@ -31,19 +31,19 @@ double distance_function(double speed_l) {
     const int length_y = 12;//120;//20;//4;
     double cell_radius = 0.75;//0.5; // radius of a cell
     const double diameter = 2 * cell_radius;//2 // diameter in which there have to be no cells, equivalent to size of the cell
-    const int N_steps = 100; // number of times the cells move up the gradient
+    const int N_steps = 800; // number of times the cells move up the gradient
     const size_t N = 4; // initial number of cells
     double l_filo = 27.5/10;//2; // sensing radius
     double diff_conc = 0.05; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1;
-    //double speed_l = 0.5;//0.05; // speed of a leader cell
-    double speed_f = speed_l;//0.5;//0.08; // speed of a follower cell
+    double speed_l = 0.2;//0.05; // speed of a leader cell
+    double speed_f = speed_l*2;//0.5;//0.08; // speed of a follower cell
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
     double chemo_leader = 0.9; //0.5; // phenotypic switching happens when the concentration of chemoattractant is higher than this (presentation video 0.95), no phenotypic switching
     double eps = 1; // for phenotypic switching, the distance has to be that much higher
-    double track_spacing = speed_f *2; // spacing between positions on the track
-    int track_length = 10;
+    double track_spacing = 5; // spacing between positions on the track
+    int track_length = 200;
 
     // distance to the track parameters
     double dist_thres = 1;
@@ -165,11 +165,10 @@ double distance_function(double speed_l) {
     ABORIA_VARIABLE(attached_leader_nr,int,"attached_leader_nr")
     ABORIA_VARIABLE(attached_at_time_step,int,"attached_at_time_step")
     ABORIA_VARIABLE(type,int,"type") // 0 if a cell is a leader, 1 if follower
-
-
     ABORIA_VARIABLE(chain, double, "chain") // stores whether attached to a leader or follower
+    ABORIA_VARIABLE(in_track, int, "in_track") // stores whether attached to a leader or follower
     // stores the distance to the closest neighbour, if less than thresold
-    typedef Particles<std::tuple<radius, type, attached_to_id, attached_leader_nr, attached_at_time_step, direction, chain>, 2> particle_type; // 2 stands for dimension
+    typedef Particles<std::tuple<radius, type, attached_to_id, attached_leader_nr, attached_at_time_step, direction, chain, in_track>, 2> particle_type; // 2 stands for dimension
 
 
     /*
@@ -298,10 +297,10 @@ double distance_function(double speed_l) {
 
 
             if (free_position ) {
-                get<chain>(f) = 0;
-                get<attached_to_id>(f) = 0;
                 particles.push_back(f);
-
+                get<chain>(f) = 0;
+                get<in_track>(f) = 0;
+                get<attached_to_id>(f) = 0;
             }
 
         }
@@ -1008,7 +1007,7 @@ double distance_function(double speed_l) {
 
                                             get<attached_at_time_step>(particles[particle_id(j)]) = i;
                                             get<attached_leader_nr>(particles[particle_id(j)]) = k;
-                                            //}
+                                            get<in_track>(particles[particle_id(j)]) = 1;
                                         }
                                     }
                                 }
@@ -1016,10 +1015,25 @@ double distance_function(double speed_l) {
                         }
                     }
 
+                    // move in the direction where track goes
 
-                    vdouble2 x_can = track_position[get<attached_at_time_step>(
+                    vdouble2 direc_follow = track_position[get<attached_at_time_step>(
                             particles[particle_id(j)])+1][get<attached_leader_nr>(
-                            particles[particle_id(j)])]; //position where the cell wants to move
+                            particles[particle_id(j)])] - track_position[get<attached_at_time_step>(
+                            particles[particle_id(j)])][get<attached_leader_nr>(
+                            particles[particle_id(j)])];
+
+                    double normalise = direc_follow.norm();
+                    //normalise
+                    direc_follow = direc_follow/normalise;
+
+                    vdouble2 x_can = direc_follow * speed_f;
+
+
+//                            // follow the track exactly
+//                    vdouble2 x_can = track_position[get<attached_at_time_step>(
+//                            particles[particle_id(j)])+1][get<attached_leader_nr>(
+//                            particles[particle_id(j)])]; //position where the cell wants to move
 
                     // check if that position is free
                     //cout << "Position "<< x << endl;
@@ -1050,10 +1064,8 @@ double distance_function(double speed_l) {
                         round((x_can[0] * (length_x / domain_length))) < length_x - 1 && round(x_can[1]) > 0 &&
                         round(x_can[1]) < length_y - 1) {
 
+                        get<position>(particles[particle_id(j)]) = direc_follow;
                         get<attached_at_time_step>(particles[particle_id(j)]) += 1;
-
-                        get<position>(particles[particle_id(j)]) = track_position[get<attached_at_time_step>(
-                                particles[particle_id(j)])][get<attached_leader_nr>(particles[particle_id(j)])];
                         found_track = 1;
                         cout << "found track" << endl;
                     }
@@ -1100,16 +1112,7 @@ double distance_function(double speed_l) {
                                 break;
                             }
                         }
-//                cout << " x coord " << round((x[0] * (length_x / domain_length))) << endl;
-//                cout << "y coord " <<  round(x[1]) << endl;
-//
-//
-//                if (round((x[0] * (length_x / domain_length))) > 0 &&
-//                round((x[0] * (length_x / domain_length))) < length_x - 1 && round(x[1]) > 0 &&
-//                round(x[1]) < length_y - 1){
-//
-//                    cout << "this condition satisfied" << endl;
-//                }
+
 
 
                         // check that the position they want to move to is free and not out of bounds
@@ -1133,26 +1136,85 @@ double distance_function(double speed_l) {
                      * */
 
 
-                                    // find the closest leader
+                    // find the closest leader
 
-                for (auto k = euclidean_search(particles.get_query(), get<position>(particles[particle_id(j)]), 2*diameter); k != false; ++k) {
 
-                    if (get<type>(*k) == 0 && get<position>(particles[particle_id(j)])[0] > get<position>(*k)[0] + eps){
-                        get<type>(particles[particle_id(j)]) = 0; // that particle becomes a leader
-                        get<type>(*k) = 1; // leader becomes a follower
-                        // their ids swap as well
-                        int temp_id = get<id>(*k);
-                        get<id>(*k) = get<id>(particles[particle_id(j)]);
-                        get<id>(particles[particle_id(j)]) = temp_id;
+                    // so that I would not go through all the cells I will choose the ones that are closer to the front
+
+                    // minimum direction in x of the leaders
+
+                    int min_index = 0;
+
+                    for (int i = 1; i < N; ++i){
+                        if (get<position>(particles[i])[0] < get<position>(particles[i-1])[0]){
+                            min_index = i;
+                        }
+
                     }
-                }
+
+                    if (get<position>(particles[particle_id[j]])[0] > get<position>(particles[min_index])[0] + eps){
+                        // find distance to all the leaders
+                        double distances[N];
+                        vdouble2 dist_vector;
+                        //check which one is the closest
+                        for (int i = 0; i < N; ++i){
+                            // if it is one of the leaders
+
+                            dist_vector = get<position>(particles[particle_id(j)]) - get<position>(particles[i]);
+                            cout << "distance vector " << dist_vector << endl;
+                            distances[i] = dist_vector.norm();
+                            cout << "i = "<<i<<" distances " << distances[i] << endl;
+
+                            for (int i=0;i<N;++i){
+                            cout << "i = "<<i<<" distances " << distances[i] << endl;
+                        }
+
+                        int winning_index = 0;
+                        for (int i = 1; i < N; ++i){
+                            if (distances[i] < distances[winning_index]){
+                                winning_index = i;
+                            }
+                        }
+
+                            // if this closest leader is behind that follower, swap them
+                            if(get<position>(particles[particle_id[j]])[0] > get<position>(particles[winning_index])[0] + eps){
+                                particle_type::value_type tmp = particles[winning_index];
+
+                                particles[winning_index] = particles[particle_id(j)];
+
+                                particles[particle_id(j)] = tmp;
+
+                                //make sure I change types
+
+                                // follower at a leading index becomes a leader
+                                get<type>(particles[winning_index]) = 0;
+                                //leader becomes a follower
+                                get<type>(particles[particle_id(j)]) = 1;
+
+                                // set all other variables for new follower to zeros or nothing
+
+                                get<direction>(particles[particle_id(j)]) = vdouble2(0,0);
+                                get<attached_to_id>(particles[particle_id(j)]) = -1;
+                                get<attached_leader_nr>(particles[particle_id(j)]) = -1;
+                                get<attached_at_time_step>(particles[particle_id(j)]) = -1;
+                            }
+
+                        }
+
+
+                    }
+
+
+
+
+
 
 
                     /*
                      * In order to find the closest leader
                      * */
 
-                    // first check if there is a leader nearby of which the follower is in front
+//                  //   first check if there is a leader nearby of which the follower is in front
 //                   bool found_leader = false;
 //
 //                    for (auto k = euclidean_search(particles.get_query(), get<position>(particles[particle_id(j)]), 4*diameter); k != false; ++k) {
@@ -1170,17 +1232,18 @@ double distance_function(double speed_l) {
 //                        double distances[N];
 //                        vdouble2 dist_vector;
 //                        //check which one is the closest
-//                        for (int i = 0; i < particles.size(); ++i){
+//                        for (int i = 0; i < N; ++i){
 //                            // if it is one of the leaders
-//                            if (get<type>(particles[i]) == 0){
+//
 //                                dist_vector = get<position>(particles[particle_id(j)]) - get<position>(particles[i]);
 //                                cout << "distance vector " << dist_vector << endl;
 //                                distances[i] = dist_vector.norm();
-//                            }
+//                                cout << "i = "<<i<<" distances " << distances[i] << endl;
+//
 //                        }
 //
 //                        for (int i=0;i<N;++i){
-//                            cout << "distances " << distances[i] << endl;
+//                            cout << "i = "<<i<<" distances " << distances[i] << endl;
 //                        }
 //
 //                        int winning_id=0;
@@ -1191,13 +1254,13 @@ double distance_function(double speed_l) {
 //                        }
 //
 //                        cout << "winning id " << winning_id << endl;
-//                        //swap types of the closest leader with the closest follower as well as their ids
-//                        get<type>(particles[particle_id(j)]) = 0; // that particle becomes a leader
-//                        get<type>(particles[winning_id]) = 1; // leader becomes a follower
-//                        // their ids swap as well
-//                        get<id>(particles[winning_id]) = get<id>(particles[particle_id(j)]);
-//                        get<id>(particles[particle_id(j)]) = winning_id;
-//                        //break;
+//
+//                        particle_type::value_type tmp = particles[winning_id];
+//
+//                        particles[winning_id] = particles[particle_id(j)];
+//
+//                        particles[particle_id(j)] = tmp;
+//
 //                    }
 
 
@@ -1217,44 +1280,43 @@ double distance_function(double speed_l) {
 
 
 
-            //cout << 'track time ' << track_time[i] << endl;
-            // check if new position is sufficiently far, but also not too far
-            for(int i=0; i<particles.size(); i++) {
-                if (get<type>(particles[i]) == 0){
-                    vdouble2 diff;
-                    int id_lead; // need this because leaders are first four ids
-                    id_lead = get<id>(particles[i]);
-                    // if shorter than track length
-                    if (track_time[id_lead] < track_length) {
-                        diff = track_position[track_time[id_lead]][id_lead] - get<position>(particles[id_lead]); // the difference is some intermediate vecotr value
-                        cout << "track position " << track_position[track_time[id_lead]][id_lead] << endl;
+        //cout << 'track time ' << track_time[i] << endl;
+        // check if new position is sufficiently far, but also not too far
+        for(int i=0; i<N; i++) {
+            //if (get<type>(particles[i]) == 0){
+                vdouble2 diff;
 
-                    }// if longer than track length
-                    else {
-                        diff = track_position[track_length-1][id_lead] - get<position>(particles[id_lead]); // the last position
-                        cout << "track position last " << track_position[track_length][id_lead] << endl;
-                    }
-                    cout << "get position " << get<position>(particles[id_lead]) << endl;
-                    cout << "norm difference " << diff.norm() << endl;
-                    if (diff.norm() > track_spacing) {
-                        track_time[id_lead] += 1; // update time steps
+                // if shorter than track length
+                if (track_time[i] < track_length) {
+                    diff = track_position[track_time[i]][i] - get<position>(particles[i]); // the difference is some intermediate vecotr value
+                    cout << "track position " << track_position[track_time[i]][i] << endl;
 
-                        if (track_time[id_lead] < track_length) {
-                            cout << "is it ever her " << endl;
-                            track_position[track_time[id_lead]][id_lead] = get<position>(particles[id_lead]);
-                        }// if longer than track length
-                        if (track_time[id_lead] > track_length) {
-                            for (int j = 0; j < track_length; j++) {
-                                track_position[j][id_lead] = track_position[j + 1][id_lead];// vector shifts by one
-                            }
-                            track_position[track_length-1][id_lead] = get<position>(particles[id_lead]); // new position added
-
-                        }
-                    }
-                    cout << "track time " << track_time[id_lead]<< endl;
+                }// if longer than track length
+                else {
+                    diff = track_position[track_length-1][i] - get<position>(particles[i]); // the last position
+                    cout << "track position last " << track_position[track_length][i] << endl;
                 }
+                cout << "get position " << get<position>(particles[i]) << endl;
+                cout << "norm difference " << diff.norm() << endl;
+                if (diff.norm() > track_spacing) {
+                    track_time[i] += 1; // update time steps
 
-            }
+                    if (track_time[i] < track_length) {
+                        cout << "is it ever her " << endl;
+                        track_position[track_time[i]][i] = get<position>(particles[i]);
+                    }// if longer than track length
+                    if (track_time[i] > track_length) {
+                        for (int j = 0; j < track_length; j++) {
+                            track_position[j][i] = track_position[j + 1][i];// vector shifts by one
+                        }
+                        track_position[track_length-1][i] = get<position>(particles[i]); // new position added
+
+                    }
+                }
+                cout << "track time " << track_time[i]<< endl;
+            //}
+
+        }
 
 
 
@@ -1273,153 +1335,21 @@ double distance_function(double speed_l) {
 
     output1 << "x, y, z, u" << "\n" << endl;
 
+    vdouble2 posi;
 
     for (int i=0;i<track_length;i++){
         for(int j=0;j<2;j++){
             if(j==1){
                 output1 << 0 << ", ";
             }
-            else{output1 << track_position[i][j] << ", ";}
+            else{
+                posi = track_position[i][j];
+                output1 << posi[0] << ", " << posi[1] << ", ";
+
+            }
         }
         output1 << "\n" << endl;
     }
-
-    // return the furthest distance travelled by the cells
-    double furthest_distance = 0.0 ;
-    vdouble2 dist; // variable for positions
-
-    for (int i = 0; i < particles.size(); i++) {
-
-        dist = get<position>(particles[i]);
-
-        if (furthest_distance < dist[0]){
-            furthest_distance = dist[0];
-        }
-
-    }
-
-
-
-    return furthest_distance;
-
-
-
-}
-
-
-
-int main(){
-
-    const int number_parameters = 5; // parameter range
-
-    const int sim_num = 1;
-
-    MatrixXf all_distances = MatrixXf::Zero(number_parameters,sim_num); //matrix over which I am going to average
-
-//n would correspond to different seeds
-    for (int n = 0; n < sim_num; n++) {
-
-        // define parameters that I will change
-        //VectorXf slope, threshold;
-        //array<double, 1> lam;
-
-        double speed_l[number_parameters];
-
-        for (int i = 0; i < number_parameters+1; ++i){
-            speed_l[i]= 0.1*(i+1);
-        }
-
-
-        VectorXf furthest_distance = VectorXf::Zero(number_parameters);
-
-#pragma omp parallel for
-        for (int i = 0; i < number_parameters; i++) {
-            for (int j = 0; j < 1; j++) {
-                cout << "iteration i " << i << endl;
-                furthest_distance(i, j) = distance_function(speed_l[i]);
-                cout << "parameters " << i << endl;
-            }
-            all_distances(i, n) = furthest_distance(i, 0);
-        }
-    }
-//        /*
-//        // save data to plot chemoattractant concentration
-//        ofstream output("furthest_distance_matrix_cell_induced.csv");
-//
-//        MatrixXd furthest_distance_3col(number_parameters * number_parameters, 4), furthest_distance_3col_ind(number_parameters * number_parameters,
-//                                                                    2); // need for because that is how paraview accepts data, third dimension is just zeros
-//
-//
-//
-//        // x, y coord, 1st and 2nd columns respectively
-//        int k = 0;
-//        // it has to be 3D for paraview
-//        while (k < number_parameters * number_parameters) {
-//            for (int i = 0; i < number_parameters; i++) {
-//                for (int j = 0; j < number_parameters; j++) {
-//                    furthest_distance_3col_ind(k, 0) = i;
-//                    furthest_distance_3col_ind(k, 1) = j;
-//                    furthest_distance_3col(k, 2) = 0;
-//                    k += 1;
-//                }
-//            }
-//        }
-//
-//
-//        // y and x (initially) column
-//        for (int i = 0; i < number_parameters * number_parameters; i++) {
-//            furthest_distance_3col(i, 1) = furthest_distance_3col_ind(i, 1);
-//            furthest_distance_3col(i, 0) = furthest_distance_3col_ind(i, 0);
-//        }
-//
-//
-//        // u column
-//        for (int i = 0; i < number_parameters * number_parameters; i++) {
-//            furthest_distance_3col(i, 3) = furthest_distance(furthest_distance_3col_ind(i, 0), furthest_distance_3col_ind(i, 1));
-//        }
-//
-//        output << "x, y, z, u" << "\n" << endl;
-//
-//
-//        for (int i = 0; i < number_parameters * number_parameters; i++) {
-//            for (int j = 0; j < 4; j++) {
-//                output << furthest_distance_3col(i, j) << ", ";
-//            }
-//            output << "\n" << endl;
-//        }
-//        */
-//
-//
-//
-//
-//        // This might be useful for matlab
-//        ofstream output2("furthest_distance_matrix_matlab_cell_induced.csv");
-//
-//        for (int i = 0; i < number_parameters; i++) {
-//
-//            for (int j = 0; j < 1; j++) {
-//
-//                output2 << furthest_distance(i, j) << ", ";
-//
-//            }
-//            output2 << "\n" << endl;
-//        }
-//
-//    }
-//
-//
-        ofstream output3("simulations_cell_induced.csv");
-
-        for (int i = 0; i < number_parameters; i++) {
-
-            for (int j = 0; j < sim_num; j++) {
-
-                output3 << all_distances(i, j) << ", ";
-
-            }
-            output3 << "\n" << endl;
-        }
-
 
 
 }
