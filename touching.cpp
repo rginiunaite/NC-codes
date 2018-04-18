@@ -31,18 +31,18 @@ int main() {
     const int length_y = 12;//120;//20;//4;
     double cell_radius = 0.75;//0.5; // radius of a cell
     const double diameter = 2 * cell_radius;//2 // diameter in which there have to be no cells, equivalent to size of the cell
-    const int N_steps = 1500; // number of times the cells move up the gradient
-    const size_t N = 7; // initial number of cells
-    double l_filo = 27.5/10;//2; // sensing radius
+    const int N_steps = 1000; // number of times the cells move up the gradient
+    const size_t N = 5; // initial number of cells
+    double l_filo_y = 1.5*2.75;//2; // sensing radius
+    double l_filo_x = 1.5*2.75; // will have to rescale filopodia when domain grows
     double diff_conc = 0.05; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1;
-    double speed_l = 0.1;//0.05; // speed of a leader cell
-    double speed_f = 0.1;//0.08; // speed of a follower cell
+    double speed_l = 0.5;//0.05; // speed of a leader cell
+    double speed_f = 0.5;//0.08; // speed of a follower cell
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
-    double non_growing_part = 1.0/6.0; // part of the domain that does not grow. It has to be a factor of length_y
     double chemo_leader = 0.9; //0.5; // phenotypic switching happens when the concentration of chemoattractant is higher than this (presentation video 0.95), no phenotypic switching
-
+    double eps = 1; // for phenotypic switching, the distance has to be that much higher
 
     // distance to the track parameters
     double dist_thres = 1;
@@ -68,10 +68,16 @@ int main() {
 //    double t_s = 16*60;//4.31*10;
 //    double constant = 29.12;
 
-    double L_0 = 30; // will have to make this consistent with actual initial length
-    double a = 0.001;//0.008;//0.23/10;
+//    double L_0 = 30; // will have to make this consistent with actual initial length
+//    double a = 0.001;//0.008;//0.23/10;
+//    double L_inf = 86.76;
+//    double t_s = 16;//4.31*10;
+//    double constant = 29.12;
+
+    double L_0 = 30;
+    double a  = 0.23/60;
     double L_inf = 86.76;
-    double t_s = 16;//4.31*10;
+    double t_s = 16*60;
     double constant = 29.12;
 
     double domain_len_der = 0; // initialise derivative of the domain growth function
@@ -81,7 +87,7 @@ int main() {
 
     double D = 1; // to 10^5 \nu m^2/h diffusion coefficient
     double t = 0; // initialise time, redundant
-    double dt = 0.000001; // time step
+    double dt = 0.00001; // time step
     double dx = 1; // space step in x direction, double to be consistent with other types
     double dy = 1; // space step in y direction
     double kai = 1/100;//0.0001/10; // to 1 /h production rate of chemoattractant
@@ -90,7 +96,7 @@ int main() {
     // parameters for internalisation
 
     double R = cell_radius;//7.5/10; // \nu m cell radius
-    double lam = 500;//(100)/10; // to 1000 /h chemoattractant internalisation
+    double lam = 50;//(100)/10; // to 1000 /h chemoattractant internalisation
 
 
     // matrix that stores the values of concentration of chemoattractant
@@ -365,33 +371,21 @@ int main() {
                 }
             }
         }
-        // non-uniform growth, changes in reaction diffusion equation
 
-        // final half
-        for (int i = length_x * (1-non_growing_part); i < length_x - 1; i++) {
+        for (int i = 1; i < length_x - 1; i++) {
             for (int j = 1; j < length_y - 1; j++) {
-                chemo_new(i, j) = dt * (D * ((chemo(i + 1, j) - 2 * chemo(i, j) + chemo(i - 1, j)) / (dx * dx) +
+
+
+                // logistic production rate
+                chemo_new(i, j) = dt * (D * ((1 / ((domain_length / length_x) * (domain_length / length_x))) *
+                                             (chemo(i + 1, j) - 2 * chemo(i, j) + chemo(i - 1, j)) / (dx * dx) +
                                              (chemo(i, j + 1) - 2 * chemo(i, j) + chemo(i, j - 1)) / (dy * dy)) -
                                         (chemo(i, j) * lam / (2 * M_PI * R * R)) * intern(i, j) +
-                                        kai * chemo(i, j) * (1 - chemo(i, j))) + chemo(i, j);
+                                        kai * chemo(i, j) * (1 - chemo(i, j)) -
+                                        double(domain_len_der) / double(domain_length) * chemo(i, j)) + chemo(i, j);
+
             }
         }
-
-        // first half
-        for (int i = 1; i < length_x * (1-non_growing_part); i++) {
-            for (int j = 1; j < length_y - 1; j++) {
-                chemo_new(i, j) = dt * (D * ((1 / (((domain_length - non_growing_part * length_x) / ((1-non_growing_part) * double(length_x))) *
-                                                   ((domain_length - non_growing_part * double(length_x)) /
-                                                    ((1-non_growing_part) * double(length_x)))) *
-                                              (chemo(i + 1, j) - 2 * chemo(i, j) + chemo(i - 1, j)) / (dx * dx) +
-                                              (chemo(i, j + 1) - 2 * chemo(i, j) + chemo(i, j - 1)) / (dy * dy)) -
-                                             (chemo(i, j) * lam / (2 * M_PI * R * R)) * intern(i, j) +
-                                             kai * chemo(i, j) * (1 - chemo(i, j)) -
-                                             double(domain_len_der) / (domain_length-non_growing_part * double(length_x))) * chemo(i, j)) +
-                                  chemo(i, j);
-            }
-        }
-
 
         // zero flux boundary conditions
 
@@ -489,32 +483,32 @@ int main() {
         for (int j = 0; j < particles.size(); j++) {
 
 
-            /*
- * phenotypic switching, based on chemoattractant concentration in front, +0.5
- * */
-
-            vdouble2 coord = get<position>(particles[particle_id(j)]);
-
-            // rescaled coord
-
-            double rescaled_coord;
-
-            rescaled_coord = (length_x / domain_length)*coord[0];
-
-
-
-            double chemo_in_front = chemo(round(rescaled_coord), round(coord[1]));
-            //cout << "chemo in front " << old_chemo << endl;
-
-
-            // if high concentration cells become leaders
-            if (chemo_in_front > chemo_leader ){
-
-                get<type>(particles[particle_id(j)]) = 0;
-            }
-            else{
-                get<type>(particles[particle_id(j)]) = 1;
-            }
+//            /*
+// * phenotypic switching, based on chemoattractant concentration in front, +0.5
+// * */
+//
+//            vdouble2 coord = get<position>(particles[particle_id(j)]);
+//
+//            // rescaled coord
+//
+//            double rescaled_coord;
+//
+//            rescaled_coord = (length_x / domain_length)*coord[0];
+//
+//
+//
+//            double chemo_in_front = chemo(round(rescaled_coord), round(coord[1]));
+//            //cout << "chemo in front " << old_chemo << endl;
+//
+//
+//            // if high concentration cells become leaders
+//            if (chemo_in_front > chemo_leader ){
+//
+//                get<type>(particles[particle_id(j)]) = 0;
+//            }
+//            else{
+//                get<type>(particles[particle_id(j)]) = 1;
+//            }
 
 
             //go through all the leaders
@@ -537,15 +531,14 @@ int main() {
 
                 // Uniform domain growth
 
-                // x_in = (length_x / domain_length)*x[0];
 
-                // Non-uniform domain growth
-
-
-                x_in = (length_x / domain_length)*x[0];//uniform growth in the first part of the domain
+                x_in = (length_x / domain_length)*x[0];//
+                l_filo_x = (length_x/domain_length)*l_filo_x; // rescale the length of filopodia as well
 
 
-
+                if (t == 0){
+                    cout << "ratio" << length_x/domain_length << endl;
+                }
 
                 // create an array to store random directions
                 std::array<double, 3> random_angle;
@@ -556,10 +549,10 @@ int main() {
                     double random_angle_tem = uniformpi(gen1);
 //                int sign_x_tem, sign_y_tem;
 
-                    while (round((x_in + sin(random_angle_tem) * l_filo)) < 0 ||
-                           round((x_in + sin(random_angle_tem) * l_filo)) >
-                           length_x - 1 || round(x[1] + cos(random_angle_tem) * l_filo) < 0 ||
-                           round(x[1] + cos(random_angle_tem) * l_filo) > length_y - 1) {
+                    while (round((x_in + sin(random_angle_tem) * l_filo_x)) < 0 ||
+                           round((x_in + sin(random_angle_tem) * l_filo_x)) >
+                           length_x - 1 || round(x[1] + cos(random_angle_tem) * l_filo_y) < 0 ||
+                           round(x[1] + cos(random_angle_tem) * l_filo_y) > length_y - 1) {
                         random_angle_tem = uniformpi(gen1);
 
 //                    if (sin(random_angle_tem) < 0) {
@@ -592,11 +585,11 @@ int main() {
 
                 double old_chemo = chemo((round(x_in)), round(x)[1]);
 
-                double new_chemo_1 = chemo(round((x_in + sin(random_angle[0]) * l_filo)),
-                                           round(x[1] + cos(random_angle[0]) * l_filo));
+                double new_chemo_1 = chemo(round((x_in + sin(random_angle[0]) * l_filo_x)),
+                                           round(x[1] + cos(random_angle[0]) * l_filo_y));
 
-                double new_chemo_2 = chemo(round((x_in + sin(random_angle[1]) * l_filo)),
-                                           round(x[1] + cos(random_angle[1]) * l_filo));
+                double new_chemo_2 = chemo(round((x_in + sin(random_angle[1]) * l_filo_x)),
+                                           round(x[1] + cos(random_angle[1]) * l_filo_y));
 
 
                 //if both smaller, move random direction
@@ -631,10 +624,10 @@ int main() {
 
                     // check that the position they want to move to is free and not out of bounds
                     if (free_position &&
-                        round(x_in) >= 0 &&
-                        round(x_in) <= length_x - 1 &&
-                        round(x[1]) >= 0 &&
-                        round(x[1] ) <= length_y - 1) {
+                        round(x_in) > 0 &&
+                        round(x_in) < length_x - 1 &&
+                        round(x[1]) > 0 &&
+                        round(x[1] ) < length_y - 1) {
                         get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[2]),
                                                                                        cos(random_angle[2])); // update if nothing is in the next position
                         get<direction>(particles)[particle_id(j)] = speed_l * vdouble2(sin(random_angle[2]),
@@ -676,10 +669,10 @@ int main() {
 
                     // check that the position they want to move to is free and not out of bounds
                     if (free_position &&
-                        round(x_in) >= 0 &&
-                        round(x_in) <= length_x - 1 &&
-                        round(x[1] ) >= 0 &&
-                        round(x[1]) <= length_y - 1) {
+                        round(x_in) > 0 &&
+                        round(x_in) < length_x - 1 &&
+                        round(x[1] ) > 0 &&
+                        round(x[1]) < length_y - 1) {
                         get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[0]),
                                                                                        cos(random_angle[0])); // update if nothing is in the next position
                         get<direction>(particles)[particle_id(j)] = speed_l * vdouble2(sin(random_angle[0]),
@@ -723,10 +716,10 @@ int main() {
 
                     // check that the position they want to move to is free and not out of bounds
                     if (free_position &&
-                        round(x_in) >= 0 &&
-                        round(x_in) <= length_x - 1 &&
-                        round(x[1]) >= 0 &&
-                        round(x[1]) <= length_y - 1) {
+                        round(x_in) > 0 &&
+                        round(x_in) < length_x - 1 &&
+                        round(x[1]) > 0 &&
+                        round(x[1]) < length_y - 1) {
                         get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[1]),
                                                                                        cos(random_angle[1])); // update if nothing is in the next position
                         get<direction>(particles)[particle_id(j)] = speed_l * vdouble2(sin(random_angle[1]),
@@ -771,10 +764,10 @@ int main() {
 
                         // check that the position they want to move to is free and not out of bounds
                         if (free_position &&
-                            round(x_in) >= 0 &&
-                            round(x_in) <= length_x - 1 &&
-                            round(x[1] ) >= 0 &&
-                            round(x[1]) <= length_y - 1) {
+                            round(x_in) > 0 &&
+                            round(x_in) < length_x - 1 &&
+                            round(x[1] ) > 0 &&
+                            round(x[1]) < length_y - 1) {
                             get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[0]),
                                                                                            cos(random_angle[0])); // update if nothing is in the next position
                             get<direction>(particles)[particle_id(j)] = speed_l * vdouble2(sin(random_angle[0]),
@@ -810,10 +803,10 @@ int main() {
 
                         // check that the position they want to move to is free and not out of bounds
                         if (free_position &&
-                            round(x_in) >= 0 &&
-                            round(x_in) <= length_x - 1 &&
-                            round(x[1]) >= 0 &&
-                            round(x[1]) <= length_y - 1) {
+                            round(x_in) > 0 &&
+                            round(x_in) < length_x - 1 &&
+                            round(x[1]) > 0 &&
+                            round(x[1]) < length_y - 1) {
                             get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[1]),
                                                                                            cos(random_angle[1])); // update if nothing is in the next position
                             get<direction>(particles)[particle_id(j)] = speed_l * vdouble2(sin(random_angle[1]),
@@ -822,151 +815,6 @@ int main() {
                         }
                     }
                 }
-
-                /*
-                 * *
-                 *
-                 *
-                 *
-                 * find all the followers that are close to the leader IGNORE THIS
-                 *
-                 *
-                 *
-                 *
-                 */
-
-//                double possible_chain_length = 5; // max number of connenctions between followers
-//
-//
-//
-//                // maximum number of chain members - the number of follower cells over 7
-//
-//
-//                for (auto tpl = euclidean_search(particles.get_query(), x, l_filo); tpl != false; ++tpl) {
-//
-//                    //if the neighbour is a follower
-//                    if (get<type>(*tpl) == 1 ){
-//                        get<chain>(*tpl) = 1; // it becomes part of the chain
-//                        get<direction>(*tpl) = get<direction>(particles)[particle_id(
-//                                j)]; // and will move the same direction as the leader
-//                        cout << "distance between two " << tpl.dx() << endl;
-//                        get<position>(*tpl) +=  -0.5*tpl.dx(); // dx x_nbr - x_centre, y_nbr- y_centre
-//                    }
-//
-//                }
-//
-//                //loop through
-//
-//                for (int fol = 0; fol < particles.size(); ++fol){
-//                    for (int i = 0; i < possible_chain_length; i++){
-//                        if(get<type>(particles[fol]) == 1){
-//                            if (get<chain>(particles[fol]) == 1.0 / double(j + 1)){
-//                                for (auto tpl = euclidean_search(particles.get_query(), get<position>(particles[fol]),get<chain>(particles[fol]) *l_filo); tpl != false; ++tpl){
-//                                        // if the neighbouring cell is a follower
-//                                        if(get<type>(*tpl) == 1){
-//                                            get<chain>(*tpl) = 1.0 / double(j + 2); // it becomes part of the chain
-//                                            get<direction>(*tpl) = get<direction>(particles)[particle_id(
-//                                                    j)]; // and will move the same direction as the leaderif (get<type>(particles[i]) == 1) { // if the cell is a follower
-//                                            get<position>(*tpl) +=  0.5*tpl.dx();
-//                                        }
-//
-//                                }
-//
-//                            }
-//                        }
-//
-//                    }
-                //           }
-
-
-//                for (int j = 0; j < possible_chain_length; j++) {
-//
-//                    for (int i = 0; i < particles.size(); ++i) {
-//                        if (get<type>(particles[i]) == 1) {//only look at followers
-//                            if (get<chain>(particles[i]) == 1.0 / double(j + 1)) {
-//                                for (auto tpl: euclidean_search(particles.get_query(), get<position>(particles[i]),
-//                                                                get<chain>(particles[i]) * l_filo)) {
-//                                    /*
-//                                     * tpl variable is a tuple containing:
-//                                     *  (0) -> neighbouring particle value_type
-//                                     *  (1) -> relative position of neighbouring particle
-//                                    *         from query point
-//                                    */
-//                                    const vdouble2 &dx = std::get<1>(tpl);
-//                                    const particle_type::value_type &ka = std::get<0>(tpl);
-//
-//                                    // make a list of followers that are close to that leader, chain = 1
-//
-//                                    for (int i = 0; i < particles.size(); i++) {
-//                                        if (get<id>(particles[i]) == get<id>(ka)) {
-//                                            if (get<type>(particles[i]) == 1) { // if the cell is a follower
-//                                                get<chain>(particles[i]) =
-//                                                        1.0 / double(j + 2); // it becomes part of the chain
-//                                                get<direction>(particles[i]) = get<direction>(particles)[particle_id(
-//                                                        j)]; // and will move the same direction as the leader
-//                                            }
-//                                        }
-//                                    }
-//
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-
-
-                //cout << "direction " << get<direction>(particles[particle_id(j)]) << endl;
-                //get<position>(particles[particle_id(j)]) += get<direction>(particles)[particle_id(
-                // j)]; // update the position
-
-//            for (int i = 0; i < particles.size(); i++) {
-//                if (get<type>(particles[i]) == 1) {// only look at the followers
-//                    if (get<chain>(particles[i]) != 0) {
-//                        get<position>(particles[i]) += get<direction>(particles[i]);
-//                    }
-//                }
-//            }
-
-
-//            if(get<type>(particles[particle_id(j)]) == 1) {
-//
-//                vdouble2 x;
-//                x = get<position>(particles[particle_id(j)]);
-//                //try to see if there is a leader in front
-//
-//                for (const auto &tpl: euclidean_search(particles.get_query(), x, l_filo)) {
-//                    /*
-//                     * tpl variable is a tuple containing:
-//                     *  (0) -> neighbouring particle value_type
-//                    *  (1) -> relative position of neighbouring particle
-//                    *         from query point
-//                    */
-//                    const vdouble2 &dx = std::get<1>(tpl);
-//                    const particle_type::value_type &ka = std::get<0>(tpl);
-//
-//                    cout << "id of a neighbour" << get<id>(ka) << endl;
-//                    cout << " dx " << dx << endl;
-//                    cout << " type " << get<type>(ka) << endl;
-//                    // if the cell is a leader
-//                    if (get<type>(ka) == 0){
-//                        get<position>(particles[particle_id(j)]) += 0.5 * dx;
-//                    }
-//                }
-//
-                // make sure that chain is reset to 0 for all followers
-//                for (int i = 0; i < particles.size(); i++) {
-//                    if (get<type>(particles[i]) == 1) {
-//                        get<chain>(particles[i]) = 0;
-//                    }
-//
-//                }
-
-                /*
-                 *
-                 *IGNORE UP TO HERE
-                 *
-                 *
-                 */
 
             }
 
@@ -1011,7 +859,7 @@ int main() {
 
                 cout << "current id " << get<id>(particles)[particle_id(j)] << endl;
 
-                for (auto k = euclidean_search(particles.get_query(), x, l_filo); k != false; ++k) {
+                for (auto k = euclidean_search(particles.get_query(), x, l_filo_x); k != false; ++k) {
 
                     //cout << "norm " << k.dx().norm() << endl;
                     //cout << "neighbours id " << get<id>(*k) << endl;
@@ -1037,7 +885,7 @@ int main() {
                     if (get<type>(*k) == 0) { // if it is close to a leader
                         //cout << "neighbours id leader" << get<id>(*k) << endl;
                         //get<direction>(particles[particle_id(j)]) = 0.2 * k.dx();
-                        get<direction>(particles)[particle_id(j)] = 1.5 * get<direction>(*k);
+                        get<direction>(particles)[particle_id(j)] = get<direction>(*k);
                         get<chain>(particles)[particle_id(j)] = 1;
                         get<attached_to_id>(particles)[particle_id(j)] = get<id>(*k);
                     }
@@ -1090,16 +938,17 @@ int main() {
                 else{
                     get<chain>(particles)[particle_id(j)] = 0; // it becomes dettached
                     //get<attached_to_id>(particles)[particle_id(j)] = 0;
+                    }
 
-                    //if(get<chain>(particles)[particle_id(j)] == 0 || (free_position == false && get<chain>(particles)[particle_id(j)] == 1)){
+                if(get<chain>(particles)[particle_id(j)] == 0){
 
                     double random_angle = uniformpi(gen1);
 
 
-                    while (round((x_in + sin(random_angle) * l_filo)) < 0 ||
-                           round((x_in + sin(random_angle)  * l_filo)) >
-                           length_x - 1 || round(x[1] + cos(random_angle) * l_filo) < 0 ||
-                           round(x[1] + cos(random_angle)  * l_filo) > length_y - 1) {
+                    while (round((x_in + sin(random_angle) * l_filo_x)) < 0 ||
+                           round((x_in + sin(random_angle)  * l_filo_x)) >
+                           length_x - 1 || round(x[1] + cos(random_angle) * l_filo_y) < 0 ||
+                           round(x[1] + cos(random_angle)  * l_filo_y) > length_y - 1) {
 
                         random_angle = uniformpi(gen1);
 
@@ -1142,9 +991,9 @@ int main() {
 
 
                     // check that the position they want to move to is free and not out of bounds
-                    if (free_position && round(x_in) >= 0 &&
-                        round(x_in) <= length_x - 1 && round(x[1]) >= 0 &&
-                        round(x[1]) <= length_y - 1) {
+                    if (free_position && x_in > 0 &&
+                        round(x_in) < length_x - 1 && round(x[1]) > 0 &&
+                        round(x[1]) < length_y - 1) {
                         //cout << " moves " << endl;
                         //cout << "how frequently come in here " << endl;
                         get<position>(particles)[particle_id(j)] += speed_f * vdouble2(sin(random_angle), cos(random_angle)); // update if nothing is in the next position
@@ -1154,6 +1003,80 @@ int main() {
                 //get<chain>(particles[particle_id(j)]) == 0;
                 //cout << "direction of each particle " << get<direction>(particles[particle_id(j)]) << endl;
                 cout << "id of follower " << get<id>(particles[particle_id(j)]) << endl;
+
+            /*
+             * Alternative phenotypic switching if a follower over takes a leader it becomes a leader and that leader follower.
+             * I will have to be careful when there will be channels because I will have to choose the closest leader
+             * */
+
+
+                // find the closest leader
+
+
+                // so that I would not go through all the cells I will choose the ones that are closer to the front
+
+                // minimum direction in x of the leaders
+
+                int min_index = 0;
+
+                for (int i = 1; i < N; ++i){
+                    if (get<position>(particles[i])[0] < get<position>(particles[i-1])[0]){
+                        min_index = i;
+                    }
+
+                }
+
+                if (get<position>(particles[particle_id[j]])[0] > get<position>(particles[min_index])[0] + eps){
+                    // find distance to all the leaders
+                    double distances[N];
+                    vdouble2 dist_vector;
+                    //check which one is the closest
+                    for (int i = 0; i < N; ++i){
+                        // if it is one of the leaders
+
+                        dist_vector = get<position>(particles[particle_id(j)]) - get<position>(particles[i]);
+                        cout << "distance vector " << dist_vector << endl;
+                        distances[i] = dist_vector.norm();
+                        cout << "i = "<<i<<" distances " << distances[i] << endl;
+
+                        for (int i=0;i<N;++i){
+                            cout << "i = "<<i<<" distances " << distances[i] << endl;
+                        }
+
+                        int winning_index = 0;
+                        for (int i = 1; i < N; ++i){
+                            if (distances[i] < distances[winning_index]){
+                                winning_index = i;
+                            }
+                        }
+
+                        // if this closest leader is behind that follower, swap them
+                        if(get<position>(particles[particle_id[j]])[0] > get<position>(particles[winning_index])[0] + eps){
+                            particle_type::value_type tmp = particles[winning_index];
+
+                            particles[winning_index] = particles[particle_id(j)];
+
+                            particles[particle_id(j)] = tmp;
+
+                            //make sure I change types
+
+                            // follower at a leading index becomes a leader
+                            get<type>(particles[winning_index]) = 0;
+                            //leader becomes a follower
+                            get<type>(particles[particle_id(j)]) = 1;
+
+                            // set all other variables for new follower to zeros or nothing
+
+                            get<direction>(particles[particle_id(j)]) = vdouble2(0,0);
+
+                        }
+
+                    }
+
+
+                }
+
+
             }
         }
 

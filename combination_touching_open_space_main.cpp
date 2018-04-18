@@ -31,24 +31,26 @@ int main() {
     const int length_y = 12;//120;//20;//4;
     double cell_radius = 0.75;//0.5; // radius of a cell
     const double diameter = 2 * cell_radius;//2 // diameter in which there have to be no cells, equivalent to size of the cell
-    const int N_steps = 800; // number of times the cells move up the gradient
-    const size_t N = 4; // initial number of cells
-    double l_filo = 27.5/10;//2; // sensing radius
+    const int N_steps = 1000; // number of times the cells move up the gradient
+    const size_t N = 5; // initial number of cells
+    double l_filo_y = 1.5*2.75;//2; // sensing radius
+    double l_filo_x = 1.5*2.75; // will have to rescale filopodia when domain grows
     double diff_conc = 0.05; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1;
-    double speed_l = 0.2;//0.05; // speed of a leader cell
-    double speed_f = speed_l*2;//0.5;//0.08; // speed of a follower cell
+    double speed_l = 0.5;//0.05; // speed of a leader cell
+    double speed_f = 0.5;//speed_l;//0.08; // speed of a follower cell
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
     double chemo_leader = 0.9; //0.5; // phenotypic switching happens when the concentration of chemoattractant is higher than this (presentation video 0.95), no phenotypic switching
     double eps = 1; // for phenotypic switching, the distance has to be that much higher
-    double track_spacing = 5; // spacing between positions on the track
-    int track_length = 200;
+
 
     // distance to the track parameters
     double dist_thres = 1;
     int closest_time;
     int leader_track;
+    double track_spacing = 0.5; // spacing between positions on the track
+    int track_length = 800;
 
 
     // domain growth parameters
@@ -69,10 +71,16 @@ int main() {
 //    double t_s = 16*60;//4.31*10;
 //    double constant = 29.12;
 
-    double L_0 = 30; // will have to make this consistent with actual initial length
-    double a = 0.008;//0.008;//0.23/10;
+//    double L_0 = 30; // will have to make this consistent with actual initial length
+//    double a = 0.001;//0.008;//0.23/10;
+//    double L_inf = 86.76;
+//    double t_s = 16;//4.31*10;
+//    double constant = 29.12;
+
+    double L_0 = 30;
+    double a  = 0.23/60;
     double L_inf = 86.76;
-    double t_s = 16;//4.31*10;
+    double t_s = 16*60;
     double constant = 29.12;
 
     double domain_len_der = 0; // initialise derivative of the domain growth function
@@ -82,7 +90,7 @@ int main() {
 
     double D = 1; // to 10^5 \nu m^2/h diffusion coefficient
     double t = 0; // initialise time, redundant
-    double dt = 0.000001; // time step
+    double dt = 0.00001; // time step
     double dx = 1; // space step in x direction, double to be consistent with other types
     double dy = 1; // space step in y direction
     double kai = 1/100;//0.0001/10; // to 1 /h production rate of chemoattractant
@@ -91,7 +99,10 @@ int main() {
     // parameters for internalisation
 
     double R = cell_radius;//7.5/10; // \nu m cell radius
-    double lam = 500;//(100)/10; // to 1000 /h chemoattractant internalisation
+    double lam = 50;//(100)/10; // to 1000 /h chemoattractant internalisation
+
+
+
 
 
     // matrix that stores the values of concentration of chemoattractant
@@ -552,6 +563,7 @@ int main() {
 
 
                 x_in = (length_x / domain_length)*x[0];//uniform growth in the first part of the domain
+                l_filo_x = (length_x/domain_length)*l_filo_x; // rescale the length of filopodia as well
 
 
 
@@ -565,10 +577,10 @@ int main() {
                     double random_angle_tem = uniformpi(gen1);
 //                int sign_x_tem, sign_y_tem;
 
-                    while (round((x_in + sin(random_angle_tem) * l_filo)) < 0 ||
-                           round((x_in + sin(random_angle_tem) * l_filo)) >
-                           length_x - 1 || round(x[1] + cos(random_angle_tem) * l_filo) < 0 ||
-                           round(x[1] + cos(random_angle_tem) * l_filo) > length_y - 1) {
+                    while (round((x_in + sin(random_angle_tem) * l_filo_x)) < 0 ||
+                           round((x_in + sin(random_angle_tem) * l_filo_x)) >
+                           length_x - 1 || round(x[1] + cos(random_angle_tem) * l_filo_y) < 0 ||
+                           round(x[1] + cos(random_angle_tem) * l_filo_y) > length_y - 1) {
                         random_angle_tem = uniformpi(gen1);
 
 //                    if (sin(random_angle_tem) < 0) {
@@ -601,11 +613,11 @@ int main() {
 
                 double old_chemo = chemo((round(x_in)), round(x)[1]);
 
-                double new_chemo_1 = chemo(round((x_in + sin(random_angle[0]) * l_filo)),
-                                           round(x[1] + cos(random_angle[0]) * l_filo));
+                double new_chemo_1 = chemo(round((x_in + sin(random_angle[0]) * l_filo_x)),
+                                           round(x[1] + cos(random_angle[0]) * l_filo_y));
 
-                double new_chemo_2 = chemo(round((x_in + sin(random_angle[1]) * l_filo)),
-                                           round(x[1] + cos(random_angle[1]) * l_filo));
+                double new_chemo_2 = chemo(round((x_in + sin(random_angle[1]) * l_filo_x)),
+                                           round(x[1] + cos(random_angle[1]) * l_filo_y));
 
 
                 //if both smaller, move random direction
@@ -641,7 +653,7 @@ int main() {
 
                     // check that the position they want to move to is free and not out of bounds
                     if (free_position &&
-                        round(x_in) >= 0 &&
+                        (x_in) > 0 &&
                         round(x_in) < length_x - 1 &&
                         round(x[1]) > 0 &&
                         round(x[1] ) < length_y - 1) {
@@ -687,7 +699,7 @@ int main() {
 
                     // check that the position they want to move to is free and not out of bounds
                     if (free_position &&
-                        round(x_in) >= 0 &&
+                        (x_in) > 0 &&
                         round(x_in) < length_x - 1 &&
                         round(x[1] ) > 0 &&
                         round(x[1]) < length_y - 1) {
@@ -735,7 +747,7 @@ int main() {
 
                     // check that the position they want to move to is free and not out of bounds
                     if (free_position &&
-                        round(x_in) >= 0 &&
+                        (x_in) > 0 &&
                         round(x_in) < length_x - 1 &&
                         round(x[1]) > 0 &&
                         round(x[1]) < length_y - 1) {
@@ -784,7 +796,7 @@ int main() {
 
                         // check that the position they want to move to is free and not out of bounds
                         if (free_position &&
-                            round(x_in) >= 0 &&
+                            (x_in) > 0 &&
                             round(x_in) < length_x - 1 &&
                             round(x[1] ) > 0 &&
                             round(x[1]) < length_y - 1) {
@@ -824,7 +836,7 @@ int main() {
 
                         // check that the position they want to move to is free and not out of bounds
                         if (free_position &&
-                            round(x_in) >= 0 &&
+                            (x_in) > 0 &&
                             round(x_in) < length_x - 1 &&
                             round(x[1]) > 0 &&
                             round(x[1]) < length_y - 1) {
@@ -880,7 +892,7 @@ int main() {
 
                 cout << "current id " << get<id>(particles)[particle_id(j)] << endl;
 
-                for (auto k = euclidean_search(particles.get_query(), x, l_filo); k != false; ++k) {
+                for (auto k = euclidean_search(particles.get_query(), x, l_filo_x); k != false; ++k) {
 
                     //cout << "norm " << k.dx().norm() << endl;
                     //cout << "neighbours id " << get<id>(*k) << endl;
@@ -947,7 +959,7 @@ int main() {
 
 
                 // check that the position they want to move to is free and not out of bounds, also it has to be non-zero, so that it would not be attached to non-moving cells
-                if (dir[0] != 0 && dir[1] != 0 && free_position && get<chain>(particles)[particle_id(j)] == 1 && round(x_in_chain) > 0 &&
+                if (dir[0] != 0 && dir[1] != 0 && free_position && get<chain>(particles)[particle_id(j)] == 1 && (x_in_chain) > 0 &&
                     round(x_in_chain) < length_x - 1 && round(x_chain[1]) > 0 &&
                     round(x_chain[1]) < length_y - 1 ) {
                     //cout << "direction " << get<direction>(particles[particle_id(j)]) << endl;
@@ -1017,23 +1029,26 @@ int main() {
 
                     // move in the direction where track goes
 
+//                    vdouble2 direc_follow = track_position[get<attached_at_time_step>(
+//                            particles[particle_id(j)])+1][get<attached_leader_nr>(
+//                            particles[particle_id(j)])] - track_position[get<attached_at_time_step>(
+//                            particles[particle_id(j)])][get<attached_leader_nr>(
+//                            particles[particle_id(j)])];
+//
+//                    double normalise = direc_follow.norm();
+//                    //normalise
+//                    direc_follow = direc_follow/normalise;
+//                    vdouble2 x_can = direc_follow * speed_f*2;
+
+                                                // follow the track exactly
                     vdouble2 direc_follow = track_position[get<attached_at_time_step>(
                             particles[particle_id(j)])+1][get<attached_leader_nr>(
-                            particles[particle_id(j)])] - track_position[get<attached_at_time_step>(
-                            particles[particle_id(j)])][get<attached_leader_nr>(
-                            particles[particle_id(j)])];
+                            particles[particle_id(j)])]; //position where the cell wants to move
 
-                    double normalise = direc_follow.norm();
-                    //normalise
-                    direc_follow = direc_follow/normalise;
-
-                    vdouble2 x_can = direc_follow * speed_f;
+                    vdouble2 x_can = direc_follow;
 
 
-//                            // follow the track exactly
-//                    vdouble2 x_can = track_position[get<attached_at_time_step>(
-//                            particles[particle_id(j)])+1][get<attached_leader_nr>(
-//                            particles[particle_id(j)])]; //position where the cell wants to move
+
 
                     // check if that position is free
                     //cout << "Position "<< x << endl;
@@ -1060,7 +1075,7 @@ int main() {
 
                     // if the cell is part of the chain update its position
                     if (free_position &&
-                        round((x_can[0] * (length_x / domain_length))) >= 0 &&
+                        ((x_can[0] * (length_x / domain_length))) > 0 &&
                         round((x_can[0] * (length_x / domain_length))) < length_x - 1 && round(x_can[1]) > 0 &&
                         round(x_can[1]) < length_y - 1) {
 
@@ -1077,10 +1092,10 @@ int main() {
                         double random_angle = uniformpi(gen1);
 
 
-                        while (round((x_in + sin(random_angle) * l_filo)) < 0 ||
-                               round((x_in + sin(random_angle) * l_filo)) >
-                               length_x - 1 || round(x[1] + cos(random_angle) * l_filo) < 0 ||
-                               round(x[1] + cos(random_angle) * l_filo) > length_y - 1) {
+                        while (round((x_in + sin(random_angle) * l_filo_x)) < 0 ||
+                               round((x_in + sin(random_angle) * l_filo_x)) >
+                               length_x - 1 || round(x[1] + cos(random_angle) * l_filo_y) < 0 ||
+                               round(x[1] + cos(random_angle) * l_filo_y) > length_y - 1) {
 
                             random_angle = uniformpi(gen1);
 
@@ -1116,9 +1131,9 @@ int main() {
 
 
                         // check that the position they want to move to is free and not out of bounds
-                        if (free_position && round(x_in) >= 0 &&
+                        if (free_position && (x_in) > 0 &&
                             round(x_in) < length_x - 1 && round(x[1]) > 0 &&
-                            round(x[1]) < length_y - 1) {
+                            (x[1]) < length_y - 1) {
                             //cout << " moves " << endl;
                             //cout << "how frequently come in here " << endl;
                             get<position>(particles)[particle_id(j)] += speed_f * vdouble2(sin(random_angle),
