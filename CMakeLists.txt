@@ -20,7 +20,11 @@ list(APPEND INCLUDES ${VTK_INCLUDE_DIRS})
 find_package(Eigen3 REQUIRED)
 list(APPEND INCLUDES ${EIGEN3_INCLUDE_DIR})
 
-set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-std=c++11")
+find_package(OpenMP REQUIRED)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 
 # Aboria
@@ -35,25 +39,39 @@ include_directories(src ${INCLUDES})
 
 #add_executable(one_type_cells one_type_cells.cpp)
 #add_executable(two_types_open_extra two_types_open_extra.cpp)
-#add_executable(forced_gradient forced_gradient.cpp)
+#add_executable(two_types_open_extra_main two_types_open_extra_main.cpp)
+add_executable(forced_gradient forced_gradient.cpp)
 #add_executable(two_types_chains two_types_chains.cpp)
+#add_executable(two_types_chains_non_uniform two_types_chains_non_uniform.cpp)
 #add_executable(forced_gradient_non_uniform forced_gradient_non_uniform.cpp)
 #add_executable(one_type_cells_non_uniform one_type_cells_non_uniform.cpp)
-add_executable(check check.cpp)
+#add_executable(open_space_improved_version open_space_improved_version.cpp)
 #add_executable(check2 two_types_open_extra_main.cpp)
 #add_executable(fixed_gradient_3D fixed_gradient_3D.cpp)
+#add_executable(touching touching.cpp)
+#add_executable(combination_touching_open_space combination_touching_open_space.cpp)
+#add_executable(combination_touching_open_space_main combination_touching_open_space_main.cpp)
+
+
 
 
 
 #target_link_libraries(one_type_cells ${LIBRARIES})
 #target_link_libraries(two_types_open_extra ${LIBRARIES})
-#target_link_libraries(forced_gradient ${LIBRARIES})
+#target_link_libraries(two_types_open_extra_main ${LIBRARIES})
+target_link_libraries(forced_gradient ${LIBRARIES})
 #target_link_libraries(two_types_chains ${LIBRARIES})
+#target_link_libraries(two_types_chains_non_uniform ${LIBRARIES})
 #target_link_libraries(forced_gradient_non_uniform ${LIBRARIES})
 #target_link_libraries(one_type_cells_non_uniform ${LIBRARIES})
-target_link_libraries(check ${LIBRARIES})
+#target_link_libraries(open_space_improved_version ${LIBRARIES})
 #target_link_libraries(check2 ${LIBRARIES})
 #target_link_libraries(fixed_gradient_3D ${LIBRARIES})
+#target_link_libraries(touching ${LIBRARIES})
+#target_link_libraries(combination_touching_open_space ${LIBRARIES})
+#target_link_libraries(combination_touching_open_space_main ${LIBRARIES})
+
+
 
 
 
