@@ -46,7 +46,7 @@ int main(){
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
     double chemo_leader = 0.9; //0.5; // phenotypic switching happens when the concentration of chemoattractant is higher than this (presentation video 0.95), no phenotypic switching
     double eps = 1; // for phenotypic switching, the distance has to be that much higher
-    const int filo_number = 6;
+    const int filo_number = 2;
 
 
     // distance to the track parameters
@@ -552,7 +552,7 @@ int main(){
                 array<double, filo_number +1> random_angle;
 //            std::array<int, 3> sign_x;
 //            std::array<int, 3> sign_y;
-                for (int k = 0; k < 4; k++) {
+                for (int k = 0; k < filo_number+1; k++) {
 
                     double random_angle_tem = uniformpi(gen1);
 //                int sign_x_tem, sign_y_tem;
@@ -588,7 +588,7 @@ int main(){
 
 
                 double old_chemo = chemo((round(x_in)), round(x)[1]);
-                array<double, 3> new_chemo;
+                array<double, filo_number> new_chemo;
 
 
                 for (int i = 0; i< filo_number; i++){
@@ -656,10 +656,10 @@ int main(){
                         (x_in) < length_x - 1 &&
                         (x[1]) > 0 &&
                         (x[1]) < length_y - 1) {
-                        get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[3]),
-                                                                                       cos(random_angle[3])); // update if nothing is in the next position
-                        get<direction>(particles)[particle_id(j)] = speed_l * vdouble2(sin(random_angle[3]),
-                                                                                       cos(random_angle[3]));
+                        get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[filo_number]),
+                                                                                       cos(random_angle[filo_number])); // update if nothing is in the next position
+                        get<direction>(particles)[particle_id(j)] = speed_l * vdouble2(sin(random_angle[filo_number]),
+                                                                                       cos(random_angle[filo_number]));
                     }
 
                 } else {
