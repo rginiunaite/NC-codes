@@ -38,7 +38,7 @@ int main(){
     double l_filo_y = 2.75;//2; // sensing radius
     double l_filo_x = 2.75; // will have to rescale filopodia when domain grows
     double l_filo_max = l_filo_y * 2;
-    double diff_conc = 0.05; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
+    double diff_conc = 0.1; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1;
     double speed_l = 0.2;//0.05; // speed of a leader cell
@@ -47,6 +47,8 @@ int main(){
     double chemo_leader = 0.9; //0.5; // phenotypic switching happens when the concentration of chemoattractant is higher than this (presentation video 0.95), no phenotypic switching
     double eps = 1; // for phenotypic switching, the distance has to be that much higher
     const int filo_number = 2;
+
+    int count_dir = 0;
 
 
     // distance to the track parameters
@@ -73,17 +75,17 @@ int main(){
 //    double t_s = 16*60;//4.31*10;
 //    double constant = 29.12;
 
-//    double L_0 = 30; // will have to make this consistent with actual initial length
-//    double a = 0.001;//0.008;//0.23/10;
-//    double L_inf = 86.76;
-//    double t_s = 16;//4.31*10;
-//    double constant = 29.12;
-
-    double L_0 = 30;
-    double a = 0.23 / 60;
+    double L_0 = 30; // will have to make this consistent with actual initial length
+    double a = 0.001;//0.008;//0.23/10;
     double L_inf = 86.76;
-    double t_s = 16 * 60;
+    double t_s = 16;//4.31*10;
     double constant = 29.12;
+
+//    double L_0 = 30;
+//    double a = 0.23 / 60;
+//    double L_inf = 86.76;
+//    double t_s = 16 * 60;
+//    double constant = 29.12;
 
     double domain_len_der = 0; // initialise derivative of the domain growth function
 
@@ -101,7 +103,7 @@ int main(){
     // parameters for internalisation
 
     double R = cell_radius;//7.5/10; // \nu m cell radius
-    double lam = 50;//(100)/10; // to 1000 /h chemoattractant internalisation
+    double lam = 500;//(100)/10; // to 1000 /h chemoattractant internalisation
 
 
     // matrix that stores the values of concentration of chemoattractant
@@ -261,7 +263,7 @@ int main(){
 
     // choose a set of random number between 0 and 2*pi, to avoid more rejections when it goes backwords (it would always be rejected)
     std::default_random_engine gen1;
-    //gen1.seed(n_seed);
+    gen1.seed(t);
     std::uniform_real_distribution<double> uniformpi(0, 2 * M_PI);
 
 
@@ -541,7 +543,7 @@ int main(){
 
 
                 x_in = (length_x / domain_length) * x[0];//
-                l_filo_x = (length_x / domain_length) * l_filo_x; // rescale the length of filopodia as well
+                //l_filo_x = (length_x / domain_length) * l_filo_x; // rescale the length of filopodia as well
 
 
                 if (t == 0) {
@@ -549,7 +551,7 @@ int main(){
                 }
 
                 // create an array to store random directions
-                array<double, filo_number +1> random_angle;
+                array<double, filo_number + 1> random_angle;
 //            std::array<int, 3> sign_x;
 //            std::array<int, 3> sign_y;
                 for (int k = 0; k < filo_number+1; k++) {
@@ -616,53 +618,22 @@ int main(){
                     }
                 }
 
+                // print all the concentration
 
-                cout << "chemo max number " << chemo_max_number << endl;
+                for (int i = 0; i < filo_number; i++){
+                    cout << "all the chemo concentrations at different angles " <<  new_chemo[i] << endl;
+                }
 
-
-                //if relative/absolute difference is smaller for the maximumu, move random direction
-                //absolute
-                //if (new_chemo[chemo_max_number] - old_chemo < diff_conc) {
-
-
-                // relative
-                if ((new_chemo[chemo_max_number] - old_chemo) / sqrt(old_chemo) < diff_conc) {
-
-                    x += speed_l * vdouble2(sin(random_angle[3]), cos(random_angle[3]));
-                    //cout << "print id " << id_[x] << endl;
-
-                    x_in = (length_x / domain_length) * x[0];//uniform growth in the first part of the domain
-
-                    //cout << "Position "<< x << endl;
-
-                    bool free_position = true; // check if the neighbouring position is free
-
-                    // if this loop is entered, it means that there is another cell where I want to move
-                    for (auto k = euclidean_search(particles.get_query(), x, diameter); k != false; ++k) {
-
-                        //for (int i=0; i < particles.size(); i++) {
-                        if (get<id>(*k) != get<id>(particles[particle_id(j)])) { // check if it is not the same particle
-                            //cout << "reject step " << 1 << endl;
-                            free_position = false;
-                        }
-                    }
+                cout << "old chemo " << old_chemo << endl;
 
 
+                cout << "chemo max number " << new_chemo[chemo_max_number] << endl;
 
+                // if the concentration in a new place is higher than the old one, move that way
 
-                    // check that the position they want to move to is free and not out of bounds
-                    if (free_position &&
-                        (x_in) > 0 &&
-                        (x_in) < length_x - 1 &&
-                        (x[1]) > 0 &&
-                        (x[1]) < length_y - 1) {
-                        get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[filo_number]),
-                                                                                       cos(random_angle[filo_number])); // update if nothing is in the next position
-                        get<direction>(particles)[particle_id(j)] = speed_l * vdouble2(sin(random_angle[filo_number]),
-                                                                                       cos(random_angle[filo_number]));
-                    }
+                if ((new_chemo[chemo_max_number] - old_chemo) / sqrt(old_chemo) > diff_conc) {
 
-                } else {
+                    count_dir += 1;
 
                     x += speed_l * vdouble2(sin(random_angle[chemo_max_number]), cos(random_angle[chemo_max_number]));
                     //cout << "print id " << id_[x] << endl;
@@ -698,6 +669,52 @@ int main(){
                                                    cos(random_angle[chemo_max_number]));
                     }
 
+
+                }
+
+
+
+                //if relative/absolute difference is smaller for the maximum, move random direction
+                //absolute
+                //if (new_chemo[chemo_max_number] - old_chemo < diff_conc) {
+
+
+                // relative
+                else {
+
+                    x += speed_l * vdouble2(sin(random_angle[filo_number]), cos(random_angle[filo_number]));
+                    //cout << "print id " << id_[x] << endl;
+
+                    x_in = (length_x / domain_length) * x[0];//uniform growth in the first part of the domain
+
+                    //cout << "Position "<< x << endl;
+
+                    bool free_position = true; // check if the neighbouring position is free
+
+                    // if this loop is entered, it means that there is another cell where I want to move
+                    for (auto k = euclidean_search(particles.get_query(), x, diameter); k != false; ++k) {
+
+                        //for (int i=0; i < particles.size(); i++) {
+                        if (get<id>(*k) != get<id>(particles[particle_id(j)])) { // check if it is not the same particle
+                            //cout << "reject step " << 1 << endl;
+                            free_position = false;
+                        }
+                    }
+
+
+
+
+                    // check that the position they want to move to is free and not out of bounds
+                    if (free_position &&
+                        (x_in) > 0 &&
+                        (x_in) < length_x - 1 &&
+                        (x[1]) > 0 &&
+                        (x[1]) < length_y - 1) {
+                        get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[filo_number]),
+                                                                                       cos(random_angle[filo_number])); // update if nothing is in the next position
+                        get<direction>(particles)[particle_id(j)] = speed_l * vdouble2(sin(random_angle[filo_number]),
+                                                                                       cos(random_angle[filo_number]));
+                    }
 
                 }
 
@@ -1303,6 +1320,7 @@ int main(){
 
         }
 
+    cout << " count dir " << count_dir << endl;
 
 
 
