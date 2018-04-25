@@ -14,14 +14,15 @@ cells move towords high concentration of varying chemoattracted, the movement is
 #include <iostream>// writing on a text file
 #include <fstream>
 #include <math.h>
-#include <assert.h>
+#include <assert.h>4
 
 using namespace std;
 using namespace Aboria;
 using namespace Eigen; // objects VectorXf, MatrixXf
 
-int main() {
+VectorXi proportions(double diff_conc, int n_seed) {
 
+//int main(){
 
     // model parameters
 
@@ -31,16 +32,16 @@ int main() {
     const int length_y = 12;//120;//20;//4;
     double cell_radius = 0.75;//0.5; // radius of a cell
     const double diameter = 2 * cell_radius;//2 // diameter in which there have to be no cells, equivalent to size of the cell
-    const int N_steps = 1000; // number of times the cells move up the gradient
+    const int N_steps = 500; // number of times the cells move up the gradient
     const size_t N = 5; // initial number of cells
     double l_filo_y = 2.75;//2; // sensing radius
     double l_filo_x = 2.75; // will have to rescale filopodia when domain grows
     double l_filo_max = l_filo_y*2;
-    double diff_conc = 0.05; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
+    //double diff_conc = 0.05; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1;
-    double speed_l = 0.5;//0.05; // speed of a leader cell
-    double speed_f = 0.5;//0.08; // speed of a follower cell
+    double speed_l = 0.2;//0.05; // speed of a leader cell
+    double speed_f = 0.2;//0.08; // speed of a follower cell
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
     double chemo_leader = 0.9; //0.5; // phenotypic switching happens when the concentration of chemoattractant is higher than this (presentation video 0.95), no phenotypic switching
     double eps = 1; // for phenotypic switching, the distance has to be that much higher
@@ -254,6 +255,7 @@ int main() {
 
     // choose a set of random number between 0 and 2*pi, to avoid more rejections when it goes backwords (it would always be rejected)
     std::default_random_engine gen1;
+    gen1.seed(n_seed);
     std::uniform_real_distribution<double> uniformpi(0,2*M_PI);
 
 
@@ -278,7 +280,7 @@ int main() {
 
                 vdouble2 diffx = tpl.dx();
 
-                if (diffx.norm() <  diameter) {
+                if (diffx.norm() < diameter) {
                     free_position = false;
                     break;
                 }
@@ -609,11 +611,11 @@ int main() {
 
                 //if both smaller, move random direction
                 //absolute
-                if (new_chemo_1 - old_chemo < diff_conc && new_chemo_2 - old_chemo < diff_conc) {
+                //if (new_chemo_1 - old_chemo < diff_conc && new_chemo_2 - old_chemo < diff_conc) {
 
 
                     // relative
-                    //if ((new_chemo_1 - old_chemo)/sqrt(old_chemo) < diff_conc && (new_chemo_2- old_chemo)/sqrt(old_chemo) < diff_conc){
+                    if ((new_chemo_1 - old_chemo)/sqrt(old_chemo) < diff_conc && (new_chemo_2- old_chemo)/sqrt(old_chemo) < diff_conc){
 
                     x += speed_l * vdouble2(sin(random_angle[2]), cos(random_angle[2]));
                     //cout << "print id " << id_[x] << endl;
@@ -653,10 +655,10 @@ int main() {
                     //cout << "stops here " << endl;
                     // if first direction greater, second smaller
                     //absolute
-                else if (new_chemo_1 - old_chemo > diff_conc && new_chemo_2 - old_chemo < diff_conc) {
+                //else if (new_chemo_1 - old_chemo > diff_conc && new_chemo_2 - old_chemo < diff_conc) {
 
                     //relative
-                    //else if ((new_chemo_1 - old_chemo)/sqrt(old_chemo) > diff_conc && (new_chemo_2 - old_chemo)/sqrt(old_chemo) < diff_conc){
+                else if ((new_chemo_1 - old_chemo)/sqrt(old_chemo) > diff_conc && (new_chemo_2 - old_chemo)/sqrt(old_chemo) < diff_conc){
 
                     x += speed_l * vdouble2(sin(random_angle[0]), cos(random_angle[0]));
                     //cout << "print id " << id_[x] << endl;
@@ -698,10 +700,10 @@ int main() {
                     // if first smaller, second bigger
 
                     //absolute
-                else if (new_chemo_1 - old_chemo < diff_conc && new_chemo_2 - old_chemo > diff_conc) {
+                //else if (new_chemo_1 - old_chemo < diff_conc && new_chemo_2 - old_chemo > diff_conc) {
 
                     //relative
-                    //else if ((new_chemo_1 - old_chemo)/sqrt(old_chemo) < diff_conc && (new_chemo_2 - old_chemo)/sqrt(old_chemo) > diff_conc){
+                else if ((new_chemo_1 - old_chemo)/sqrt(old_chemo) < diff_conc && (new_chemo_2 - old_chemo)/sqrt(old_chemo) > diff_conc){
 
 
 
@@ -745,10 +747,10 @@ int main() {
                     // if both greater choose the bigger one
 
                     // absolute
-                else if (new_chemo_1 - old_chemo > diff_conc && new_chemo_2 - old_chemo > diff_conc) {
+                //else if (new_chemo_1 - old_chemo > diff_conc && new_chemo_2 - old_chemo > diff_conc) {
 
                     //relative
-                    //else if ((new_chemo_1 - old_chemo)/sqrt(old_chemo) > diff_conc && (new_chemo_2 - old_chemo)/sqrt(old_chemo) > diff_conc){
+                else if ((new_chemo_1 - old_chemo)/sqrt(old_chemo) > diff_conc && (new_chemo_2 - old_chemo)/sqrt(old_chemo) > diff_conc){
 
 
                     // if first is greater than the second
@@ -1359,5 +1361,262 @@ int main() {
     }
 
 
+
+
+    /*
+     * return the density of cells in each of the fifth of the domain
+     */
+
+    const int domain_partition = int (domain_length/double(5)); ; // number of intervalas of 50 \mu m
+
+    VectorXi proportions = VectorXi::Zero(domain_partition); // integer with number of cells in particular part
+    //array<double, domain_partition> proportions;
+
+
+    double one_part = domain_length/double(domain_partition);
+
+    cout << "one part of the domain " << one_part << endl;
+
+    for (int i = 0; i < domain_partition; i++){
+
+        cout << "number of cells " << particles.size() << endl;
+        for (int j = 0; j < particles.size(); j++){
+            vdouble2 x = get<position>(particles[j]);
+            //cout<< "domain partition " << i*one_part << endl;
+            //cout << "x coordinate " << x[0] << endl;
+            cout << "position " << get<position>(particles[j]) << endl;
+            cout << "from here " << i*one_part << endl;
+            cout << "to here " << (i+1) * one_part << endl;
+            if (i*one_part < x[0] && x[0] < (i+1)* one_part){
+                proportions(i) += 1;
+            }
+        }
+
+    }
+
+
+    // for loops to count the number of cells in each of the fifth of the domain
+
+    return proportions;
+
+
+
 }
 
+
+/*
+ * main for futhest distance
+ * */
+
+//
+//int main(){
+//
+//    const int number_parameters = 5; // parameter range
+//
+//    const int sim_num = 1;
+//
+//    MatrixXf all_distances = MatrixXf::Zero(number_parameters,sim_num); //matrix over which I am going to average
+//
+////n would correspond to different seeds
+//    for (int n = 0; n < sim_num; n++) {
+//
+//        // define parameters that I will change
+//        //VectorXf slope, threshold;
+//        //array<double, 1> lam;
+//
+//        double speed_l[number_parameters];
+//
+//        for (int i = 0; i < number_parameters+1; ++i){
+//            speed_l[i]= 0.1*(i+1);
+//        }
+//
+//
+//        VectorXf furthest_distance = VectorXf::Zero(number_parameters);
+//
+//#pragma omp parallel for
+//        for (int i = 0; i < number_parameters; i++) {
+//            for (int j = 0; j < 1; j++) {
+//                cout << "iteration i " << i << endl;
+//                furthest_distance(i, j) = distance_function(speed_l[i]);
+//                cout << "parameters " << i << endl;
+//            }
+//            all_distances(i, n) = furthest_distance(i, 0);
+//        }
+//    }
+////        /*
+////        // save data to plot chemoattractant concentration
+////        ofstream output("furthest_distance_matrix_cell_induced.csv");
+////
+////        MatrixXd furthest_distance_3col(number_parameters * number_parameters, 4), furthest_distance_3col_ind(number_parameters * number_parameters,
+////                                                                    2); // need for because that is how paraview accepts data, third dimension is just zeros
+////
+////
+////
+////        // x, y coord, 1st and 2nd columns respectively
+////        int k = 0;
+////        // it has to be 3D for paraview
+////        while (k < number_parameters * number_parameters) {
+////            for (int i = 0; i < number_parameters; i++) {
+////                for (int j = 0; j < number_parameters; j++) {
+////                    furthest_distance_3col_ind(k, 0) = i;
+////                    furthest_distance_3col_ind(k, 1) = j;
+////                    furthest_distance_3col(k, 2) = 0;
+////                    k += 1;
+////                }
+////            }
+////        }
+////
+////
+////        // y and x (initially) column
+////        for (int i = 0; i < number_parameters * number_parameters; i++) {
+////            furthest_distance_3col(i, 1) = furthest_distance_3col_ind(i, 1);
+////            furthest_distance_3col(i, 0) = furthest_distance_3col_ind(i, 0);
+////        }
+////
+////
+////        // u column
+////        for (int i = 0; i < number_parameters * number_parameters; i++) {
+////            furthest_distance_3col(i, 3) = furthest_distance(furthest_distance_3col_ind(i, 0), furthest_distance_3col_ind(i, 1));
+////        }
+////
+////        output << "x, y, z, u" << "\n" << endl;
+////
+////
+////        for (int i = 0; i < number_parameters * number_parameters; i++) {
+////            for (int j = 0; j < 4; j++) {
+////                output << furthest_distance_3col(i, j) << ", ";
+////            }
+////            output << "\n" << endl;
+////        }
+////        */
+////
+////
+////
+////
+////        // This might be useful for matlab
+////        ofstream output2("furthest_distance_matrix_matlab_cell_induced.csv");
+////
+////        for (int i = 0; i < number_parameters; i++) {
+////
+////            for (int j = 0; j < 1; j++) {
+////
+////                output2 << furthest_distance(i, j) << ", ";
+////
+////            }
+////            output2 << "\n" << endl;
+////        }
+////
+////    }
+////
+////
+//    ofstream output3("simulations_cell_induced.csv");
+//
+//    for (int i = 0; i < number_parameters; i++) {
+//
+//        for (int j = 0; j < sim_num; j++) {
+//
+//            output3 << all_distances(i, j) << ", ";
+//
+//        }
+//        output3 << "\n" << endl;
+//    }
+//
+//
+//
+//}
+
+
+
+
+
+/*
+ * main for proportions in different sections
+ */
+
+
+// parameter analysis
+int main(){
+
+    const int number_parameters = 1; // parameter range
+    const int sim_num = 1;
+
+    VectorXi vector_check_length = proportions(0.005, 2); //just to know what the length is
+
+    int num_parts = vector_check_length.size(); // number of parts that I partition my domain
+
+    MatrixXf sum_of_all = MatrixXf::Zero(num_parts,number_parameters); // sum of the values over all simulations
+
+//n would correspond to different seeds
+    for (int n = 0; n < sim_num; n++) {
+
+
+        // define parameters that I will change
+        //VectorXf slope, threshold;
+        array<double, number_parameters> threshold;
+        array<double, 1> slope;
+        //array<double,number_parameters,number_parameters>;
+
+        MatrixXf furthest_distance = MatrixXf::Zero(number_parameters,1);
+        //VectorXf furthest_distance = VectorXf::Zero(number_parameters);
+
+
+        for (int i = 0; i < number_parameters; i++) {
+            threshold[i] = 0.5;
+            //threshold[i] = 0.005 * (i + 1);// 0.01;
+            //cout << "slope " << slope[i] << endl;
+
+        }
+
+
+
+
+        MatrixXi numbers = MatrixXi::Zero(num_parts,number_parameters); // can't initialise because do not know the size
+
+        cout << "stops here" << endl;
+
+#pragma omp parallel for
+        for (int i = 0; i < number_parameters; i++) {
+
+            //for (int j = 0; j < 1; j++) {
+
+            numbers.block(0,i,num_parts,1) = proportions(threshold[i], n);
+
+            //}
+        }
+
+
+        // This is what I am using for MATLAB
+        ofstream output2("numbers_matrix_matlab.csv");
+
+        for (int i = 0; i < numbers.rows(); i++) {
+
+            for (int j = 0; j < numbers.cols(); j++) {
+
+                output2 << numbers(i, j) << ", ";
+
+                sum_of_all(i,j) += numbers(i,j);
+
+            }
+            output2 << "\n" << endl;
+        }
+
+    }
+
+    /*
+    * will store everything in one matrix, the entries will be summed over all simulations
+    */
+
+    ofstream output3("simulations_domain_partition_simple.csv");
+
+    for (int i = 0; i < num_parts; i++) {
+
+        for (int j = 0; j < number_parameters; j++) {
+
+            output3 << sum_of_all(i, j) << ", ";
+
+        }
+        output3 << "\n" << endl;
+    }
+
+
+}
