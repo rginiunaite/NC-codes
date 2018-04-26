@@ -1,4 +1,5 @@
 
+
 /*
 cells move towords high concentration of varying chemoattracted, the movement is directed,
  cells only move if they sense higher concentration. Leaders and followers separately, cells move in chains, physical
@@ -20,9 +21,9 @@ using namespace std;
 using namespace Aboria;
 using namespace Eigen; // objects VectorXf, MatrixXf
 
-VectorXi proportions(double diff_conc, int n_seed) {
+//VectorXi proportions(double diff_conc, int n_seed) {
 
-//int main(){
+int main(){
 
     // model parameters
 
@@ -36,8 +37,9 @@ VectorXi proportions(double diff_conc, int n_seed) {
     const size_t N = 5; // initial number of cells
     double l_filo_y = 2.75;//2; // sensing radius
     double l_filo_x = 2.75; // will have to rescale filopodia when domain grows
+    double l_filo_x_in = l_filo_x; // initial l_filo_x, used for the scaling of coordinates
     double l_filo_max = l_filo_y*2;
-    //double diff_conc = 0.05; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
+    double diff_conc = 0.05; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1;
     double speed_l = 0.2;//0.05; // speed of a leader cell
@@ -255,7 +257,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
     // choose a set of random number between 0 and 2*pi, to avoid more rejections when it goes backwords (it would always be rejected)
     std::default_random_engine gen1;
-    gen1.seed(n_seed);
+    //gen1.seed(n_seed);
     std::uniform_real_distribution<double> uniformpi(0,2*M_PI);
 
 
@@ -535,12 +537,13 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
 
                 x_in = (length_x / domain_length)*x[0];//
-                l_filo_x = (length_x/domain_length)*l_filo_x; // rescale the length of filopodia as well
+                l_filo_x = (length_x/domain_length)*l_filo_x_in; // rescale the length of filopodia as well
 
 
-                if (t == 0){
-                    cout << "ratio" << length_x/domain_length << endl;
-                }
+
+                    cout << "ratio " << length_x/domain_length << endl;
+               cout << " l filo " << l_filo_x << endl;
+
 
                 // create an array to store random directions
                 std::array<double, 3> random_angle;
@@ -1363,41 +1366,41 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
 
 
-    /*
-     * return the density of cells in each of the fifth of the domain
-     */
-
-    const int domain_partition = int (domain_length/double(5)); ; // number of intervalas of 50 \mu m
-
-    VectorXi proportions = VectorXi::Zero(domain_partition); // integer with number of cells in particular part
-    //array<double, domain_partition> proportions;
-
-
-    double one_part = domain_length/double(domain_partition);
-
-    cout << "one part of the domain " << one_part << endl;
-
-    for (int i = 0; i < domain_partition; i++){
-
-        cout << "number of cells " << particles.size() << endl;
-        for (int j = 0; j < particles.size(); j++){
-            vdouble2 x = get<position>(particles[j]);
-            //cout<< "domain partition " << i*one_part << endl;
-            //cout << "x coordinate " << x[0] << endl;
-            cout << "position " << get<position>(particles[j]) << endl;
-            cout << "from here " << i*one_part << endl;
-            cout << "to here " << (i+1) * one_part << endl;
-            if (i*one_part < x[0] && x[0] < (i+1)* one_part){
-                proportions(i) += 1;
-            }
-        }
-
-    }
-
-
-    // for loops to count the number of cells in each of the fifth of the domain
-
-    return proportions;
+//    /*
+//     * return the density of cells in each of the fifth of the domain
+//     */
+//
+//    const int domain_partition = int (domain_length/double(5)); ; // number of intervalas of 50 \mu m
+//
+//    VectorXi proportions = VectorXi::Zero(domain_partition); // integer with number of cells in particular part
+//    //array<double, domain_partition> proportions;
+//
+//
+//    double one_part = domain_length/double(domain_partition);
+//
+//    cout << "one part of the domain " << one_part << endl;
+//
+//    for (int i = 0; i < domain_partition; i++){
+//
+//        cout << "number of cells " << particles.size() << endl;
+//        for (int j = 0; j < particles.size(); j++){
+//            vdouble2 x = get<position>(particles[j]);
+//            //cout<< "domain partition " << i*one_part << endl;
+//            //cout << "x coordinate " << x[0] << endl;
+//            cout << "position " << get<position>(particles[j]) << endl;
+//            cout << "from here " << i*one_part << endl;
+//            cout << "to here " << (i+1) * one_part << endl;
+//            if (i*one_part < x[0] && x[0] < (i+1)* one_part){
+//                proportions(i) += 1;
+//            }
+//        }
+//
+//    }
+//
+//
+//    // for loops to count the number of cells in each of the fifth of the domain
+//
+//    return proportions;
 
 
 
@@ -1529,94 +1532,94 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
 
 
-/*
- * main for proportions in different sections
- */
-
-
-// parameter analysis
-int main(){
-
-    const int number_parameters = 1; // parameter range
-    const int sim_num = 1;
-
-    VectorXi vector_check_length = proportions(0.005, 2); //just to know what the length is
-
-    int num_parts = vector_check_length.size(); // number of parts that I partition my domain
-
-    MatrixXf sum_of_all = MatrixXf::Zero(num_parts,number_parameters); // sum of the values over all simulations
-
-//n would correspond to different seeds
-    for (int n = 0; n < sim_num; n++) {
-
-
-        // define parameters that I will change
-        //VectorXf slope, threshold;
-        array<double, number_parameters> threshold;
-        array<double, 1> slope;
-        //array<double,number_parameters,number_parameters>;
-
-        MatrixXf furthest_distance = MatrixXf::Zero(number_parameters,1);
-        //VectorXf furthest_distance = VectorXf::Zero(number_parameters);
-
-
-        for (int i = 0; i < number_parameters; i++) {
-            threshold[i] = 0.5;
-            //threshold[i] = 0.005 * (i + 1);// 0.01;
-            //cout << "slope " << slope[i] << endl;
-
-        }
-
-
-
-
-        MatrixXi numbers = MatrixXi::Zero(num_parts,number_parameters); // can't initialise because do not know the size
-
-        cout << "stops here" << endl;
-
-#pragma omp parallel for
-        for (int i = 0; i < number_parameters; i++) {
-
-            //for (int j = 0; j < 1; j++) {
-
-            numbers.block(0,i,num_parts,1) = proportions(threshold[i], n);
-
-            //}
-        }
-
-
-        // This is what I am using for MATLAB
-        ofstream output2("numbers_matrix_matlab.csv");
-
-        for (int i = 0; i < numbers.rows(); i++) {
-
-            for (int j = 0; j < numbers.cols(); j++) {
-
-                output2 << numbers(i, j) << ", ";
-
-                sum_of_all(i,j) += numbers(i,j);
-
-            }
-            output2 << "\n" << endl;
-        }
-
-    }
-
-    /*
-    * will store everything in one matrix, the entries will be summed over all simulations
-    */
-
-    ofstream output3("simulations_domain_partition_simple.csv");
-
-    for (int i = 0; i < num_parts; i++) {
-
-        for (int j = 0; j < number_parameters; j++) {
-
-            output3 << sum_of_all(i, j) << ", ";
-
-        }
-        output3 << "\n" << endl;
-    }
-
-
-}
+///*
+// * main for proportions in different sections
+// */
+//
+//
+//// parameter analysis
+//int main(){
+//
+//    const int number_parameters = 1; // parameter range
+//    const int sim_num = 1;
+//
+//    VectorXi vector_check_length = proportions(0.005, 2); //just to know what the length is
+//
+//    int num_parts = vector_check_length.size(); // number of parts that I partition my domain
+//
+//    MatrixXf sum_of_all = MatrixXf::Zero(num_parts,number_parameters); // sum of the values over all simulations
+//
+////n would correspond to different seeds
+//    for (int n = 0; n < sim_num; n++) {
+//
+//
+//        // define parameters that I will change
+//        //VectorXf slope, threshold;
+//        array<double, number_parameters> threshold;
+//        array<double, 1> slope;
+//        //array<double,number_parameters,number_parameters>;
+//
+//        MatrixXf furthest_distance = MatrixXf::Zero(number_parameters,1);
+//        //VectorXf furthest_distance = VectorXf::Zero(number_parameters);
+//
+//
+//        for (int i = 0; i < number_parameters; i++) {
+//            threshold[i] = 0.5;
+//            //threshold[i] = 0.005 * (i + 1);// 0.01;
+//            //cout << "slope " << slope[i] << endl;
+//
+//        }
+//
+//
+//
+//
+//        MatrixXi numbers = MatrixXi::Zero(num_parts,number_parameters); // can't initialise because do not know the size
+//
+//        cout << "stops here" << endl;
+//
+//#pragma omp parallel for
+//        for (int i = 0; i < number_parameters; i++) {
+//
+//            //for (int j = 0; j < 1; j++) {
+//
+//            numbers.block(0,i,num_parts,1) = proportions(threshold[i], n);
+//
+//            //}
+//        }
+//
+//
+//        // This is what I am using for MATLAB
+//        ofstream output2("numbers_matrix_matlab.csv");
+//
+//        for (int i = 0; i < numbers.rows(); i++) {
+//
+//            for (int j = 0; j < numbers.cols(); j++) {
+//
+//                output2 << numbers(i, j) << ", ";
+//
+//                sum_of_all(i,j) += numbers(i,j);
+//
+//            }
+//            output2 << "\n" << endl;
+//        }
+//
+//    }
+//
+//    /*
+//    * will store everything in one matrix, the entries will be summed over all simulations
+//    */
+//
+//    ofstream output3("simulations_domain_partition_simple.csv");
+//
+//    for (int i = 0; i < num_parts; i++) {
+//
+//        for (int j = 0; j < number_parameters; j++) {
+//
+//            output3 << sum_of_all(i, j) << ", ";
+//
+//        }
+//        output3 << "\n" << endl;
+//    }
+//
+//
+//}
