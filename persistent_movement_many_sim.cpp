@@ -46,8 +46,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
     double chemo_leader = 0.9; //0.5; // phenotypic switching happens when the concentration of chemoattractant is higher than this (presentation video 0.95), no phenotypic switching
     double eps = 1; // for phenotypic switching, the distance has to be that much higher
-    const int filo_number = 2;
-    int same_dir = 3; // number of steps in the same direction
+    const int filo_number = 1;
+    int same_dir = 1; // number of steps in the same direction
     bool random_pers = true; // persistent movement also when the cell moves randomly
 
     int count_dir = 0;
@@ -204,7 +204,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
      * periodic in x and y
      */
 
-    particles.init_neighbour_search(vdouble2(0, 0), 5 * vdouble2(length_x, length_y), vbool2(false, false));
+    particles.init_neighbour_search(vdouble2(0, 0), 2 * vdouble2(length_x, length_y), vbool2(false, false));
 
 
     /*
@@ -1590,19 +1590,19 @@ int main(){
 
         cout << "stops here" << endl;
 
-#pragma omp parallel for
-        for (int i = 0; i < number_parameters; i++) {
+//#pragma omp parallel for
+  //      for (int i = 0; i < number_parameters; i++) {
 
             //for (int j = 0; j < 1; j++) {
 
-            numbers.block(0,i,num_parts,1) = proportions(threshold[i], n);
+            numbers.block(0,0,num_parts,1) = proportions(threshold[0], n);
 
             //}
-        }
+       // }
 
 
         // This is what I am using for MATLAB
-        ofstream output2("numbers_matrix_matlab_persistent.csv");
+        ofstream output2("numbers_matrix_matlab_downregulation.csv");
 
         for (int i = 0; i < numbers.rows(); i++) {
 
@@ -1622,7 +1622,7 @@ int main(){
     * will store everything in one matrix, the entries will be summed over all simulations
     */
 
-    ofstream output3("simulations_domain_partition_simple_persistent.csv");
+    ofstream output3("simulations_domain_partition_simple_downregulation.csv");
 
     for (int i = 0; i < num_parts; i++) {
 
