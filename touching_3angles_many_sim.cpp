@@ -1503,7 +1503,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
 int main(){
 
     const int number_parameters = 1; // parameter range
-    const int sim_num = 20;
+    const int sim_num = 10;
 
     VectorXi vector_check_length = proportions(0.005, 2); //just to know what the length is
 
@@ -1514,7 +1514,7 @@ int main(){
 //n would correspond to different seeds
     for (int n = 0; n < sim_num; n++) {
 
-
+        cout << "Now the n_th simulation, n = " << n << endl;
         // define parameters that I will change
         //VectorXf slope, threshold;
         array<double, number_parameters> threshold;
