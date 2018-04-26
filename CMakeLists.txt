@@ -48,11 +48,13 @@ include_directories(src ${INCLUDES})
 #add_executable(open_space_improved_version open_space_improved_version.cpp)
 #add_executable(check2 two_types_open_extra_main.cpp)
 #add_executable(fixed_gradient_3D fixed_gradient_3D.cpp)
-add_executable(touching touching.cpp)
+#add_executable(touching touching.cpp)
 #add_executable(combination_touching_open_space combination_touching_open_space.cpp)
 #add_executable(combination_touching_open_space_main combination_touching_open_space_main.cpp)
 #add_executable(touching_3angles touching_3angles.cpp)
 #add_executable(persistent_movement persistent_movement.cpp)
+#add_executable(persistent_movement_many_sim persistent_movement_many_sim.cpp)
+add_executable(touching_3angles_many_sim touching_3angles_many_sim.cpp)
 
 
 
@@ -68,11 +70,13 @@ add_executable(touching touching.cpp)
 #target_link_libraries(open_space_improved_version ${LIBRARIES})
 #target_link_libraries(check2 ${LIBRARIES})
 #target_link_libraries(fixed_gradient_3D ${LIBRARIES})
-target_link_libraries(touching ${LIBRARIES})
+#target_link_libraries(touching ${LIBRARIES})
 #target_link_libraries(combination_touching_open_space ${LIBRARIES})
 #target_link_libraries(combination_touching_open_space_main ${LIBRARIES})
 #target_link_libraries(touching_3angles ${LIBRARIES})
 #target_link_libraries(persistent_movement ${LIBRARIES})
+#target_link_libraries(persistent_movement_many_sim ${LIBRARIES})
+target_link_libraries(touching_3angles_many_sim ${LIBRARIES})
 
 
 
