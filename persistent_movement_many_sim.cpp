@@ -41,13 +41,13 @@ VectorXi proportions(double diff_conc, int n_seed) {
     //double diff_conc = 0.1; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1;
-    double speed_l = 0.2;//0.05; // speed of a leader cell
-    double speed_f = 0.2;//0.08; // speed of a follower cell
+    double speed_l = 0.13;//0.05; // speed of a leader cell
+    double speed_f = 0.13;//0.08; // speed of a follower cell
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
     double chemo_leader = 0.9; //0.5; // phenotypic switching happens when the concentration of chemoattractant is higher than this (presentation video 0.95), no phenotypic switching
     double eps = 1; // for phenotypic switching, the distance has to be that much higher
-    const int filo_number = 1;
-    int same_dir = 1; // number of steps in the same direction
+    const int filo_number = 2;
+    int same_dir = 2; // number of steps in the same direction, 2 if three steps
     bool random_pers = true; // persistent movement also when the cell moves randomly
 
     int count_dir = 0;
@@ -94,12 +94,12 @@ VectorXi proportions(double diff_conc, int n_seed) {
     // parameters for the dynamics of chemoattractant concentration
 
 
-    double D = 1; // to 10^5 \nu m^2/h diffusion coefficient
+    double D = 0.01; // to 10^5 \nu m^2/h diffusion coefficient
     double t = 0; // initialise time, redundant
     double dt = 0.00001; // time step
     double dx = 1; // space step in x direction, double to be consistent with other types
     double dy = 1; // space step in y direction
-    double kai = 1 / 100;//0.0001/10; // to 1 /h production rate of chemoattractant
+    double kai = 10000;//1 / 100;//0.0001/10; // to 1 /h production rate of chemoattractant
 
 
     // parameters for internalisation
@@ -204,7 +204,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
      * periodic in x and y
      */
 
-    particles.init_neighbour_search(vdouble2(0, 0), 2 * vdouble2(length_x, length_y), vbool2(false, false));
+    //particles.init_neighbour_search(vdouble2(0, 0), 2 * vdouble2(length_x, length_y), vbool2(false, false));
 
 
     /*
@@ -341,6 +341,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
         //cout << "diff domain outside " << diff_domain << endl;
 
 
+        cout << " domain_length after the first step " << domain_length << endl;
+
 
 
         // save the chemoattractant concentration with properly rescaled coordinates, UNIFORM DOMAIN GROWTH
@@ -374,11 +376,11 @@ VectorXi proportions(double diff_conc, int n_seed) {
         for (int i = 0; i < length_x; i++) {
             for (int j = 0; j < length_y; j++) {
                 //go through all the cells
-                // leaders
                 for (int k = 0; k < particles.size(); k++) {
+                // leaders
+                    //for (int k = 0; k < N; k++) {
                     vdouble2 x;
                     x = get<position>(particles[k]);
-
                     intern(i, j) = intern(i, j) + exp(-(((domain_length / length_x) * i - x[0]) *
                                                         ((domain_length / length_x) * i - x[0]) +
                                                         (j - x[1]) * (j - x[1])) /
@@ -396,7 +398,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
                                              (chemo(i + 1, j) - 2 * chemo(i, j) + chemo(i - 1, j)) / (dx * dx) +
                                              (chemo(i, j + 1) - 2 * chemo(i, j) + chemo(i, j - 1)) / (dy * dy)) -
                                         (chemo(i, j) * lam / (2 * M_PI * R * R)) * intern(i, j) +
-                                        kai * chemo(i, j) * (1 - chemo(i, j)) -
+                                        kai *  chemo(i,j) * (1 - chemo(i, j)) -
                                         double(domain_len_der) / double(domain_length) * chemo(i, j)) + chemo(i, j);
 
             }
@@ -707,7 +709,14 @@ VectorXi proportions(double diff_conc, int n_seed) {
                             get<direction>(particles)[particle_id(j)] =
                                     speed_l * vdouble2(sin(random_angle[chemo_max_number]),
                                                        cos(random_angle[chemo_max_number]));
-                            get<persistence_extent>(particles)[particle_id(j)] = 1; // assume now that the movement becomes persistent
+
+                            //only if the difference in concentration is high enough we introduce persistent movement actually
+
+                            //if ((new_chemo[chemo_max_number] - old_chemo) / sqrt(old_chemo) > diff_conc*100){
+                                cout << "buldozing " << endl;
+                                get<persistence_extent>(particles)[particle_id(j)] = 1; // assume now that the movement becomes persistent
+                           // }
+
                         }
 
 
@@ -757,7 +766,11 @@ VectorXi proportions(double diff_conc, int n_seed) {
                                                                                            cos(random_angle[filo_number]));
                             // persistence in all directions
                             if (random_pers == true){
-                                get<persistence_extent>(particles[particle_id(j)]) = 1; // assume for now that it also becomes peristent in random direction
+                                // if there is directed buldozing effect
+                                if (same_dir > 0){
+                                    get<persistence_extent>(particles[particle_id(j)]) = 1; // assume for now that it also becomes peristent in random direction
+
+                                }
                             }
 
                         }
@@ -937,6 +950,12 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
                     }
 
+                    // else it becomes dettached
+
+                    else{
+                        get<chain>(particles[particle_id(j)]) == 0;
+                    }
+
 
                     // check if it is not too far from the cell it was following
 
@@ -948,12 +967,12 @@ VectorXi proportions(double diff_conc, int n_seed) {
                         get<chain>(particles[particle_id(j)]) = 0;
 
                         // all the cells in the chain behind it become detached
-                        for (int i = 0 ; i< particles.size(); ++i){
-                            if (get<chain_type>(particles[i]) == get<chain_type>(particles)[particle_id(j)]){
-                                get<chain>(particles[i]) = 0;
-                            }
-
-                        }
+//                        for (int i = 0 ; i< particles.size(); ++i){
+//                            if (get<chain_type>(particles[i]) == get<chain_type>(particles)[particle_id(j)]){
+//                                get<chain>(particles[i]) = 0;
+//                            }
+//
+//                        }
                     }
 
 
@@ -1006,9 +1025,6 @@ VectorXi proportions(double diff_conc, int n_seed) {
                         }
 
                     }
-
-
-
 
 
 
@@ -1113,6 +1129,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
                             //cout << "how frequently come in here " << endl;
                             get<position>(particles)[particle_id(j)] += speed_f * vdouble2(sin(random_angle),
                                                                                            cos(random_angle)); // update if nothing is in the next position
+                            get<direction>(particles)[particle_id(j)] = speed_f * vdouble2(sin(random_angle),
+                                                                                            cos(random_angle));
                         }
 
                     }
@@ -1380,7 +1398,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
 
         /*
-         * return the density of cells in each of the fifth of the domain
+         * return the density of cells in domain_partition parts of the domain
          */
         const int domain_partition = int(domain_length / double(5));; // number of intervalas of 50 \mu m
 
@@ -1411,7 +1429,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
 
         // for loops to count the number of cells in each of the fifth of the domain
-
+    cout << "domain length " << domain_length << endl;
         return proportions;
 
 
@@ -1553,7 +1571,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
 int main(){
 
     const int number_parameters = 1; // parameter range
-    const int sim_num = 20;
+    const int sim_num = 1;
 
     VectorXi vector_check_length = proportions(0.005, 2); //just to know what the length is
 
@@ -1577,7 +1595,7 @@ int main(){
 
 
         for (int i = 0; i < number_parameters; i++) {
-            threshold[i] = 0.05;
+            threshold[i] = 0.0005;
             //threshold[i] = 0.005 * (i + 1);// 0.01;
             //cout << "slope " << slope[i] << endl;
 
@@ -1602,7 +1620,7 @@ int main(){
 
 
         // This is what I am using for MATLAB
-        ofstream output2("numbers_matrix_matlab_downregulation.csv");
+        ofstream output2("numbers_matrix_matlab_up_random_do_not_move.csv");
 
         for (int i = 0; i < numbers.rows(); i++) {
 
@@ -1622,17 +1640,17 @@ int main(){
     * will store everything in one matrix, the entries will be summed over all simulations
     */
 
-    ofstream output3("simulations_domain_partition_simple_downregulation.csv");
-
-    for (int i = 0; i < num_parts; i++) {
-
-        for (int j = 0; j < number_parameters; j++) {
-
-            output3 << sum_of_all(i, j) << ", ";
-
-        }
-        output3 << "\n" << endl;
-    }
+//    ofstream output3("simulations_domain_partition_simple_up_random_do_not_move.csv");
+//
+//    for (int i = 0; i < num_parts; i++) {
+//
+//        for (int j = 0; j < number_parameters; j++) {
+//
+//            output3 << sum_of_all(i, j) << ", ";
+//
+//        }
+//        output3 << "\n" << endl;
+//    }
 
 
 }

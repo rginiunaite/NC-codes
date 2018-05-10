@@ -2,7 +2,7 @@
 <project version="4">
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true" buildAllGenerated="true">
     <generated>
-      <config projectName="Project" targetName="touching_3angles" />
+      <config projectName="Project" targetName="touching" />
     </generated>
   </component>
   <component name="CMakeSettings" AUTO_RELOAD="true">
@@ -11,19 +11,21 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1ec5f354-1b51-4296-a816-1497275ece8f" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/touching_3angles.cpp" />
+    <list default="true" id="1ec5f354-1b51-4296-a816-1497275ece8f" name="Default" comment="new filopodia rescaling">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/CMakeLists.txt" afterPath="$PROJECT_DIR$/CMakeLists.txt" />
       <change beforePath="$PROJECT_DIR$/check.cpp" afterPath="$PROJECT_DIR$/forced_non_uniform_final_part_grows.cpp" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/track_positions.csv" afterPath="" />
       <change beforePath="$PROJECT_DIR$/combination_touching_open_space.cpp" afterPath="$PROJECT_DIR$/combination_touching_open_space.cpp" />
       <change beforePath="$PROJECT_DIR$/forced_gradient.cpp" afterPath="$PROJECT_DIR$/forced_gradient.cpp" />
       <change beforePath="$PROJECT_DIR$/one_type_cells_non_uniform.cpp" afterPath="$PROJECT_DIR$/one_type_cells_non_uniform.cpp" />
+      <change beforePath="$PROJECT_DIR$/persistent_movement.cpp" afterPath="$PROJECT_DIR$/persistent_movement.cpp" />
+      <change beforePath="$PROJECT_DIR$/persistent_movement_many_sim.cpp" afterPath="$PROJECT_DIR$/persistent_movement_many_sim.cpp" />
       <change beforePath="$PROJECT_DIR$/touching.cpp" afterPath="$PROJECT_DIR$/touching.cpp" />
+      <change beforePath="$PROJECT_DIR$/touching_3angles.cpp" afterPath="$PROJECT_DIR$/touching_3angles.cpp" />
       <change beforePath="$PROJECT_DIR$/two_types_chains.cpp" afterPath="$PROJECT_DIR$/two_types_chains.cpp" />
       <change beforePath="$PROJECT_DIR$/two_types_chains_non_uniform.cpp" afterPath="$PROJECT_DIR$/two_types_chains_non_uniform.cpp" />
       <change beforePath="$PROJECT_DIR$/two_types_open_extra.cpp" afterPath="$PROJECT_DIR$/two_types_open_extra.cpp" />
+      <change beforePath="$PROJECT_DIR$/two_types_open_extra_main.cpp" afterPath="$PROJECT_DIR$/two_types_open_extra_main.cpp" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <ignored path="$PROJECT_DIR$/CMakeFiles/" />
@@ -40,8 +42,8 @@
       <file leaf-file-name="CMakeLists.txt" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="886">
-              <caret line="69" column="1" lean-forward="false" selection-start-line="69" selection-start-column="1" selection-end-line="69" selection-end-column="1" />
+            <state relative-caret-position="853">
+              <caret line="77" column="1" lean-forward="false" selection-start-line="77" selection-start-column="1" selection-end-line="77" selection-end-column="1" />
               <folding />
             </state>
           </provider>
@@ -50,71 +52,29 @@
       <file leaf-file-name="touching.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/touching.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="498">
-              <caret line="930" column="0" lean-forward="false" selection-start-line="837" selection-start-column="12" selection-end-line="930" selection-end-column="0" />
+            <state relative-caret-position="-15578">
+              <caret line="376" column="9" lean-forward="true" selection-start-line="376" selection-start-column="9" selection-end-line="376" selection-end-column="9" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="touching_3angles.cpp" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/touching_3angles.cpp">
+      <file leaf-file-name="persistent_movement.cpp" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/persistent_movement.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="510">
-              <caret line="41" column="62" lean-forward="true" selection-start-line="41" selection-start-column="62" selection-end-line="41" selection-end-column="62" />
+            <state relative-caret-position="12988">
+              <caret line="382" column="20" lean-forward="false" selection-start-line="382" selection-start-column="20" selection-end-line="385" selection-end-column="94" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="combination_touching_open_space.cpp" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/combination_touching_open_space.cpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="16660">
-              <caret line="504" column="2" lean-forward="false" selection-start-line="504" selection-start-column="2" selection-end-line="504" selection-end-column="2" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="forced_gradient.cpp" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/forced_gradient.cpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="301">
-              <caret line="580" column="20" lean-forward="false" selection-start-line="580" selection-start-column="14" selection-end-line="580" selection-end-column="20" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="one_type_cells_non_uniform.cpp" pinned="false" current-in-tab="false">
+      <file leaf-file-name="one_type_cells_non_uniform.cpp" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/one_type_cells_non_uniform.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="30328">
-              <caret line="900" column="92" lean-forward="false" selection-start-line="900" selection-start-column="92" selection-end-line="900" selection-end-column="92" />
+            <state relative-caret-position="943">
+              <caret line="413" column="30" lean-forward="false" selection-start-line="413" selection-start-column="24" selection-end-line="413" selection-end-column="30" />
               <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="one_type_cells.cpp" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/one_type_cells.cpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-15681">
-              <caret line="277" column="29" lean-forward="false" selection-start-line="277" selection-start-column="29" selection-end-line="277" selection-end-column="29" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="two_types_chains.cpp" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/two_types_chains.cpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="368">
-              <caret line="967" column="0" lean-forward="false" selection-start-line="967" selection-start-column="0" selection-end-line="967" selection-end-column="0" />
-              <folding>
-                <element signature="e#305#324#0" expanded="true" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -123,36 +83,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>l_filo_x</find>
-      <find>l_filo</find>
-      <find>l_filo_y</find>
-      <find>domain_length</find>
-      <find>pheno</find>
-      <find>&lt;</find>
-      <find>lam</find>
-      <find>found</find>
-      <find>&lt; le</find>
-      <find>l_fil</find>
-      <find>L_filo_x</find>
-      <find>chain_type</find>
-      <find>&gt;=</find>
-      <find>while</find>
-      <find>round</find>
-      <find>winning</find>
-      <find>f</find>
-      <find>slop</find>
-      <find>gen</find>
-      <find>gen1</find>
-      <find>number</find>
-      <find>numbe</find>
-      <find>n_seed</find>
-      <find>relati</find>
-      <find>relative</find>
-      <find>arra</find>
-      <find>chemo</find>
-      <find>new_chemo_3</find>
+      <find>filo_n</find>
+      <find>count_</find>
+      <find>all the che</find>
+      <find>step</find>
+      <find>get&lt;same_dir_step&gt;</find>
       <find>array&lt;</find>
-      <find>chemo max number</find>
+      <find>ratio</find>
+      <find>r</find>
+      <find>ratio&quot;</find>
+      <find>l_filo_x</find>
+      <find>persis</find>
+      <find>gen</find>
+      <find>st</find>
+      <find>stops here</find>
+      <find>domain</find>
+      <find>n_seed</find>
+      <find>random_per</find>
+      <find>direction</find>
+      <find>sin</find>
+      <find>kai</find>
+      <find>gen1</find>
+      <find>intern</find>
+      <find>init</find>
+      <find>particles.ini</find>
+      <find>random</find>
+      <find>random_pers</find>
+      <find>persistence_extent</find>
+      <find>same_dir</find>
+      <find>100</find>
+      <find>init_</find>
     </findStrings>
     <replaceStrings>
       <replace>non_growing_domain</replace>
@@ -176,18 +136,21 @@
         <option value="$PROJECT_DIR$/forced_gradient_non_uniform.cpp" />
         <option value="$PROJECT_DIR$/two_types_open_extra.cpp" />
         <option value="$PROJECT_DIR$/two_types_chains_non_uniform.cpp" />
-        <option value="$PROJECT_DIR$/two_types_open_extra_main.cpp" />
         <option value="$PROJECT_DIR$/check.cpp" />
         <option value="$PROJECT_DIR$/two_types_chains.cpp" />
         <option value="$PROJECT_DIR$/open_space_improved_version.cpp" />
         <option value="$PROJECT_DIR$/Images/combination_touching_open_space_main.cpp" />
-        <option value="$PROJECT_DIR$/combination_touching_open_space_main.cpp" />
         <option value="$PROJECT_DIR$/forced_gradient.cpp" />
         <option value="$PROJECT_DIR$/one_type_cells_non_uniform.cpp" />
         <option value="$PROJECT_DIR$/combination_touching_open_space.cpp" />
+        <option value="$PROJECT_DIR$/touching_3angles.cpp" />
+        <option value="$PROJECT_DIR$/touching_3angles_many_sim.cpp" />
+        <option value="$PROJECT_DIR$/combination_touching_open_space_main.cpp" />
+        <option value="$PROJECT_DIR$/two_types_open_extra_main.cpp" />
+        <option value="$PROJECT_DIR$/persistent_movement.cpp" />
+        <option value="$PROJECT_DIR$/persistent_movement_many_sim.cpp" />
         <option value="$PROJECT_DIR$/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/touching.cpp" />
-        <option value="$PROJECT_DIR$/touching_3angles.cpp" />
       </list>
     </option>
   </component>
@@ -197,11 +160,11 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="201" />
-    <option name="y" value="-8" />
-    <option name="width" value="2755" />
-    <option name="height" value="1772" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="114" />
+    <option name="y" value="59" />
+    <option name="width" value="2753" />
+    <option name="height" value="1736" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -248,6 +211,9 @@
     <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file:///home/rasa/NC-codes/CMakeLists.txt" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
     </key>
@@ -264,16 +230,16 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Application.touching_3angles">
-    <configuration name="Build All" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Project" RUN_TARGET_NAME="touching_3angles" EXPLICIT_BUILD_TARGET_NAME="all">
+  <component name="RunManager" selected="Application.touching">
+    <configuration name="Build All" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Project" RUN_TARGET_NAME="persistent_movement" EXPLICIT_BUILD_TARGET_NAME="all">
       <envs />
     </configuration>
-    <configuration name="touching_3angles" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Project" TARGET_NAME="touching_3angles" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Project" RUN_TARGET_NAME="touching_3angles">
+    <configuration name="touching" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Project" TARGET_NAME="touching" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Project" RUN_TARGET_NAME="touching">
       <envs />
     </configuration>
     <list size="2">
       <item index="0" class="java.lang.String" itemvalue="Application.Build All" />
-      <item index="1" class="java.lang.String" itemvalue="Application.touching_3angles" />
+      <item index="1" class="java.lang.String" itemvalue="Application.touching" />
     </list>
   </component>
   <component name="ShelveChangesManager" show_recycled="false">
@@ -303,7 +269,12 @@
       <workItem from="1524037593242" duration="27268000" />
       <workItem from="1524151666876" duration="116000" />
       <workItem from="1524151868596" duration="683000" />
-      <workItem from="1524473806509" duration="20105000" />
+      <workItem from="1524473806509" duration="39806000" />
+      <workItem from="1524732015331" duration="13246000" />
+      <workItem from="1524818437594" duration="1665000" />
+      <workItem from="1525097907346" duration="10285000" />
+      <workItem from="1525689997937" duration="5031000" />
+      <workItem from="1525877317731" duration="8967000" />
     </task>
     <task id="LOCAL-00001" summary="first versions, can show for the two_types_chains that some cells dissapear sometimes, why?">
       <created>1520530164941</created>
@@ -564,11 +535,74 @@
       <option name="project" value="LOCAL" />
       <updated>1524151768492</updated>
     </task>
-    <option name="localTasksCounter" value="38" />
+    <task id="LOCAL-00038" summary="can choose freely the number of filopodia">
+      <created>1524589215836</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1524589215836</updated>
+    </task>
+    <task id="LOCAL-00039" summary="can choose freely the number of filopodia, slightly updated version, but works wrong">
+      <created>1524590013196</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1524590013196</updated>
+    </task>
+    <task id="LOCAL-00040" summary="can choose freely the number of filopodia, slightly updated version, works quite well">
+      <created>1524655880441</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1524655880441</updated>
+    </task>
+    <task id="LOCAL-00041" summary="movement same direction for a few steps">
+      <created>1524672013542</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1524672013542</updated>
+    </task>
+    <task id="LOCAL-00042" summary="does not work, memory allocation error">
+      <created>1524675101388</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1524675101388</updated>
+    </task>
+    <task id="LOCAL-00043" summary="new filopodia rescaling">
+      <created>1524736047276</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1524736047276</updated>
+    </task>
+    <task id="LOCAL-00044" summary="many simulations">
+      <created>1524756144788</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1524756144788</updated>
+    </task>
+    <task id="LOCAL-00045" summary="for simulations">
+      <created>1524756764767</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1524756764767</updated>
+    </task>
+    <task id="LOCAL-00046" summary="simulations for the data, for all three different scenarios">
+      <created>1524760207082</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1524760207082</updated>
+    </task>
+    <option name="localTasksCounter" value="47" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="426547000" />
+    <option name="totallyTimeSpent" value="485442000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -580,48 +614,28 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="201" y="-8" width="3088" height="1788" extended-state="6" />
+    <frame x="114" y="59" width="2753" height="1736" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.14700066" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16512403" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32738096" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32738096" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3263889" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32708332" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32898352" sideWeight="0.5014493" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32473546" sideWeight="0.4985507" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32738096" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22222222" sideWeight="0.4985507" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3399471" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39814815" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33958334" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39814815" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
-    <layout-to-restore>
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32738096" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3276099" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32898352" sideWeight="0.5014493" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32738096" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32473546" sideWeight="0.4985507" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.34060848" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.14700066" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.39814815" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-    </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
@@ -630,15 +644,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="works quite ok" />
-    <MESSAGE value="speed difference has to be very high, phenotypic switching should help in this case." />
-    <MESSAGE value="phenotypic switching, if they are on the &quot;wavefront&quot; of chemoattractant concentration." />
-    <MESSAGE value="works for 0.5, but not for other proportions" />
-    <MESSAGE value="works different size of the first part of the domain that grows" />
-    <MESSAGE value="3D does not work because chemo is always 0" />
-    <MESSAGE value="works quite well but some cells are left behind" />
-    <MESSAGE value="cells do not get stuck at the back, not strict inequality" />
-    <MESSAGE value="quite normal non-uniform domain growth" />
     <MESSAGE value="for 3D movie" />
     <MESSAGE value="for presentation video, two types open extra" />
     <MESSAGE value="for the open space video" />
@@ -655,7 +660,16 @@
     <MESSAGE value="combination works quite well, but sometimes some followers shoot off" />
     <MESSAGE value="These are for the figures in poster" />
     <MESSAGE value="new touching code, works quite well" />
-    <option name="LAST_COMMIT_MESSAGE" value="new touching code, works quite well" />
+    <MESSAGE value="can choose freely the number of filopodia" />
+    <MESSAGE value="can choose freely the number of filopodia, slightly updated version, but works wrong" />
+    <MESSAGE value="can choose freely the number of filopodia, slightly updated version, works quite well" />
+    <MESSAGE value="movement same direction for a few steps" />
+    <MESSAGE value="does not work, memory allocation error" />
+    <MESSAGE value="new filopodia rescaling" />
+    <MESSAGE value="many simulations" />
+    <MESSAGE value="for simulations" />
+    <MESSAGE value="simulations for the data, for all three different scenarios" />
+    <option name="LAST_COMMIT_MESSAGE" value="simulations for the data, for all three different scenarios" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -667,41 +681,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/two_types_chains_non_uniform.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2754">
-          <caret line="81" column="20" lean-forward="false" selection-start-line="81" selection-start-column="20" selection-end-line="81" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/one_type_cells_non_uniform.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="20026">
-          <caret line="589" column="0" lean-forward="false" selection-start-line="589" selection-start-column="0" selection-end-line="589" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/forced_gradient.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="38352">
-          <caret line="1128" column="1" lean-forward="true" selection-start-line="0" selection-start-column="0" selection-end-line="1128" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/forced_non_uniform_final_part_grows.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="6" column="9" lean-forward="true" selection-start-line="6" selection-start-column="9" selection-end-line="6" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fixed_gradient_3D.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2822">
-          <caret line="83" column="36" lean-forward="true" selection-start-line="83" selection-start-column="36" selection-end-line="83" selection-end-column="36" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1088">
@@ -862,13 +841,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/two_types_open_extra_main.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="486">
-          <caret line="1007" column="63" lean-forward="false" selection-start-line="1007" selection-start-column="63" selection-end-line="1007" selection-end-column="63" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/two_types_open_extra.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="578">
@@ -920,11 +892,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/two_types_chains.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="368">
+        <state relative-caret-position="32878">
           <caret line="967" column="0" lean-forward="false" selection-start-line="967" selection-start-column="0" selection-end-line="967" selection-end-column="0" />
-          <folding>
-            <element signature="e#305#324#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -932,34 +901,10 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="287">
           <caret line="109" column="0" lean-forward="false" selection-start-line="109" selection-start-column="0" selection-end-line="109" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/touching_3angles.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/combination_touching_open_space_main.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="55">
-          <caret line="26" column="0" lean-forward="false" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/one_type_cells.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-15681">
-          <caret line="277" column="29" lean-forward="false" selection-start-line="277" selection-start-column="29" selection-end-line="277" selection-end-column="29" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/touching_3angles.h" />
     <entry file="file://$PROJECT_DIR$/open_space_improved_version.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-4597">
@@ -968,35 +913,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="886">
-          <caret line="69" column="1" lean-forward="false" selection-start-line="69" selection-start-column="1" selection-end-line="69" selection-end-column="1" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/combination_touching_open_space.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="16660">
-          <caret line="504" column="2" lean-forward="false" selection-start-line="504" selection-start-column="2" selection-end-line="504" selection-end-column="2" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/forced_gradient.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="301">
+        <state relative-caret-position="19720">
           <caret line="580" column="20" lean-forward="false" selection-start-line="580" selection-start-column="14" selection-end-line="580" selection-end-column="20" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/one_type_cells_non_uniform.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30328">
-          <caret line="900" column="92" lean-forward="false" selection-start-line="900" selection-start-column="92" selection-end-line="900" selection-end-column="92" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1004,22 +924,104 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="287">
           <caret line="351" column="0" lean-forward="false" selection-start-line="351" selection-start-column="0" selection-end-line="351" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/combination_touching_open_space.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1015">
+          <caret line="504" column="2" lean-forward="false" selection-start-line="504" selection-start-column="2" selection-end-line="504" selection-end-column="2" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/touching_3angles.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="1583" selection-end-column="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Aboria/src/CellList.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="287">
+          <caret line="652" column="0" lean-forward="false" selection-start-line="652" selection-start-column="0" selection-end-line="652" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Images/open_extra.png">
+      <provider selected="true" editor-type-id="images">
+        <state />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/two_types_open_extra_main.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-298">
+          <caret line="815" column="34" lean-forward="false" selection-start-line="815" selection-start-column="34" selection-end-line="815" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/combination_touching_open_space_main.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="55">
+          <caret line="26" column="0" lean-forward="false" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/touching_3angles_many_sim.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1335">
+          <caret line="1505" column="25" lean-forward="false" selection-start-line="1505" selection-start-column="25" selection-end-line="1505" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/one_type_cells.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="11118">
+          <caret line="327" column="17" lean-forward="false" selection-start-line="327" selection-start-column="11" selection-end-line="327" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/persistent_movement.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="12988">
+          <caret line="382" column="20" lean-forward="false" selection-start-line="382" selection-start-column="20" selection-end-line="385" selection-end-column="94" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/persistent_movement_many_sim.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="20094">
+          <caret line="953" column="0" lean-forward="false" selection-start-line="953" selection-start-column="0" selection-end-line="953" selection-end-column="0" />
+          <folding>
+            <marker date="1525948254087" expanded="false" signature="314:522" ph="..." />
+            <marker date="1525948254087" expanded="true" signature="674:56613" ph="{...}" />
+            <marker date="1525948254087" expanded="true" signature="60547:62848" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="853">
+          <caret line="77" column="1" lean-forward="false" selection-start-line="77" selection-start-column="1" selection-end-line="77" selection-end-column="1" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/touching.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="498">
-          <caret line="930" column="0" lean-forward="false" selection-start-line="837" selection-start-column="12" selection-end-line="930" selection-end-column="0" />
+        <state relative-caret-position="-15578">
+          <caret line="376" column="9" lean-forward="true" selection-start-line="376" selection-start-column="9" selection-end-line="376" selection-end-column="9" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/touching_3angles.cpp">
+    <entry file="file://$PROJECT_DIR$/one_type_cells_non_uniform.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="510">
-          <caret line="41" column="62" lean-forward="true" selection-start-line="41" selection-start-column="62" selection-end-line="41" selection-end-column="62" />
+        <state relative-caret-position="943">
+          <caret line="413" column="30" lean-forward="false" selection-start-line="413" selection-start-column="24" selection-end-line="413" selection-end-column="30" />
           <folding />
         </state>
       </provider>
