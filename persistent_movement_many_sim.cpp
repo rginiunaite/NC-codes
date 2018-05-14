@@ -882,7 +882,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
             }
 
-
+// so that there would be a change
 
 //go through all the followers
 //            if (get<type>(particles[particle_id(j)]) == 1){
