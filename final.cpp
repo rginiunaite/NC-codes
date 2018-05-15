@@ -35,7 +35,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
     double cell_radius = 0.75;//0.5; // radius of a cell
     const double diameter =
             2 * cell_radius; // diameter of a cell
-    const int N_steps = 500; // number of timesteps
+    const int N_steps = 1000; // number of timesteps
     const size_t N = 5; // initial number of cells
     double l_filo_y = 2.75;//2; // sensing radius, filopodia + cell radius
     double l_filo_x = 2.75; // sensing radius, it will have to be rescaled when domain grows
@@ -44,8 +44,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
     //double diff_conc = 0.1; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1; // determines how frequently new cells are inserted, regulates the density of population
-    double speed_l = 0.1;//3;//0.05; // speed of a leader cell
-    double speed_f = 0.1;//3;//0.08; // speed of a follower cell
+    double speed_l = 0.1;//0.05; // speed of a leader cell
+    double speed_f = 0.1;//0.08; // speed of a follower cell
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
     double chemo_leader = 0.9; //0.5; // phenotypic switching happens when the concentration of chemoattractant is higher than this (presentation video 0.95), no phenotypic switching
     double eps = 1; // for phenotypic switching, the distance has to be that much higher
@@ -86,7 +86,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
     double dt = 0.00001; // time step
     double dx = 1; // space step in x direction, double to be consistent with other types
     double dy = 1; // space step in y direction
-    double kai = 10000;//1 / 100;//0.0001/10; // to 1 /h production rate of chemoattractant
+    double kai = 1;//1 / 100;//0.0001/10; // to 1 /h production rate of chemoattractant
 
 
     // parameters for internalisation
@@ -237,10 +237,10 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
 
             if (free_position) {
-                particles.push_back(f);
                 get<chain>(f) = 0;
                 get<chain_type>(f) = -1;
                 get<attached_to_id>(f) = -1;
+                particles.push_back(f);
             }
 
         }
@@ -388,25 +388,25 @@ VectorXi proportions(double diff_conc, int n_seed) {
             * phenotypic switching, based on chemoattractant concentration in front, +0.5
             */
 
-//            vdouble2 coord = get<position>(particles[particle_id(j)]);
-//
-//            // rescaled coord
-//
-//            double rescaled_coord;
-//
-//            rescaled_coord = (length_x / domain_length)*coord[0];
-//
-//            double chemo_in_front = chemo(round(rescaled_coord), round(coord[1]));
-//            //cout << "chemo in front " << old_chemo << endl;
-//
-//
-//            // if high concentration cells become leaders
-//            if (chemo_in_front > chemo_leader ){
-//                get<type>(particles[particle_id(j)]) = 0;
-//            }
-//            else{
-//                get<type>(particles[particle_id(j)]) = 1;
-//            }
+            vdouble2 coord = get<position>(particles[particle_id(j)]);
+
+            // rescaled coord
+
+            double rescaled_coord;
+
+            rescaled_coord = (length_x / domain_length)*coord[0];
+
+            double chemo_in_front = chemo(round(rescaled_coord), round(coord[1]));
+            //cout << "chemo in front " << old_chemo << endl;
+
+
+            // if high concentration cells become leaders
+            if (chemo_in_front > chemo_leader ){
+                get<type>(particles[particle_id(j)]) = 0;
+            }
+            else{
+                get<type>(particles[particle_id(j)]) = 1;
+            }
 
             // if a particle is a leader
             if (get<type>(particles[particle_id(j)]) == 0) {
@@ -638,6 +638,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
                     }
 
+
                     // check if it is not too far from the cell it was following
 
                     vdouble2 dist;
@@ -648,15 +649,15 @@ VectorXi proportions(double diff_conc, int n_seed) {
                     // if it is sufficiently far dettach the cell
                     if (dist.norm() > l_filo_max) {
                         get<chain>(particles[particle_id(j)]) = 0;
-                        //get<chain_type>(particles)[particle_id(j)] = -1;
-                        //dettach also all the cells that are behind it, so that afterwards the cell would not be attached to them
+                        //dettach also all the cells that are behind it, so that other cells would not be attached to this chain
                         for (int i = 0 ; i< particles.size(); ++i){
                             if (get<chain_type>(particles[i]) == get<chain_type>(particles)[particle_id(j)]){
-                                // get<chain_type>(particles)[i] = -1;
+                               // get<chain_type>(particles)[i] = -1;
                                 get<chain>(particles[i]) = 0;
                             }
 
                         }
+                       // get<chain_type>(particles)[particle_id(j)] = -1;
                     }
                 }
 
@@ -693,11 +694,19 @@ VectorXi proportions(double diff_conc, int n_seed) {
                             if (get<type>(*k) == 1 && get<chain>(*k) > 0) {
 
                                 if (get<id>(*k) != get<id>(particles[particle_id(j)])) {
+                                    //check if there is a leader in front of the chain
+                                    //for (int i= 0; i< particles.size(); i++){//go through all the particles
+                                      //  if (get<chain_type>(particles)[i] == get<chain_type>(*k) && get<chain>(particles)[i] == 1){// if they are in the same chain and directly attached to a leader
+
                                     get<direction>(particles)[particle_id(j)] = get<direction>(*k);
                                     get<chain>(particles)[particle_id(j)] = get<chain>(*k) + 1; // it is subsequent member of the chain
                                     get<attached_to_id>(particles)[particle_id(j)] = get<id>(*k); // id of the particle it is attached to
                                     get<chain_type>(particles)[particle_id(j)] = get<chain_type>(*k); // chain type is
-                                    // the same as the one of the particle it is attached to
+                                                // the same as the one of the particle it is attached to
+                                        //}
+
+                                    //}
+
                                 }
 
 
@@ -798,50 +807,50 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
                 // minimum position in x of the leaders
 
-                int min_index = 0;
-
-                for (int i = 1; i < N; ++i){
-                    if (get<position>(particles[i])[0] < get<position>(particles[min_index])[0]){
-                        min_index = i;
-                    }
-
-                }
-
-                // if a follower is eps further in front than the leader, swap their types
-                if (get<position>(particles[particle_id(j)])[0] > get<position>(particles[min_index])[0] + eps){
-                    // find distance to all the leaders
-                    double distances[N];
-                    vdouble2 dist_vector;
-                    //check which one is the closest
-                    for (int i = 0; i < N; ++i){
-                        dist_vector = get<position>(particles[particle_id(j)]) - get<position>(particles[i]);
-                        distances[i] = dist_vector.norm();
-
-                        int winning_index = 0;
-                        for (int i = 1; i < N; ++i){
-                            if (distances[i] < distances[winning_index]){
-                                winning_index = i;
-                            }
-                        }
-
-                        // if this closest leader is behind that follower, swap them
-                        if(get<position>(particles[particle_id(j)])[0] > get<position>(particles[winning_index])[0] + eps){
-                            particle_type::value_type tmp = particles[winning_index];
-
-
-                            // their position swap
-
-                            vdouble2 temp = get<position>(particles[winning_index]);
-                            get<position>(particles[winning_index]) = get<position>(particles[particle_id(j)]);
-                            get<position>(particles[particle_id(j)]) = temp;
-
-
-                        }
-
-                    }
-
-
-                }
+//                int min_index = 0;
+//
+//                for (int i = 1; i < N; ++i){
+//                    if (get<position>(particles[i])[0] < get<position>(particles[min_index])[0]){
+//                        min_index = i;
+//                    }
+//
+//                }
+//
+//                // if a follower is eps further in front than the leader, swap their types
+//                if (get<position>(particles[particle_id(j)])[0] > get<position>(particles[min_index])[0] + eps){
+//                    // find distance to all the leaders
+//                    double distances[N];
+//                    vdouble2 dist_vector;
+//                    //check which one is the closest
+//                    for (int i = 0; i < N; ++i){
+//                        dist_vector = get<position>(particles[particle_id(j)]) - get<position>(particles[i]);
+//                        distances[i] = dist_vector.norm();
+//
+//                        int winning_index = 0;
+//                        for (int i = 1; i < N; ++i){
+//                            if (distances[i] < distances[winning_index]){
+//                                winning_index = i;
+//                            }
+//                        }
+//
+//                        // if this closest leader is behind that follower, swap them
+//                        if(get<position>(particles[particle_id(j)])[0] > get<position>(particles[winning_index])[0] + eps){
+//                            particle_type::value_type tmp = particles[winning_index];
+//
+//
+//                            // their position swap
+//
+//                            vdouble2 temp = get<position>(particles[winning_index]);
+//                            get<position>(particles[winning_index]) = get<position>(particles[particle_id(j)]);
+//                            get<position>(particles[particle_id(j)]) = temp;
+//
+//
+//                        }
+//
+//                    }
+//
+//
+//                }
 
             }
 
@@ -916,7 +925,7 @@ int main(){
 
         // set the parameters
         for (int i = 0; i < number_parameters; i++) {
-            threshold[i] = 0.0005;
+            threshold[i] = 0.005;
             //threshold[i] = 0.005 * (i + 1);// 0.01;
             //cout << "slope " << slope[i] << endl;
 
