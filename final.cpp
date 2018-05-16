@@ -50,8 +50,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
     double chemo_leader = 0.9; //0.5; // phenotypic switching happens when the concentration of chemoattractant is higher than this (presentation video 0.95), no phenotypic switching
     double eps = 1; // for phenotypic switching, the distance has to be that much higher
-    const int filo_number = 2; // number of filopodia sent
-    int same_dir = 2; // number of steps in the same direction +1, because if 0, then only one step in the same direction
+    const int filo_number = 3; // number of filopodia sent
+    int same_dir = 0; // number of steps in the same direction +1, because if 0, then only one step in the same direction
     bool random_pers = true; // persistent movement also when the cell moves randomly
     int count_dir = 0; // this is to count the number of times the cell moved the same direction, up to same_dir for each cell
 
@@ -94,7 +94,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
     // parameters for internalisation
 
     double R = cell_radius;//7.5/10; // \nu m cell radius
-    double lam = 20.3;//(100)/10; // to 1000 /h chemoattractant internalisation
+    double lam = 8.3;//(100)/10; // to 1000 /h chemoattractant internalisation
 
 
     /*
@@ -913,62 +913,77 @@ VectorXi proportions(double diff_conc, int n_seed) {
 int main(){
 
     const int number_parameters = 1; // parameter range
-    const int sim_num = 1;
+    const int sim_num = 10;
 
-    VectorXi vector_check_length = proportions(0.1, 2); //just to know what the length is
-cout << "prop " << vector_check_length << endl;
-    int num_parts = vector_check_length.size(); // number of parts that I partition my domain
+//    VectorXi vector_check_length = proportions(0.005, 2); //just to know what the length is
+//    cout << "prop " << vector_check_length << endl;
+//    int num_parts = vector_check_length.size(); // number of parts that I partition my domain
+    int num_parts = 21;
+    MatrixXf sum_of_all = MatrixXf::Zero(num_parts,number_parameters); // sum of the values over all simulations
 
-//    MatrixXf sum_of_all = MatrixXf::Zero(num_parts,number_parameters); // sum of the values over all simulations
-//
-//    // n would correspond to different seeds
-//    // parallel programming
-//#pragma omp parallel for
-//    for (int n = 0; n < sim_num; n++) {
-//
-//        // define parameters that I will change
-//
-//        array<double, number_parameters> threshold;
-//        array<double, 1> slope;
-//
-//        // set the parameters
-//        for (int i = 0; i < number_parameters; i++) {
-//            threshold[i] = 0.005;
-//            //threshold[i] = 0.005 * (i + 1);// 0.01;
-//            //cout << "slope " << slope[i] << endl;
-//
-//        }
-//
-//        //initialise the matrix to store the values
-//        MatrixXi numbers = MatrixXi::Zero(num_parts,number_parameters);
-//
-////#pragma omp parallel for
-//        //      for (int i = 0; i < number_parameters; i++) {
-//
-//        //for (int j = 0; j < 1; j++) {
-//
-//        numbers.block(0,0,num_parts,1) = proportions(threshold[0], n);
-//
-//        //}
-//        // }
-//
-//
-//        // This is what I am using for MATLAB
-//        ofstream output2("numbers_matrix_matlab.csv");
-//
-//        for (int i = 0; i < numbers.rows(); i++) {
-//
-//            for (int j = 0; j < numbers.cols(); j++) {
-//
-//                output2 << numbers(i, j) << ", ";
-//
-//                sum_of_all(i,j) += numbers(i,j);
-//
-//            }
-//            output2 << "\n" << endl;
-//        }
-//
-//    }
+    // n would correspond to different seeds
+    // parallel programming
+#pragma omp parallel for
+    for (int n = 0; n < sim_num; n++) {
+
+        // define parameters that I will change
+
+        array<double, number_parameters> threshold;
+        array<double, 1> slope;
+
+        // set the parameters
+        for (int i = 0; i < number_parameters; i++) {
+            threshold[i] = 0.05;
+            //threshold[i] = 0.005 * (i + 1);// 0.01;
+            //cout << "slope " << slope[i] << endl;
+
+        }
+
+        //initialise the matrix to store the values
+        MatrixXi numbers = MatrixXi::Zero(num_parts,number_parameters);
+
+    //#pragma omp parallel for
+      //        for (int i = 0; i < number_parameters; i++) {
+
+        //for (int j = 0; j < 1; j++) {
+
+        numbers.block(0,0,num_parts,1) = proportions(threshold[0], n);
+
+        //}
+        // }
+
+
+        // This is what I am using for MATLAB
+        ofstream output2("control_case.csv");
+
+        for (int i = 0; i < numbers.rows(); i++) {
+
+            for (int j = 0; j < numbers.cols(); j++) {
+
+                output2 << numbers(i, j) << ", ";
+
+                sum_of_all(i,j) += numbers(i,j);
+
+            }
+            output2 << "\n" << endl;
+        }
+
+    }
+    /*
+    * will store everything in one matrix, the entries will be summed over all simulations
+    */
+
+    ofstream output3("control.csv");
+
+    for (int i = 0; i < num_parts; i++) {
+
+        for (int j = 0; j < number_parameters; j++) {
+
+            output3 << sum_of_all(i, j) << ", ";
+
+        }
+        output3 << "\n" << endl;
+    }
 
 
 }
