@@ -35,17 +35,18 @@ VectorXi proportions(double diff_conc, int n_seed) {
     double cell_radius = 0.75;//0.5; // radius of a cell
     const double diameter =
             2 * cell_radius; // diameter of a cell
-    const int N_steps = 1000; // number of timesteps
+    const int N_steps = 1800; // number of timesteps, 1min - 1timestep, from 6h tp 24hours.
     const size_t N = 5; // initial number of cells
     double l_filo_y = 2.75;//2; // sensing radius, filopodia + cell radius
     double l_filo_x = 2.75; // sensing radius, it will have to be rescaled when domain grows
     double l_filo_x_in = l_filo_x; // this value is used for rescaling when domain grows based on initial value
-    double l_filo_max = l_filo_y; // this is the length when two cells which were previously in a chain become dettached
+    double l_filo_max = 4.5; // this is the length when two cells which were previously in a chain become dettached
     //double diff_conc = 0.1; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1; // determines how frequently new cells are inserted, regulates the density of population
-    double speed_l = 0.1;//0.05; // speed of a leader cell
-    double speed_f = 0.1;//0.08; // speed of a follower cell
+    double speed_l = 0.1;// 0.05;//1;//0.05; // speed of a leader cell
+    double speed_f = 0.1;//0.05;//0.1;//0.08; // speed of a follower cell
+    double increase_fol_speed = 1.2;
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
     double chemo_leader = 0.9; //0.5; // phenotypic switching happens when the concentration of chemoattractant is higher than this (presentation video 0.95), no phenotypic switching
     double eps = 1; // for phenotypic switching, the distance has to be that much higher
@@ -63,36 +64,37 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
     // domain growth parameters
 
-    double L_0 = 30; // will have to make this consistent with actual initial length
-    double a = 0.001;//0.008;//0.23/10;
-    double L_inf = 86.76;
-    double t_s = 16;//4.31*10;
-    double constant = 29.12;
-
-
-//    double L_0 = 30;
-//    double a = 0.23 / 60;
+//    double L_0 = 30; // will have to make this consistent with actual initial length
+//    double a = 0.001;//0.008;//0.23/10;
 //    double L_inf = 86.76;
-//    double t_s = 16 * 60; // think about these rescaled variables
-//    double constant = 29.12 * 60;
+//    double t_s = 16;//4.31*10;
+//    double constant = 29.12;
+
+
+    double L_0 = 30;
+    double a = 0.23;
+    double L_inf = 86.76;
+    double t_s = 15.9; // think about these rescaled variables
+    double constant = 29.12 ;
+
 
     double domain_len_der = 0; // initialise derivative of the domain growth function
 
 
     // parameters for the dynamics of chemoattractant concentration
 
-    double D = 0.01; // to 10^5 \nu m^2/h diffusion coefficient
+    double D = 0.016; // to 10^5 \nu m^2/h diffusion coefficient
     double t = 0; // initialise time, redundant
     double dt = 0.00001; // time step
     double dx = 1; // space step in x direction, double to be consistent with other types
     double dy = 1; // space step in y direction
-    double kai = 1;//1 / 100;//0.0001/10; // to 1 /h production rate of chemoattractant
+    double kai = 0.1;//1 / 100;//0.0001/10; // to 1 /h production rate of chemoattractant
 
 
     // parameters for internalisation
 
     double R = cell_radius;//7.5/10; // \nu m cell radius
-    double lam = 500;//(100)/10; // to 1000 /h chemoattractant internalisation
+    double lam = 20.3;//(100)/10; // to 1000 /h chemoattractant internalisation
 
 
     /*
@@ -206,15 +208,20 @@ VectorXi proportions(double diff_conc, int n_seed) {
     std::uniform_real_distribution<double> uniformpi(0, 2 * M_PI);
 
     //for each timestep
+    cout << "how many times here?" << endl;
     for (int t = 0; t < N_steps; t++) {
 
+        if (t == 5){
+            cout << "t is 5" << endl;
+        }
 
+        cout << "domain length " << domain_length << endl;
         // insert new cells at the start of the domain at insertion time (have to think about this insertion time)
 
         if (t % insertion_freq == 0) {
             bool free_position = false;
             particle_type::value_type f;
-            get<radius>(f) = cell_radius;
+            //get<radius>(f) = cell_radius;
 
 
             get<position>(f) = vdouble2(cell_radius, uniform(gen)); // x=2, uniformly in y
@@ -241,6 +248,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
                 get<chain_type>(f) = -1;
                 get<attached_to_id>(f) = -1;
                 particles.push_back(f);
+                cout << " new position, coordinates " << get<position>(f) << endl;
             }
 
         }
@@ -254,10 +262,10 @@ VectorXi proportions(double diff_conc, int n_seed) {
         if (t % freq_growth == 0) {
 
             // with time delay and constant to make the initial conditions consistent
-            domain_length = ((L_inf * exp(a * (t - t_s))) / (L_inf / L_0 + exp(a * (t - t_s)) - 1)) + constant;
+            domain_length = ((L_inf * exp(a * (t/60.0 - t_s))) / (L_inf / L_0 + exp(a * (t/60.0 - t_s)) - 1)) + constant;
 
-            domain_len_der = ((a * L_inf * exp(a * (t - t_s))) / (L_inf / L_0 + exp(a * (t - t_s)) - 1) -
-                              (a * L_inf * exp(2 * a * (t - t_s))) / (L_inf / L_0 + exp(a * (t - t_s)) - 1));
+            domain_len_der = ((a * L_inf * exp(a * (t/60.0 - t_s))) / (L_inf / L_0 + exp(a * (t/60.0 - t_s)) - 1) -
+                              (a * L_inf * exp(2 * a * (t/60.0 - t_s))) / (L_inf / L_0 + exp(a * (t/60.0 - t_s)) - 1));
 
         }
 
@@ -387,26 +395,26 @@ VectorXi proportions(double diff_conc, int n_seed) {
             /*
             * phenotypic switching, based on chemoattractant concentration in front, +0.5
             */
-
-            vdouble2 coord = get<position>(particles[particle_id(j)]);
-
-            // rescaled coord
-
-            double rescaled_coord;
-
-            rescaled_coord = (length_x / domain_length)*coord[0];
-
-            double chemo_in_front = chemo(round(rescaled_coord), round(coord[1]));
-            //cout << "chemo in front " << old_chemo << endl;
-
-
-            // if high concentration cells become leaders
-            if (chemo_in_front > chemo_leader ){
-                get<type>(particles[particle_id(j)]) = 0;
-            }
-            else{
-                get<type>(particles[particle_id(j)]) = 1;
-            }
+//
+//            vdouble2 coord = get<position>(particles[particle_id(j)]);
+//
+//            // rescaled coord
+//
+//            double rescaled_coord;
+//
+//            rescaled_coord = (length_x / domain_length)*coord[0];
+//
+//            double chemo_in_front = chemo(round(rescaled_coord), round(coord[1]));
+//            //cout << "chemo in front " << old_chemo << endl;
+//
+//
+//            // if high concentration cells become leaders
+//            if (chemo_in_front > chemo_leader ){
+//                get<type>(particles[particle_id(j)]) = 0;
+//            }
+//            else{
+//                get<type>(particles[particle_id(j)]) = 1;
+//            }
 
             // if a particle is a leader
             if (get<type>(particles[particle_id(j)]) == 0) {
@@ -613,7 +621,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
                             particles[particle_id(j)])];
 
                     //try to move in the same direction as the cell it is attached to
-                    vdouble2 x_chain = x + get<direction>(particles)[particle_id(j)];
+                    vdouble2 x_chain = x + increase_fol_speed * get<direction>(particles)[particle_id(j)];
 
                     double x_in_chain; // scaled coordinate
 
@@ -634,7 +642,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
                     // update the position if the place they want to move to is free and not out of bounds
                     if (free_position && (x_in_chain) > 0 && (x_in_chain) < length_x - 1 && (x_chain[1]) > 0 && (x_chain[1]) < length_y - 1) {
-                        get<position>(particles)[particle_id(j)] += get<direction>(particles[particle_id(j)]);
+                        get<position>(particles)[particle_id(j)] += increase_fol_speed *get<direction>(particles[particle_id(j)]);
 
                     }
 
@@ -717,7 +725,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
 
                     //try to move in the same direction as the cell it is attached to
-                    vdouble2 x_chain = x + get<direction>(particles)[particle_id(j)];
+                    vdouble2 x_chain = x + increase_fol_speed * get<direction>(particles)[particle_id(j)];
 
                     // Non-uniform domain growth
                     double x_in_chain;
@@ -746,7 +754,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
                         (x_in_chain) < length_x - 1 && (x_chain[1]) > 0 &&
                         (x_chain[1]) < length_y - 1) {
                         //cout << "direction " << get<direction>(particles[particle_id(j)]) << endl;
-                        get<position>(particles)[particle_id(j)] += get<direction>(particles[particle_id(j)]);
+                        get<position>(particles)[particle_id(j)] += increase_fol_speed *  get<direction>(particles[particle_id(j)]);
 
                     }
 
@@ -807,50 +815,50 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
                 // minimum position in x of the leaders
 
-//                int min_index = 0;
-//
-//                for (int i = 1; i < N; ++i){
-//                    if (get<position>(particles[i])[0] < get<position>(particles[min_index])[0]){
-//                        min_index = i;
-//                    }
-//
-//                }
-//
-//                // if a follower is eps further in front than the leader, swap their types
-//                if (get<position>(particles[particle_id(j)])[0] > get<position>(particles[min_index])[0] + eps){
-//                    // find distance to all the leaders
-//                    double distances[N];
-//                    vdouble2 dist_vector;
-//                    //check which one is the closest
-//                    for (int i = 0; i < N; ++i){
-//                        dist_vector = get<position>(particles[particle_id(j)]) - get<position>(particles[i]);
-//                        distances[i] = dist_vector.norm();
-//
-//                        int winning_index = 0;
-//                        for (int i = 1; i < N; ++i){
-//                            if (distances[i] < distances[winning_index]){
-//                                winning_index = i;
-//                            }
-//                        }
-//
-//                        // if this closest leader is behind that follower, swap them
-//                        if(get<position>(particles[particle_id(j)])[0] > get<position>(particles[winning_index])[0] + eps){
-//                            particle_type::value_type tmp = particles[winning_index];
-//
-//
-//                            // their position swap
-//
-//                            vdouble2 temp = get<position>(particles[winning_index]);
-//                            get<position>(particles[winning_index]) = get<position>(particles[particle_id(j)]);
-//                            get<position>(particles[particle_id(j)]) = temp;
-//
-//
-//                        }
-//
-//                    }
-//
-//
-//                }
+                int min_index = 0;
+
+                for (int i = 1; i < N; ++i){
+                    if (get<position>(particles[i])[0] < get<position>(particles[min_index])[0]){
+                        min_index = i;
+                    }
+
+                }
+
+                // if a follower is eps further in front than the leader, swap their types
+                if (get<position>(particles[particle_id(j)])[0] > get<position>(particles[min_index])[0] + eps){
+                    // find distance to all the leaders
+                    double distances[N];
+                    vdouble2 dist_vector;
+                    //check which one is the closest
+                    for (int i = 0; i < N; ++i){
+                        dist_vector = get<position>(particles[particle_id(j)]) - get<position>(particles[i]);
+                        distances[i] = dist_vector.norm();
+
+                        int winning_index = 0;
+                        for (int i = 1; i < N; ++i){
+                            if (distances[i] < distances[winning_index]){
+                                winning_index = i;
+                            }
+                        }
+
+                        // if this closest leader is behind that follower, swap them
+                        if(get<position>(particles[particle_id(j)])[0] > get<position>(particles[winning_index])[0] + eps){
+                            particle_type::value_type tmp = particles[winning_index];
+
+
+                            // their position swap
+
+                            vdouble2 temp = get<position>(particles[winning_index]);
+                            get<position>(particles[winning_index]) = get<position>(particles[particle_id(j)]);
+                            get<position>(particles[particle_id(j)]) = temp;
+
+
+                        }
+
+                    }
+
+
+                }
 
             }
 
@@ -907,60 +915,60 @@ int main(){
     const int number_parameters = 1; // parameter range
     const int sim_num = 1;
 
-    VectorXi vector_check_length = proportions(0.005, 2); //just to know what the length is
-
+    VectorXi vector_check_length = proportions(0.1, 2); //just to know what the length is
+cout << "prop " << vector_check_length << endl;
     int num_parts = vector_check_length.size(); // number of parts that I partition my domain
 
-    MatrixXf sum_of_all = MatrixXf::Zero(num_parts,number_parameters); // sum of the values over all simulations
-
-    // n would correspond to different seeds
-    // parallel programming
-#pragma omp parallel for
-    for (int n = 0; n < sim_num; n++) {
-
-        // define parameters that I will change
-
-        array<double, number_parameters> threshold;
-        array<double, 1> slope;
-
-        // set the parameters
-        for (int i = 0; i < number_parameters; i++) {
-            threshold[i] = 0.005;
-            //threshold[i] = 0.005 * (i + 1);// 0.01;
-            //cout << "slope " << slope[i] << endl;
-
-        }
-
-        //initialise the matrix to store the values
-        MatrixXi numbers = MatrixXi::Zero(num_parts,number_parameters);
-
+//    MatrixXf sum_of_all = MatrixXf::Zero(num_parts,number_parameters); // sum of the values over all simulations
+//
+//    // n would correspond to different seeds
+//    // parallel programming
 //#pragma omp parallel for
-        //      for (int i = 0; i < number_parameters; i++) {
-
-        //for (int j = 0; j < 1; j++) {
-
-        numbers.block(0,0,num_parts,1) = proportions(threshold[0], n);
-
-        //}
-        // }
-
-
-        // This is what I am using for MATLAB
-        ofstream output2("numbers_matrix_matlab.csv");
-
-        for (int i = 0; i < numbers.rows(); i++) {
-
-            for (int j = 0; j < numbers.cols(); j++) {
-
-                output2 << numbers(i, j) << ", ";
-
-                sum_of_all(i,j) += numbers(i,j);
-
-            }
-            output2 << "\n" << endl;
-        }
-
-    }
+//    for (int n = 0; n < sim_num; n++) {
+//
+//        // define parameters that I will change
+//
+//        array<double, number_parameters> threshold;
+//        array<double, 1> slope;
+//
+//        // set the parameters
+//        for (int i = 0; i < number_parameters; i++) {
+//            threshold[i] = 0.005;
+//            //threshold[i] = 0.005 * (i + 1);// 0.01;
+//            //cout << "slope " << slope[i] << endl;
+//
+//        }
+//
+//        //initialise the matrix to store the values
+//        MatrixXi numbers = MatrixXi::Zero(num_parts,number_parameters);
+//
+////#pragma omp parallel for
+//        //      for (int i = 0; i < number_parameters; i++) {
+//
+//        //for (int j = 0; j < 1; j++) {
+//
+//        numbers.block(0,0,num_parts,1) = proportions(threshold[0], n);
+//
+//        //}
+//        // }
+//
+//
+//        // This is what I am using for MATLAB
+//        ofstream output2("numbers_matrix_matlab.csv");
+//
+//        for (int i = 0; i < numbers.rows(); i++) {
+//
+//            for (int j = 0; j < numbers.cols(); j++) {
+//
+//                output2 << numbers(i, j) << ", ";
+//
+//                sum_of_all(i,j) += numbers(i,j);
+//
+//            }
+//            output2 << "\n" << endl;
+//        }
+//
+//    }
 
 
 }
