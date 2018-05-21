@@ -54,7 +54,8 @@ include_directories(src ${INCLUDES})
 #add_executable(touching_3angles touching_3angles.cpp)
 #add_executable(persistent_movement persistent_movement.cpp)
 #add_executable(persistent_movement_many_sim persistent_movement_many_sim.cpp)
-add_executable(touching_3angles_many_sim touching_3angles_many_sim.cpp)
+#add_executable(touching_3angles_many_sim touching_3angles_many_sim.cpp)
+add_executable(final final.cpp)
 
 
 
@@ -76,11 +77,7 @@ add_executable(touching_3angles_many_sim touching_3angles_many_sim.cpp)
 #target_link_libraries(touching_3angles ${LIBRARIES})
 #target_link_libraries(persistent_movement ${LIBRARIES})
 #target_link_libraries(persistent_movement_many_sim ${LIBRARIES})
-target_link_libraries(touching_3angles_many_sim ${LIBRARIES})
-
-
-
-
-
+#target_link_libraries(touching_3angles_many_sim ${LIBRARIES})
+target_link_libraries(final ${LIBRARIES})
 
 
