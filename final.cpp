@@ -44,15 +44,15 @@ VectorXi proportions(double diff_conc, int n_seed) {
     //double diff_conc = 0.1; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1; // determines how frequently new cells are inserted, regulates the density of population
-    double speed_l = 0.136;// 0.05;//1;//0.05; // speed of a leader cell
-    double speed_f = 0.136;//0.05;//0.1;//0.08; // speed of a follower cell
+    double speed_l = 0.1;// 0.05;//1;//0.05; // speed of a leader cell
+    double speed_f = 0.1;//0.05;//0.1;//0.08; // speed of a follower cell
     double increase_fol_speed = 1.2;
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
     double chemo_leader = 0.9; //0.5; // phenotypic switching happens when the concentration of chemoattractant is higher than this (presentation video 0.95), no phenotypic switching
     double eps = 1; // for phenotypic switching, the distance has to be that much higher
-    const int filo_number = 2; // number of filopodia sent
+    const int filo_number = 3; // number of filopodia sent
     int same_dir = 2; // number of steps in the same direction +1, because if 0, then only one step in the same direction
-    bool random_pers = true; // persistent movement also when the cell moves randomly
+    bool random_pers = false; // persistent movement also when the cell moves randomly
     int count_dir = 0; // this is to count the number of times the cell moved the same direction, up to same_dir for each cell
 
 
@@ -431,7 +431,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
 
                 // if it is still in the process of moving in the same direction
-                if (get<persistence_extent>(particles[particle_id(j)]) == 1){
+                if (get<persistence_extent>(particles[particle_id(j)]) == 1) {
 
 
                     x += get<direction>(particles[particle_id(j)]);
@@ -454,13 +454,14 @@ VectorXi proportions(double diff_conc, int n_seed) {
                         get<position>(particles)[particle_id(j)] +=
                                 get<direction>(particles)[particle_id(j)];
                     }
-                    get<same_dir_step>(particles)[particle_id(j)] += 1; // add regardless whether the step happened or no to that count of the number of movement in the same direction
+                    get<same_dir_step>(particles)[particle_id(
+                            j)] += 1; // add regardless whether the step happened or no to that count of the number of movement in the same direction
 
                 }
 
 
                 // if a particle is not in a sequence of persistent steps
-                if (get<persistence_extent>(particles[particle_id(j)]) == 0){
+                if (get<persistence_extent>(particles[particle_id(j)]) == 0) {
 
 
 
@@ -468,7 +469,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
                     array<double, filo_number + 1> random_angle;
 
                     // choose the number of angles where the filopodia is sent
-                    for (int k = 0; k < filo_number+1; k++) {
+                    for (int k = 0; k < filo_number + 1; k++) {
 
                         double random_angle_tem = uniformpi(gen1);
                         int sign_x_tem, sign_y_tem;
@@ -489,7 +490,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
                     array<double, filo_number> new_chemo;
 
 
-                    for (int i = 0; i < filo_number; i++){
+                    for (int i = 0; i < filo_number; i++) {
 
                         if (round((x_in + sin(random_angle[i]) * l_filo_x)) < 0 ||
                             round((x_in + sin(random_angle[i]) * l_filo_x)) >
@@ -508,7 +509,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
                     int chemo_max_number = 0;
 
-                    for (int i = 1; i < filo_number; i++){
+                    for (int i = 1; i < filo_number; i++) {
                         if (new_chemo[chemo_max_number] < new_chemo[i]) {
                             chemo_max_number = i;
                         }
@@ -523,7 +524,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
                         count_dir += 1;
 
-                        x += speed_l * vdouble2(sin(random_angle[chemo_max_number]), cos(random_angle[chemo_max_number]));
+                        x += speed_l *
+                             vdouble2(sin(random_angle[chemo_max_number]), cos(random_angle[chemo_max_number]));
 
                         x_in = (length_x / domain_length) * x[0];//scale to initial coordinates
 
@@ -533,14 +535,16 @@ VectorXi proportions(double diff_conc, int n_seed) {
                         // check if the position the particle wants to move is free
                         for (auto k = euclidean_search(particles.get_query(), x, diameter); k != false; ++k) {
 
-                            if (get<id>(*k) != get<id>(particles[particle_id(j)])) { // check if it is not the same particle
+                            if (get<id>(*k) !=
+                                get<id>(particles[particle_id(j)])) { // check if it is not the same particle
                                 free_position = false;
                             }
                         }
 
 
                         // if the position they want to move to is free and not out of bounds, move that direction
-                        if (free_position && (x_in) > 0 && (x_in) < length_x - 1 && (x[1]) > 0 && (x[1]) < length_y - 1) {
+                        if (free_position && (x_in) > 0 && (x_in) < length_x - 1 && (x[1]) > 0 &&
+                            (x[1]) < length_y - 1) {
                             get<position>(particles)[particle_id(j)] +=
                                     speed_l * vdouble2(sin(random_angle[chemo_max_number]),
                                                        cos(random_angle[chemo_max_number])); // update if nothing is in the next position
@@ -549,8 +553,9 @@ VectorXi proportions(double diff_conc, int n_seed) {
                                                        cos(random_angle[chemo_max_number]));
 
                             // if there is some kind of tendency to move persistently
-                            if (same_dir > 0){
-                                get<persistence_extent>(particles[particle_id(j)]) = 1; // assume for now that it also becomes peristent in random direction
+                            if (same_dir > 0) {
+                                get<persistence_extent>(particles[particle_id(
+                                        j)]) = 1; // assume for now that it also becomes peristent in random direction
 
                             }
 
@@ -573,22 +578,27 @@ VectorXi proportions(double diff_conc, int n_seed) {
                         // if this loop is entered, it means that there is another cell where I want to move
                         for (auto k = euclidean_search(particles.get_query(), x, diameter); k != false; ++k) {
 
-                            if (get<id>(*k) != get<id>(particles[particle_id(j)])) { // check if it is not the same particle
+                            if (get<id>(*k) !=
+                                get<id>(particles[particle_id(j)])) { // check if it is not the same particle
                                 free_position = false;
                             }
                         }
 
 
                         // update the position if the place they want to move to is free and not out of bounds
-                        if (free_position && (x_in) > 0 && (x_in) < length_x - 1 && (x[1]) > 0 && (x[1]) < length_y - 1) {
-                            get<position>(particles)[particle_id(j)] += speed_l * vdouble2(sin(random_angle[filo_number]),
-                                                                                           cos(random_angle[filo_number])); // update if nothing is in the next position
-                            get<direction>(particles)[particle_id(j)] = speed_l * vdouble2(sin(random_angle[filo_number]),
-                                                                                           cos(random_angle[filo_number]));
+                        if (free_position && (x_in) > 0 && (x_in) < length_x - 1 && (x[1]) > 0 &&
+                            (x[1]) < length_y - 1) {
+                            get<position>(particles)[particle_id(j)] +=
+                                    speed_l * vdouble2(sin(random_angle[filo_number]),
+                                                       cos(random_angle[filo_number])); // update if nothing is in the next position
+                            get<direction>(particles)[particle_id(j)] =
+                                    speed_l * vdouble2(sin(random_angle[filo_number]),
+                                                       cos(random_angle[filo_number]));
                             // if particles start moving persistently in all directions
-                            if (random_pers ){
-                                if (same_dir > 0){
-                                    get<persistence_extent>(particles[particle_id(j)]) = 1; // assume for now that it also becomes peristent in random direction
+                            if (random_pers) {
+                                if (same_dir > 0) {
+                                    get<persistence_extent>(particles[particle_id(
+                                            j)]) = 1; // assume for now that it also becomes peristent in random direction
 
                                 }
                             }
@@ -600,7 +610,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
                 }
 
                 // check if it is not the end of moving in the same direction
-                if (get<same_dir_step>(particles)[particle_id(j)] > same_dir){
+                if (get<same_dir_step>(particles)[particle_id(j)] > same_dir) {
                     get<persistence_extent>(particles)[particle_id(j)] = 0;
                     get<same_dir_step>(particles[particle_id(j)]) = 0;
                 }
@@ -631,7 +641,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
                     double x_in_chain; // scaled coordinate
 
-                    x_in_chain = (length_x / domain_length) * x_chain[0];//uniform growth in the first part of the domain
+                    x_in_chain =
+                            (length_x / domain_length) * x_chain[0];//uniform growth in the first part of the domain
 
 
                     bool free_position = true;
@@ -647,8 +658,10 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
 
                     // update the position if the place they want to move to is free and not out of bounds
-                    if (free_position && (x_in_chain) > 0 && (x_in_chain) < length_x - 1 && (x_chain[1]) > 0 && (x_chain[1]) < length_y - 1) {
-                        get<position>(particles)[particle_id(j)] += increase_fol_speed *get<direction>(particles[particle_id(j)]);
+                    if (free_position && (x_in_chain) > 0 && (x_in_chain) < length_x - 1 && (x_chain[1]) > 0 &&
+                        (x_chain[1]) < length_y - 1) {
+                        get<position>(particles)[particle_id(j)] +=
+                                increase_fol_speed * get<direction>(particles[particle_id(j)]);
 
                     }
 
@@ -664,14 +677,14 @@ VectorXi proportions(double diff_conc, int n_seed) {
                     if (dist.norm() > l_filo_max) {
                         get<chain>(particles[particle_id(j)]) = 0;
                         //dettach also all the cells that are behind it, so that other cells would not be attached to this chain
-                        for (int i = 0 ; i< particles.size(); ++i){
-                            if (get<chain_type>(particles[i]) == get<chain_type>(particles)[particle_id(j)]){
-                               // get<chain_type>(particles)[i] = -1;
+                        for (int i = 0; i < particles.size(); ++i) {
+                            if (get<chain_type>(particles[i]) == get<chain_type>(particles)[particle_id(j)]) {
+                                // get<chain_type>(particles)[i] = -1;
                                 get<chain>(particles[i]) = 0;
                             }
 
                         }
-                       // get<chain_type>(particles)[particle_id(j)] = -1;
+                        // get<chain_type>(particles)[particle_id(j)] = -1;
                     }
                 }
 
@@ -691,8 +704,10 @@ VectorXi proportions(double diff_conc, int n_seed) {
                         if (get<type>(*k) == 0) { // if it is close to a leader
                             get<direction>(particles)[particle_id(j)] = get<direction>(*k); // set the same direction
                             get<chain>(particles)[particle_id(j)] = 1; // note that it is directly attached to a leader
-                            get<attached_to_id>(particles)[particle_id(j)] = get<id>(*k); // note the id of the particle it is attached to
-                            get<chain_type>(particles)[particle_id(j)] = get<id>(*k); // chain type is the id of the leader
+                            get<attached_to_id>(particles)[particle_id(j)] = get<id>(
+                                    *k); // note the id of the particle it is attached to
+                            get<chain_type>(particles)[particle_id(j)] = get<id>(
+                                    *k); // chain type is the id of the leader
                         }
 
                     }
@@ -701,7 +716,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
                     // if it hasn't found a leader nearby,
                     // try to find a close follower which is in a chain contact with a leader
 
-                    if (get<chain>(particles)[particle_id(j)] != 1){
+                    if (get<chain>(particles)[particle_id(j)] != 1) {
                         for (auto k = euclidean_search(particles.get_query(), x, l_filo_y); k != false; ++k) {
 
                             // if it is close to a follower that is part of the chain
@@ -710,14 +725,16 @@ VectorXi proportions(double diff_conc, int n_seed) {
                                 if (get<id>(*k) != get<id>(particles[particle_id(j)])) {
                                     //check if there is a leader in front of the chain
                                     //for (int i= 0; i< particles.size(); i++){//go through all the particles
-                                      //  if (get<chain_type>(particles)[i] == get<chain_type>(*k) && get<chain>(particles)[i] == 1){// if they are in the same chain and directly attached to a leader
+                                    //  if (get<chain_type>(particles)[i] == get<chain_type>(*k) && get<chain>(particles)[i] == 1){// if they are in the same chain and directly attached to a leader
 
                                     get<direction>(particles)[particle_id(j)] = get<direction>(*k);
-                                    get<chain>(particles)[particle_id(j)] = get<chain>(*k) + 1; // it is subsequent member of the chain
-                                    get<attached_to_id>(particles)[particle_id(j)] = get<id>(*k); // id of the particle it is attached to
+                                    get<chain>(particles)[particle_id(j)] =
+                                            get<chain>(*k) + 1; // it is subsequent member of the chain
+                                    get<attached_to_id>(particles)[particle_id(j)] = get<id>(
+                                            *k); // id of the particle it is attached to
                                     get<chain_type>(particles)[particle_id(j)] = get<chain_type>(*k); // chain type is
-                                                // the same as the one of the particle it is attached to
-                                        //}
+                                    // the same as the one of the particle it is attached to
+                                    //}
 
                                     //}
 
@@ -760,21 +777,22 @@ VectorXi proportions(double diff_conc, int n_seed) {
                         (x_in_chain) < length_x - 1 && (x_chain[1]) > 0 &&
                         (x_chain[1]) < length_y - 1) {
                         //cout << "direction " << get<direction>(particles[particle_id(j)]) << endl;
-                        get<position>(particles)[particle_id(j)] += increase_fol_speed *  get<direction>(particles[particle_id(j)]);
+                        get<position>(particles)[particle_id(j)] +=
+                                increase_fol_speed * get<direction>(particles[particle_id(j)]);
 
                     }
 
 
                     // if it hasn't found anything close, move randomly
 
-                    if (get<chain>(particles[particle_id(j)]) == 0){
+                    if (get<chain>(particles[particle_id(j)]) == 0) {
 
                         double random_angle = uniformpi(gen1);
 
                         while (((x_in + sin(random_angle) * l_filo_y) < 0 ||
-                                ((x_in + sin(random_angle)  * l_filo_y)) >
+                                ((x_in + sin(random_angle) * l_filo_y)) >
                                 length_x - 1 || (x[1] + cos(random_angle) * l_filo_y) < 0 ||
-                                (x[1] + cos(random_angle)  * l_filo_y) > length_y - 1)) {
+                                (x[1] + cos(random_angle) * l_filo_y) > length_y - 1)) {
                             random_angle = uniformpi(gen1);
                         }
 
@@ -788,7 +806,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
                         // check if the position the cells want to move to is free
                         for (auto k = euclidean_search(particles.get_query(), x, diameter); k != false; ++k) {
 
-                            if (get<id>(*k) != get<id>(particles[particle_id(j)])) { // check if it is not the same particle
+                            if (get<id>(*k) !=
+                                get<id>(particles[particle_id(j)])) { // check if it is not the same particle
                                 free_position = false;
                             }
                         }
@@ -823,32 +842,33 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
                 int min_index = 0;
 
-                for (int i = 1; i < N; ++i){
-                    if (get<position>(particles[i])[0] < get<position>(particles[min_index])[0]){
+                for (int i = 1; i < N; ++i) {
+                    if (get<position>(particles[i])[0] < get<position>(particles[min_index])[0]) {
                         min_index = i;
                     }
 
                 }
 
                 // if a follower is eps further in front than the leader, swap their types
-                if (get<position>(particles[particle_id(j)])[0] > get<position>(particles[min_index])[0] + eps){
+                if (get<position>(particles[particle_id(j)])[0] > get<position>(particles[min_index])[0] + eps) {
                     // find distance to all the leaders
                     double distances[N];
                     vdouble2 dist_vector;
                     //check which one is the closest
-                    for (int i = 0; i < N; ++i){
+                    for (int i = 0; i < N; ++i) {
                         dist_vector = get<position>(particles[particle_id(j)]) - get<position>(particles[i]);
                         distances[i] = dist_vector.norm();
 
                         int winning_index = 0;
-                        for (int i = 1; i < N; ++i){
-                            if (distances[i] < distances[winning_index]){
+                        for (int i = 1; i < N; ++i) {
+                            if (distances[i] < distances[winning_index]) {
                                 winning_index = i;
                             }
                         }
 
                         // if this closest leader is behind that follower, swap them
-                        if(get<position>(particles[particle_id(j)])[0] > get<position>(particles[winning_index])[0] + eps){
+                        if (get<position>(particles[particle_id(j)])[0] >
+                            get<position>(particles[winning_index])[0] + eps) {
                             particle_type::value_type tmp = particles[winning_index];
 
 
@@ -919,7 +939,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
 int main(){
 
     const int number_parameters = 1; // parameter range
-    const int sim_num = 10;
+    const int sim_num = 1;
 
     //VectorXi vector_check_length = proportions(0.05, 2); //just to know what the length is
     //cout << "prop " << vector_check_length << endl;
@@ -953,7 +973,7 @@ int main(){
 
         //for (int j = 0; j < 1; j++) {
 
-        numbers.block(0,0,num_parts,1) = proportions(threshold[0], n);
+        numbers.block(0,0,num_parts,1) = proportions(threshold[0], 1);
 
         //}
         // }
@@ -979,7 +999,7 @@ int main(){
     * will store everything in one matrix, the entries will be summed over all simulations
     */
 
-    ofstream output3("aqp_M2.csv");
+    ofstream output3("aqp_M9.csv");
 
     for (int i = 0; i < num_parts; i++) {
 
