@@ -935,7 +935,7 @@ VectorXi prop_break(double diff_conc, int n_seed){
 
     for (int i = 0; i < particles.size(); ++i){
         if (get<chain>(particles[i]) == 0){
-            if (get<type>(particles[i]) == 11){
+            if (get<type>(particles[i]) == 1){
                 pro_break(0) = 1;
             }
         }
