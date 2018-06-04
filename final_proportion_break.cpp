@@ -18,7 +18,7 @@ using namespace Aboria;
 using namespace Eigen; // objects VectorXf, MatrixXf
 
 //VectorXi proportions(double diff_conc, int n_seed) {
-VectorXd prop_break(double diff_conc, int n_seed){
+double prop_break(double diff_conc, int n_seed){
 
 
     // model parameters
@@ -36,7 +36,7 @@ VectorXd prop_break(double diff_conc, int n_seed){
     double cell_radius = 0.75;//0.5; // radius of a cell
     const double diameter =
             2 * cell_radius; // diameter of a cell
-    const int N_steps = 1800; // number of timesteps, 1min - 1timestep, from 6h tp 24hours.
+    const int N_steps = 100; // number of timesteps, 1min - 1timestep, from 6h tp 24hours.
     const size_t N = 5; // initial number of cells
     double l_filo_y = 2.75;//2; // sensing radius, filopodia + cell radius
     double l_filo_x = 2.75; // sensing radius, it will have to be rescaled when domain grows
@@ -931,7 +931,7 @@ VectorXd prop_break(double diff_conc, int n_seed){
      *
      */
 
-    VectorXd pro_break = VectorXd::Zero(1);; // the stream did not break
+    double pro_break = 0.0; // the stream did not break
 
     int followers_not_in_chain = 0;
 
@@ -943,7 +943,7 @@ VectorXd prop_break(double diff_conc, int n_seed){
         }
     }
 
-    pro_break(0) = double(followers_not_in_chain)/(double(particles.size()-N));
+    pro_break = double(followers_not_in_chain)/(double(particles.size()-N));
 
 return pro_break;
 
@@ -966,7 +966,9 @@ int main(){
     //cout << "prop " << vector_check_length << endl;
     //int num_parts = vector_check_length.size(); // number of parts that I partition my domain
     int num_parts = 1; // for 1800 timesteps
-    MatrixXd sum_of_all = MatrixXd::Zero(num_parts,number_parameters); // sum of the values over all simulations
+    //MatrixXd sum_of_all = MatrixXd::Zero(num_parts,number_parameters); // sum of the values over all simulations
+
+    VectorXd store_values = VectorXd::Zero(sim_num);
 
     // n would correspond to different seeds
     // parallel programming
@@ -987,33 +989,20 @@ int main(){
         }
 
         //initialise the matrix to store the values
-        MatrixXd numbers = MatrixXd::Zero(num_parts,number_parameters);
+        //MatrixXd numbers = MatrixXd::Zero(num_parts,number_parameters);
+
 
         //#pragma omp parallel for
         //        for (int i = 0; i < number_parameters; i++) {
 
         //for (int j = 0; j < 1; j++) {
 
-        numbers.block(0,0,num_parts,1) = prop_break(threshold[0], n);
+        //numbers.block(0,0,num_parts,1) = prop_break(threshold[0], n);
 
         //}
         // }
+        store_values(n) = prop_break(threshold[0], n);
 
-
-        // This is what I am using for MATLAB
-        ofstream output2("control_case.csv");
-
-        for (int i = 0; i < numbers.rows(); i++) {
-
-            for (int j = 0; j < numbers.cols(); j++) {
-
-                output2 << numbers(i, j) << ", ";
-
-                sum_of_all(i,j) += numbers(i,j);
-
-            }
-            output2 << "\n" << endl;
-        }
 
     }
     /*
@@ -1022,15 +1011,15 @@ int main(){
 
     ofstream output3("aqp_M1_prop.csv");
 
-    for (int i = 0; i < num_parts; i++) {
 
-        for (int j = 0; j < number_parameters; j++) {
 
-            output3 << sum_of_all(i, j) << ", ";
+        for (int j = 0; j < sim_num; j++) {
+
+            output3 << store_values(j) << ", ";
+            output3 << "\n" << endl;
+
 
         }
-        output3 << "\n" << endl;
-    }
 
 
 }
