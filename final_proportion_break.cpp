@@ -18,7 +18,7 @@ using namespace Aboria;
 using namespace Eigen; // objects VectorXf, MatrixXf
 
 //VectorXi proportions(double diff_conc, int n_seed) {
-VectorXi prop_break(double diff_conc, int n_seed){
+VectorXd prop_break(double diff_conc, int n_seed){
 
 
     // model parameters
@@ -52,7 +52,7 @@ VectorXi prop_break(double diff_conc, int n_seed){
     double chemo_leader = 0.9; //0.5; // phenotypic switching happens when the concentration of chemoattractant is higher than this (presentation video 0.95), no phenotypic switching
     double eps = 1; // for phenotypic switching, the distance has to be that much higher
     const int filo_number = 3; // number of filopodia sent
-    int same_dir = 2; // number of steps in the same direction +1, because if 0, then only one step in the same direction
+    int same_dir = 0; // number of steps in the same direction +1, because if 0, then only one step in the same direction
     bool random_pers = true; // persistent movement also when the cell moves randomly
     int count_dir = 0; // this is to count the number of times the cell moved the same direction, up to same_dir for each cell
 
@@ -95,7 +95,7 @@ VectorXi prop_break(double diff_conc, int n_seed){
     // parameters for internalisation
 
     double R = cell_radius;//7.5/10; // \nu m cell radius
-    double lam = 1;//(100)/10; // to 1000 /h chemoattractant internalisation
+    double lam = 10;//(100)/10; // to 1000 /h chemoattractant internalisation
 
 
     /*
@@ -931,15 +931,19 @@ VectorXi prop_break(double diff_conc, int n_seed){
      *
      */
 
-    VectorXi pro_break = VectorXi::Zero(1);; // the stream did not break
+    VectorXd pro_break = VectorXd::Zero(1);; // the stream did not break
+
+    int followers_not_in_chain = 0;
 
     for (int i = 0; i < particles.size(); ++i){
         if (get<chain>(particles[i]) == 0){
             if (get<type>(particles[i]) == 1){
-                pro_break(0) = 1;
+                followers_not_in_chain += 1; // add to coung
             }
         }
     }
+
+    pro_break(0) = double(followers_not_in_chain)/(double(particles.size()-N));
 
 return pro_break;
 
@@ -962,7 +966,7 @@ int main(){
     //cout << "prop " << vector_check_length << endl;
     //int num_parts = vector_check_length.size(); // number of parts that I partition my domain
     int num_parts = 1; // for 1800 timesteps
-    MatrixXf sum_of_all = MatrixXf::Zero(num_parts,number_parameters); // sum of the values over all simulations
+    MatrixXd sum_of_all = MatrixXd::Zero(num_parts,number_parameters); // sum of the values over all simulations
 
     // n would correspond to different seeds
     // parallel programming
@@ -976,14 +980,14 @@ int main(){
 
         // set the parameters
         for (int i = 0; i < number_parameters; i++) {
-            threshold[i] = 0.01;
+            threshold[i] = 0.08;
             //threshold[i] = 0.005 * (i + 1);// 0.01;
             //cout << "slope " << slope[i] << endl;
 
         }
 
         //initialise the matrix to store the values
-        MatrixXi numbers = MatrixXi::Zero(num_parts,number_parameters);
+        MatrixXd numbers = MatrixXd::Zero(num_parts,number_parameters);
 
         //#pragma omp parallel for
         //        for (int i = 0; i < number_parameters; i++) {
