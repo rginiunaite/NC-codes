@@ -8,7 +8,7 @@
 #include <map>
 #include <Eigen/Core>
 #include <algorithm> // std::unique_copy
-#include <iostream>// writing on a text file
+#include <iostream> // writing on a text file
 #include <fstream>
 #include <math.h>
 #include <assert.h>
@@ -62,7 +62,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
     int closest_time;
     int leader_track;
     double track_spacing = 1; // spacing between positions on the track
-    int track_length = 100;
+    int track_length = 120;
 
 
 
@@ -98,7 +98,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
     // parameters for internalisation
 
     double R = cell_radius;//7.5/10; // \nu m cell radius
-    double lam = 1;//(100)/10; // to 1000 /h chemoattractant internalisation
+    double lam = 10;//(100)/10; // to 1000 /h chemoattractant internalisation
 
 
     /*
@@ -881,7 +881,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
 //                    vdouble2 x_can = direc_follow * speed_f*2;
 
                         // follow the track exactly
-                        vdouble2 direc_follow = track_position[get<attached_at_time_step>(
+                        vdouble2 direc_follow =  track_position[get<attached_at_time_step>(
                                 particles[particle_id(j)]) + 1][get<attached_leader_nr>(
                                 particles[particle_id(j)])]; //position where the cell wants to move
 
@@ -924,6 +924,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
                             get<in_track>(particles[particle_id(j)]) = 1;
                             cout << "found track" << endl;
                         }
+
 
 
                         // if it hasn't found a track
@@ -1173,7 +1174,7 @@ int main(){
 
         // set the parameters
         for (int i = 0; i < number_parameters; i++) {
-            threshold[i] = 0.01;
+            threshold[i] = 0.08;
             //threshold[i] = 0.005 * (i + 1);// 0.01;
             //cout << "slope " << slope[i] << endl;
 

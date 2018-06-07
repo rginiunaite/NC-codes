@@ -51,7 +51,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
     double chemo_leader = 0.9; //0.5; // phenotypic switching happens when the concentration of chemoattractant is higher than this (presentation video 0.95), no phenotypic switching
     double eps = 1; // for phenotypic switching, the distance has to be that much higher
     const int filo_number = 3; // number of filopodia sent
-    int same_dir = 0; // number of steps in the same direction +1, because if 0, then only one step in the same direction
+    int same_dir = 2; // number of steps in the same direction +1, because if 0, then only one step in the same direction
     bool random_pers = true; // persistent movement also when the cell moves randomly
     int count_dir = 0; // this is to count the number of times the cell moved the same direction, up to same_dir for each cell
 
