@@ -56,8 +56,9 @@ include_directories(src ${INCLUDES})
 #add_executable(persistent_movement_many_sim persistent_movement_many_sim.cpp)
 #add_executable(touching_3angles_many_sim touching_3angles_many_sim.cpp)
 #add_executable(final final.cpp)
-add_executable(final_with_track final_with_track.cpp)
+#add_executable(final_with_track final_with_track.cpp)
 #add_executable(final_proportion_break final_proportion_break.cpp)
+add_executable(final_proportion_break_tunnel final_proportion_break_tunnel.cpp)
 
 
 
@@ -82,5 +83,6 @@ add_executable(final_with_track final_with_track.cpp)
 #target_link_libraries(touching_3angles_many_sim ${LIBRARIES})
 #target_link_libraries(final ${LIBRARIES})
 #target_link_libraries(final_proportion_break ${LIBRARIES})
-target_link_libraries(final_with_track ${LIBRARIES})
+#target_link_libraries(final_with_track ${LIBRARIES})
+target_link_libraries(final_proportion_break_tunnel ${LIBRARIES})
 
