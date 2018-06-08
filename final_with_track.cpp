@@ -61,8 +61,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
     double dist_thres = 0.5;
     int closest_time;
     int leader_track;
-    double track_spacing = 1; // spacing between positions on the track
-    int track_length = 120;
+    double track_spacing = 2; // spacing between positions on the track
+    int track_length = 100;
 
 
 
@@ -869,23 +869,23 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
                         // move in the direction where track goes
 
-//                    vdouble2 direc_follow = track_position[get<attached_at_time_step>(
-//                            particles[particle_id(j)])+1][get<attached_leader_nr>(
-//                            particles[particle_id(j)])] - track_position[get<attached_at_time_step>(
-//                            particles[particle_id(j)])][get<attached_leader_nr>(
-//                            particles[particle_id(j)])];
-//
-//                    double normalise = direc_follow.norm();
-//                    //normalise
-//                    direc_follow = direc_follow/normalise;
-//                    vdouble2 x_can = direc_follow * speed_f*2;
+                    vdouble2 direc_follow = track_position[get<attached_at_time_step>(
+                            particles[particle_id(j)])+1][get<attached_leader_nr>(
+                            particles[particle_id(j)])] - track_position[get<attached_at_time_step>(
+                            particles[particle_id(j)])][get<attached_leader_nr>(
+                            particles[particle_id(j)])];
+
+                    double normalise = direc_follow.norm();
+                    //normalise
+                    direc_follow = direc_follow/normalise;
+                    vdouble2 x_can = x + direc_follow * speed_f;
 
                         // follow the track exactly
-                        vdouble2 direc_follow =  track_position[get<attached_at_time_step>(
-                                particles[particle_id(j)]) + 1][get<attached_leader_nr>(
-                                particles[particle_id(j)])]; //position where the cell wants to move
-
-                        vdouble2 x_can = direc_follow;
+//                        vdouble2 direc_follow =  track_position[get<attached_at_time_step>(
+//                                particles[particle_id(j)]) + 1][get<attached_leader_nr>(
+//                                particles[particle_id(j)])]; //position where the cell wants to move
+//
+//                        vdouble2 x_can = direc_follow;
 
 
 
@@ -903,7 +903,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
                                 get<id>(particles[particle_id(j)])) { // check if it is not the same particle
                                 //cout << "reject step " << 1 << endl;
                                 free_position = false;
-                                break;
+                                //break;
                                 cout << "how frequently free position is false" << endl;
                             }
                         }
@@ -919,10 +919,13 @@ VectorXi proportions(double diff_conc, int n_seed) {
                             round((x_can[0] * (length_x / domain_length))) < length_x - 1 && round(x_can[1]) > 0 &&
                             round(x_can[1]) < length_y - 1) {
 
-                            get<position>(particles[particle_id(j)]) = direc_follow;
+                            get<position>(particles[particle_id(j)]) = x_can;
                             get<attached_at_time_step>(particles[particle_id(j)]) += 1;
                             get<in_track>(particles[particle_id(j)]) = 1;
                             cout << "found track" << endl;
+                        }
+                        else{
+                            get<in_track>(particles[particle_id(j)]) == 0;
                         }
 
 
@@ -988,63 +991,63 @@ VectorXi proportions(double diff_conc, int n_seed) {
                 }
 
 
-                    /* CHECK IF A FOLLOWER DOES NOT BECOME A LEADER
-                    * Alternative phenotypic switching if a follower overtakes a leader it becomes a leader and that leader follower.
-                    * I will have to be careful when there will be channels because I will have to choose the closest leader
-                    * */
+                /* CHECK IF A FOLLOWER DOES NOT BECOME A LEADER
+                * Alternative phenotypic switching if a follower overtakes a leader it becomes a leader and that leader follower.
+                * I will have to be careful when there will be channels because I will have to choose the closest leader
+                * */
 
 
-                    // find the closest leader
+                // find the closest leader
 
 
-                    // so that I would not go through all the cells I will choose the ones that are closer to the front
+                // so that I would not go through all the cells I will choose the ones that are closer to the front
 
-                    // minimum position in x of the leaders
+                // minimum position in x of the leaders
 
-                    int min_index = 0;
+                int min_index = 0;
 
-                    for (int i = 1; i < N; ++i) {
-                        if (get<position>(particles[i])[0] < get<position>(particles[min_index])[0]) {
-                            min_index = i;
-                        }
-
+                for (int i = 1; i < N; ++i) {
+                    if (get<position>(particles[i])[0] < get<position>(particles[min_index])[0]) {
+                        min_index = i;
                     }
 
-                    // if a follower is eps further in front than the leader, swap their types
-                    if (get<position>(particles[particle_id(j)])[0] > get<position>(particles[min_index])[0] + eps) {
-                        // find distance to all the leaders
-                        double distances[N];
-                        vdouble2 dist_vector;
-                        //check which one is the closest
-                        for (int i = 0; i < N; ++i) {
-                            dist_vector = get<position>(particles[particle_id(j)]) - get<position>(particles[i]);
-                            distances[i] = dist_vector.norm();
+                }
 
-                            int winning_index = 0;
-                            for (int i = 1; i < N; ++i) {
-                                if (distances[i] < distances[winning_index]) {
-                                    winning_index = i;
-                                }
+                // if a follower is eps further in front than the leader, swap their types
+                if (get<position>(particles[particle_id(j)])[0] > get<position>(particles[min_index])[0] + eps) {
+                    // find distance to all the leaders
+                    double distances[N];
+                    vdouble2 dist_vector;
+                    //check which one is the closest
+                    for (int i = 0; i < N; ++i) {
+                        dist_vector = get<position>(particles[particle_id(j)]) - get<position>(particles[i]);
+                        distances[i] = dist_vector.norm();
+
+                        int winning_index = 0;
+                        for (int i = 1; i < N; ++i) {
+                            if (distances[i] < distances[winning_index]) {
+                                winning_index = i;
                             }
+                        }
 
-                            // if this closest leader is behind that follower, swap them
-                            if (get<position>(particles[particle_id(j)])[0] >
-                                get<position>(particles[winning_index])[0] + eps) {
-                                particle_type::value_type tmp = particles[winning_index];
-
-
-                                // their position swap
-
-                                vdouble2 temp = get<position>(particles[winning_index]);
-                                get<position>(particles[winning_index]) = get<position>(particles[particle_id(j)]);
-                                get<position>(particles[particle_id(j)]) = temp;
+                        // if this closest leader is behind that follower, swap them
+                        if (get<position>(particles[particle_id(j)])[0] >
+                            get<position>(particles[winning_index])[0] + eps) {
+                            particle_type::value_type tmp = particles[winning_index];
 
 
-                            }
+                            // their position swap
+
+                            vdouble2 temp = get<position>(particles[winning_index]);
+                            get<position>(particles[winning_index]) = get<position>(particles[particle_id(j)]);
+                            get<position>(particles[particle_id(j)]) = temp;
+
 
                         }
+
                     }
                 }
+            }
         }
 
         for(int i=0; i<N; i++) {
@@ -1154,7 +1157,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
 int main(){
 
     const int number_parameters = 1; // parameter range
-    const int sim_num = 1;
+    const int sim_num = 10;
 
     //VectorXi vector_check_length = proportions(0.05, 2); //just to know what the length is
     //cout << "prop " << vector_check_length << endl;
@@ -1214,7 +1217,7 @@ int main(){
     * will store everything in one matrix, the entries will be summed over all simulations
     */
 
-    ofstream output3("aqp_M2.csv");
+    ofstream output3("aqp_M2_tunnel.csv");
 
     for (int i = 0; i < num_parts; i++) {
 
