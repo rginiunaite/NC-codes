@@ -927,7 +927,7 @@ double prop_break(double diff_conc, int n_seed){
 //    return proportions;
 
     /*
-     * Number that break
+     * Proportion that break
      *
      */
 
@@ -952,7 +952,7 @@ return pro_break;
 
 
 /*
- * main for proportions in different sections
+ * main for final percentage of followers not in a chain
  */
 
 

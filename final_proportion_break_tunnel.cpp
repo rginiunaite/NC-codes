@@ -19,8 +19,6 @@ using namespace Eigen; // objects VectorXf, MatrixXf
 
 double prop_break(double diff_conc, int n_seed){
 
-
-
     // model parameters
 
     /*
@@ -1141,8 +1139,8 @@ double prop_break(double diff_conc, int n_seed){
     pro_break = double(followers_not_in_chain)/(double(particles.size()-N));
 
     return pro_break;
-
 }
+
 
 
 
@@ -1150,7 +1148,7 @@ double prop_break(double diff_conc, int n_seed){
  * main for final percentage of followers not in a chain
  */
 
-// parameter analysis
+
 // parameter analysis
 int main(){
 
@@ -1204,7 +1202,7 @@ int main(){
     * will store everything in one matrix, the entries will be summed over all simulations
     */
 
-    ofstream output3("aqp_M2_tunnel_prop.csv");
+    ofstream output3("aqp_M1_prop.csv");
 
 
 
