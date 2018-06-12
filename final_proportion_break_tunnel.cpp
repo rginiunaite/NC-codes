@@ -61,8 +61,8 @@ double prop_break(double diff_conc, int n_seed) {
     double dist_thres = 0.5;
     int closest_time;
     int leader_track;
-    double track_spacing = 1; // spacing between positions on the track
-    int track_length = 110;
+    double track_spacing = 2; // spacing between positions on the track
+    int track_length = 100;
 
 
 
@@ -920,8 +920,8 @@ double prop_break(double diff_conc, int n_seed) {
                         // if the cell is part of the chain update its position
                         if (free_position &&
                             ((x_can[0] * (length_x / domain_length))) > 0 &&
-                            round((x_can[0] * (length_x / domain_length))) < length_x - 1 && round(x_can[1]) > 0 &&
-                            round(x_can[1]) < length_y - 1) {
+                            ((x_can[0] * (length_x / domain_length))) < length_x - 1 && (x_can[1]) > 0 &&
+                            (x_can[1]) < length_y - 1) {
 
                             get<position>(particles[particle_id(j)]) = x_can;
                             get<attached_at_time_step>(particles[particle_id(j)]) += 1;
