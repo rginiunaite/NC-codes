@@ -58,7 +58,7 @@ double prop_break(double diff_conc, int n_seed) {
 
 
     // distance to the track parameters
-    double dist_thres = 0.5;
+    double dist_thres = 1;
     int closest_time;
     int leader_track;
     double track_spacing = 2; // spacing between positions on the track
@@ -983,7 +983,7 @@ double prop_break(double diff_conc, int n_seed) {
 
                             // check that the position they want to move to is free and not out of bounds
                             if (free_position && (x_in) > 0 &&
-                                round(x_in) < length_x - 1 && round(x[1]) > 0 &&
+                                (x_in) < length_x - 1 && (x[1]) > 0 &&
                                 (x[1]) < length_y - 1) {
                                 //cout << " moves " << endl;
                                 //cout << "how frequently come in here " << endl;

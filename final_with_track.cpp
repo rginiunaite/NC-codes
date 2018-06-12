@@ -58,7 +58,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
 
     // distance to the track parameters
-    double dist_thres = 0.5;
+    double dist_thres = 1;
     int closest_time;
     int leader_track;
     double track_spacing = 2; // spacing between positions on the track
@@ -229,13 +229,13 @@ VectorXi proportions(double diff_conc, int n_seed) {
     gen1.seed(t*n_seed); // choose different seeds to obtain different random numbers
     std::uniform_real_distribution<double> uniformpi(0, 2 * M_PI);
 
+
+
     //for each timestep
     cout << "how many times here?" << endl;
     for (int t = 0; t < N_steps; t++) {
 
-        if (t == 5){
-            cout << "t is 5" << endl;
-        }
+
 
         cout << "domain length " << domain_length << endl;
         // insert new cells at the start of the domain at insertion time (have to think about this insertion time)
@@ -978,7 +978,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
                             // check that the position they want to move to is free and not out of bounds
                             if (free_position && (x_in) > 0 &&
-                                round(x_in) < length_x - 1 && round(x[1]) > 0 &&
+                                (x_in) < length_x - 1 && (x[1]) > 0 &&
                                 (x[1]) < length_y - 1) {
                                 //cout << " moves " << endl;
                                 //cout << "how frequently come in here " << endl;
@@ -1191,6 +1191,7 @@ int main(){
         //        for (int i = 0; i < number_parameters; i++) {
 
         //for (int j = 0; j < 1; j++) {
+
 
         numbers.block(0,0,num_parts,1) = proportions(threshold[0], n);
 
