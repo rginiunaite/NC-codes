@@ -61,8 +61,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
     double dist_thres = 0.5;
     int closest_time;
     int leader_track;
-    double track_spacing = 2; // spacing between positions on the track
-    int track_length = 100;
+    double track_spacing = 1; // spacing between positions on the track
+    int track_length = 110;
 
 
 
@@ -1156,7 +1156,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
 int main(){
 
     const int number_parameters = 1; // parameter range
-    const int sim_num = 1;
+    const int sim_num = 10;
 
     //VectorXi vector_check_length = proportions(0.05, 2); //just to know what the length is
     //cout << "prop " << vector_check_length << endl;
@@ -1190,7 +1190,7 @@ int main(){
 
         //for (int j = 0; j < 1; j++) {
 
-        numbers.block(0,0,num_parts,1) = proportions(threshold[0], 1);
+        numbers.block(0,0,num_parts,1) = proportions(threshold[0], n);
 
         //}
         // }

@@ -61,8 +61,8 @@ double prop_break(double diff_conc, int n_seed) {
     double dist_thres = 0.5;
     int closest_time;
     int leader_track;
-    double track_spacing = 2; // spacing between positions on the track
-    int track_length = 100;
+    double track_spacing = 1; // spacing between positions on the track
+    int track_length = 110;
 
 
 
@@ -910,10 +910,8 @@ double prop_break(double diff_conc, int n_seed) {
                                 //cout << "reject step " << 1 << endl;
                                 free_position = false;
                                 //break;
-                                cout << "how frequently free position is false" << endl;
                             }
                         }
-
 
 
                         // it is possible that randomly they get dettached
@@ -929,14 +927,17 @@ double prop_break(double diff_conc, int n_seed) {
                             get<attached_at_time_step>(particles[particle_id(j)]) += 1;
                             get<in_track>(particles[particle_id(j)]) = 1;
                             cout << "found track" << endl;
-                        } else {
+                        }
+
+                        // Dettached from track
+                        else {
                             get<in_track>(particles[particle_id(j)]) = 0;
                         }
 
 
 
                         // if it hasn't found a track
-                        if (get<in_track>(particles[particle_id(j)]) == 0) {
+                        if (get<in_track>(particles[particle_id(j)]) == 0){
 
 
                             double random_angle = uniformpi(gen1);
