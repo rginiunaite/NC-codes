@@ -17,7 +17,8 @@ using namespace std;
 using namespace Aboria;
 using namespace Eigen; // objects VectorXf, MatrixXf
 
-double prop_break(double diff_conc, int n_seed){
+double prop_break(double diff_conc, int n_seed) {
+
 
     // model parameters
 
@@ -78,7 +79,7 @@ double prop_break(double diff_conc, int n_seed){
     double a = 0.23;
     double L_inf = 86.76;
     double t_s = 15.9; // think about these rescaled variables
-    double constant = 29.12 ;
+    double constant = 29.12;
 
 
     double domain_len_der = 0; // initialise derivative of the domain growth function
@@ -149,13 +150,14 @@ double prop_break(double diff_conc, int n_seed){
 
     // create an array to keep track of all the positions of leader cells
 
-    vdouble2 track_position [track_length][N] = {vdouble2(0,0)};
-    for (int i =0; i < track_length; i++){
-        for(int j = 0; j < N; j++){
-            track_position[i][j] = vdouble2(0,0);
+    vdouble2 track_position[track_length][N] = {vdouble2(0, 0)};
+    for (int i = 0; i < track_length; i++) {
+        for (int j = 0; j < N; j++) {
+            track_position[i][j] = vdouble2(0, 0);
         }
     }
-    int track_time[N] = {0}; // vector that stores the time values for each leader when there was a sufficiently big change in the position
+    int track_time[N] = {
+            0}; // vector that stores the time values for each leader when there was a sufficiently big change in the position
 
 
 
@@ -171,20 +173,22 @@ double prop_break(double diff_conc, int n_seed){
     //ABORIA_VARIABLE(velocity,vdouble2,"velocity")
     ABORIA_VARIABLE(radius, double, "radius")
     ABORIA_VARIABLE(direction, vdouble2, "direction")// stores the direction a particle moved
-    ABORIA_VARIABLE(persistence_extent, int, "persistence extent")// stores whether cell moves only one step in current direction or in a process of moving persistently
-    ABORIA_VARIABLE(same_dir_step, int, "same dir step")// the number which stores how many steps in the same direction are made.
+    ABORIA_VARIABLE(persistence_extent, int,
+                    "persistence extent")// stores whether cell moves only one step in current direction or in a process of moving persistently
+    ABORIA_VARIABLE(same_dir_step, int,
+                    "same dir step")// the number which stores how many steps in the same direction are made.
     ABORIA_VARIABLE(attached_to_id, int, "attached_to_id")
     ABORIA_VARIABLE(type, int, "type") // 0 if a cell is a leader, 1 if follower
     ABORIA_VARIABLE(chain_type, int, "chain_type") // leaders form different chain types
     ABORIA_VARIABLE(chain, int, "chain") // stores whether a follower is part of the chain or no, 0 if it is not part of
 
     // tunneling model
-    ABORIA_VARIABLE(attached_at_time_step,int,"attached_at_time_step")
-    ABORIA_VARIABLE(attached_leader_nr,int,"attached_leader_nr")
+    ABORIA_VARIABLE(attached_at_time_step, int, "attached_at_time_step")
+    ABORIA_VARIABLE(attached_leader_nr, int, "attached_leader_nr")
     ABORIA_VARIABLE(in_track, int, "in_track") // stores whether attached to a leader or follower
     // the chain and then increasing integer if it is. If it is attached to a leader, it is 1, and then increasing order.
     // stores the distance to the closest neighbour, if less than thresold
-    typedef Particles<std::tuple<radius, type, attached_to_id, attached_at_time_step,in_track, attached_leader_nr, direction, chain, chain_type, persistence_extent, same_dir_step>, 2> particle_type; // 2 stands for dimension
+    typedef Particles<std::tuple<radius, type, attached_to_id, attached_at_time_step, in_track, attached_leader_nr, direction, chain, chain_type, persistence_extent, same_dir_step>, 2> particle_type; // 2 stands for dimension
 
     // will use stored value of the position of a particle
     typedef particle_type::position position;
@@ -225,14 +229,14 @@ double prop_break(double diff_conc, int n_seed){
 
     // initialise random number generator to obtain random number between 0 and 2*pi
     std::default_random_engine gen1;
-    gen1.seed(t*n_seed); // choose different seeds to obtain different random numbers
+    gen1.seed(t * n_seed); // choose different seeds to obtain different random numbers
     std::uniform_real_distribution<double> uniformpi(0, 2 * M_PI);
 
     //for each timestep
     cout << "how many times here?" << endl;
     for (int t = 0; t < N_steps; t++) {
 
-        if (t == 5){
+        if (t == 5) {
             cout << "t is 5" << endl;
         }
 
@@ -284,10 +288,12 @@ double prop_break(double diff_conc, int n_seed){
         if (t % freq_growth == 0) {
 
             // with time delay and constant to make the initial conditions consistent
-            domain_length = ((L_inf * exp(a * (t/60.0 - t_s))) / (L_inf / L_0 + exp(a * (t/60.0 - t_s)) - 1)) + constant;
+            domain_length =
+                    ((L_inf * exp(a * (t / 60.0 - t_s))) / (L_inf / L_0 + exp(a * (t / 60.0 - t_s)) - 1)) + constant;
 
-            domain_len_der = ((a * L_inf * exp(a * (t/60.0 - t_s))) / (L_inf / L_0 + exp(a * (t/60.0 - t_s)) - 1) -
-                              (a * L_inf * exp(2 * a * (t/60.0 - t_s))) / (L_inf / L_0 + exp(a * (t/60.0 - t_s)) - 1));
+            domain_len_der = ((a * L_inf * exp(a * (t / 60.0 - t_s))) / (L_inf / L_0 + exp(a * (t / 60.0 - t_s)) - 1) -
+                              (a * L_inf * exp(2 * a * (t / 60.0 - t_s))) /
+                              (L_inf / L_0 + exp(a * (t / 60.0 - t_s)) - 1));
 
         }
 
@@ -334,7 +340,7 @@ double prop_break(double diff_conc, int n_seed){
                                              (chemo(i + 1, j) - 2 * chemo(i, j) + chemo(i - 1, j)) / (dx * dx) +
                                              (chemo(i, j + 1) - 2 * chemo(i, j) + chemo(i, j - 1)) / (dy * dy)) -
                                         (chemo(i, j) * lam / (2 * M_PI * R * R)) * intern(i, j) +
-                                        kai *  chemo(i,j) * (1 - chemo(i, j)) -
+                                        kai * chemo(i, j) * (1 - chemo(i, j)) -
                                         double(domain_len_der) / double(domain_length) * chemo(i, j)) + chemo(i, j);
 
             }
@@ -378,7 +384,7 @@ double prop_break(double diff_conc, int n_seed){
             for (int i = 0; i < particles.size(); i++) {
                 get<position>(particles)[i] *= vdouble2((domain_length / old_length), 1);
             }
-            cout << "ratio " << double(domain_length/old_length) << endl;
+            cout << "ratio " << double(domain_length / old_length) << endl;
             old_length = domain_length;
         }
 
@@ -392,7 +398,7 @@ double prop_break(double diff_conc, int n_seed){
 
 
         std::default_random_engine gen2;
-        gen2.seed(t*n_seed); // different seeds
+        gen2.seed(t * n_seed); // different seeds
         std::uniform_real_distribution<double> uniform_particles(0, particles.size()); // can only move forward
 
         VectorXi particle_id = VectorXi::Zero(particles.size());
@@ -686,6 +692,7 @@ double prop_break(double diff_conc, int n_seed){
                     }
 
 
+
                     // check if it is not too far from the cell it was following
 
                     vdouble2 dist;
@@ -869,14 +876,14 @@ double prop_break(double diff_conc, int n_seed){
                         // move in the direction where track goes
 
                         vdouble2 direc_follow = track_position[get<attached_at_time_step>(
-                                particles[particle_id(j)])+1][get<attached_leader_nr>(
+                                particles[particle_id(j)]) + 1][get<attached_leader_nr>(
                                 particles[particle_id(j)])] - track_position[get<attached_at_time_step>(
                                 particles[particle_id(j)])][get<attached_leader_nr>(
                                 particles[particle_id(j)])];
 
                         double normalise = direc_follow.norm();
                         //normalise
-                        direc_follow = direc_follow/normalise;
+                        direc_follow = direc_follow / normalise;
                         vdouble2 x_can = x + direc_follow * speed_f;
 
                         // follow the track exactly
@@ -922,9 +929,8 @@ double prop_break(double diff_conc, int n_seed){
                             get<attached_at_time_step>(particles[particle_id(j)]) += 1;
                             get<in_track>(particles[particle_id(j)]) = 1;
                             cout << "found track" << endl;
-                        }
-                        else{
-                            get<in_track>(particles[particle_id(j)]) == 0;
+                        } else {
+                            get<in_track>(particles[particle_id(j)]) = 0;
                         }
 
 
@@ -1049,18 +1055,19 @@ double prop_break(double diff_conc, int n_seed){
             }
         }
 
-        for(int i=0; i<N; i++) {
+        for (int i = 0; i < N; i++) {
             //if (get<type>(particles[i]) == 0){
             vdouble2 diff;
 
             // if shorter than track length
             if (track_time[i] < track_length) {
-                diff = track_position[track_time[i]][i] - get<position>(particles[i]); // the difference is some intermediate vecotr value
+                diff = track_position[track_time[i]][i] -
+                       get<position>(particles[i]); // the difference is some intermediate vecotr value
                 cout << "track position " << track_position[track_time[i]][i] << endl;
 
             }// if longer than track length
             else {
-                diff = track_position[track_length-1][i] - get<position>(particles[i]); // the last position
+                diff = track_position[track_length - 1][i] - get<position>(particles[i]); // the last position
                 cout << "track position last " << track_position[track_length][i] << endl;
             }
             cout << "get position " << get<position>(particles[i]) << endl;
@@ -1076,11 +1083,11 @@ double prop_break(double diff_conc, int n_seed){
                     for (int j = 0; j < track_length; j++) {
                         track_position[j][i] = track_position[j + 1][i];// vector shifts by one
                     }
-                    track_position[track_length-1][i] = get<position>(particles[i]); // new position added
+                    track_position[track_length - 1][i] = get<position>(particles[i]); // new position added
 
                 }
             }
-            cout << "track time " << track_time[i]<< endl;
+            cout << "track time " << track_time[i] << endl;
             //}
 
         }
@@ -1102,12 +1109,11 @@ double prop_break(double diff_conc, int n_seed){
 
         vdouble2 posi;
 
-        for (int i=0;i<track_length;i++){
-            for(int j=0;j<2;j++){
-                if(j==1){
+        for (int i = 0; i < track_length; i++) {
+            for (int j = 0; j < 2; j++) {
+                if (j == 1) {
                     output1 << 0 << ", ";
-                }
-                else{
+                } else {
                     posi = track_position[i][j];
                     output1 << posi[0] << ", " << posi[1] << ", ";
 
@@ -1140,7 +1146,6 @@ double prop_break(double diff_conc, int n_seed){
 
     return pro_break;
 }
-
 
 
 
@@ -1206,13 +1211,13 @@ int main(){
 
 
 
-    for (int j = 0; j < sim_num; j++) {
+        for (int j = 0; j < sim_num; j++) {
 
-        output3 << store_values(j) << ", ";
-        output3 << "\n" << endl;
+            output3 << store_values(j) << ", ";
+            output3 << "\n" << endl;
 
 
-    }
+        }
 
 
 }

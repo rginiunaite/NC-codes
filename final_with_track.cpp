@@ -922,10 +922,9 @@ VectorXi proportions(double diff_conc, int n_seed) {
                             get<position>(particles[particle_id(j)]) = x_can;
                             get<attached_at_time_step>(particles[particle_id(j)]) += 1;
                             get<in_track>(particles[particle_id(j)]) = 1;
-                            cout << "found track" << endl;
                         }
                         else{
-                            get<in_track>(particles[particle_id(j)]) == 0;
+                            get<in_track>(particles[particle_id(j)]) = 0;
                         }
 
 
@@ -1157,7 +1156,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
 int main(){
 
     const int number_parameters = 1; // parameter range
-    const int sim_num = 10;
+    const int sim_num = 1;
 
     //VectorXi vector_check_length = proportions(0.05, 2); //just to know what the length is
     //cout << "prop " << vector_check_length << endl;
@@ -1191,7 +1190,7 @@ int main(){
 
         //for (int j = 0; j < 1; j++) {
 
-        numbers.block(0,0,num_parts,1) = proportions(threshold[0], n);
+        numbers.block(0,0,num_parts,1) = proportions(threshold[0], 1);
 
         //}
         // }
