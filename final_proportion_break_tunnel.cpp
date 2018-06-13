@@ -20,6 +20,7 @@ using namespace Eigen; // objects VectorXf, MatrixXf
 double prop_break(double diff_conc, int n_seed) {
 
 
+
     // model parameters
 
     /*
@@ -79,7 +80,7 @@ double prop_break(double diff_conc, int n_seed) {
     double a = 0.23;
     double L_inf = 86.76;
     double t_s = 15.9; // think about these rescaled variables
-    double constant = 29.12;
+    double constant = 29.12 ;
 
 
     double domain_len_der = 0; // initialise derivative of the domain growth function
@@ -150,14 +151,13 @@ double prop_break(double diff_conc, int n_seed) {
 
     // create an array to keep track of all the positions of leader cells
 
-    vdouble2 track_position[track_length][N] = {vdouble2(0, 0)};
-    for (int i = 0; i < track_length; i++) {
-        for (int j = 0; j < N; j++) {
-            track_position[i][j] = vdouble2(0, 0);
+    vdouble2 track_position [track_length][N] = {vdouble2(0,0)};
+    for (int i =0; i < track_length; i++){
+        for(int j = 0; j < N; j++){
+            track_position[i][j] = vdouble2(0,0);
         }
     }
-    int track_time[N] = {
-            0}; // vector that stores the time values for each leader when there was a sufficiently big change in the position
+    int track_time[N] = {0}; // vector that stores the time values for each leader when there was a sufficiently big change in the position
 
 
 
@@ -173,22 +173,20 @@ double prop_break(double diff_conc, int n_seed) {
     //ABORIA_VARIABLE(velocity,vdouble2,"velocity")
     ABORIA_VARIABLE(radius, double, "radius")
     ABORIA_VARIABLE(direction, vdouble2, "direction")// stores the direction a particle moved
-    ABORIA_VARIABLE(persistence_extent, int,
-                    "persistence extent")// stores whether cell moves only one step in current direction or in a process of moving persistently
-    ABORIA_VARIABLE(same_dir_step, int,
-                    "same dir step")// the number which stores how many steps in the same direction are made.
+    ABORIA_VARIABLE(persistence_extent, int, "persistence extent")// stores whether cell moves only one step in current direction or in a process of moving persistently
+    ABORIA_VARIABLE(same_dir_step, int, "same dir step")// the number which stores how many steps in the same direction are made.
     ABORIA_VARIABLE(attached_to_id, int, "attached_to_id")
     ABORIA_VARIABLE(type, int, "type") // 0 if a cell is a leader, 1 if follower
     ABORIA_VARIABLE(chain_type, int, "chain_type") // leaders form different chain types
     ABORIA_VARIABLE(chain, int, "chain") // stores whether a follower is part of the chain or no, 0 if it is not part of
 
     // tunneling model
-    ABORIA_VARIABLE(attached_at_time_step, int, "attached_at_time_step")
-    ABORIA_VARIABLE(attached_leader_nr, int, "attached_leader_nr")
+    ABORIA_VARIABLE(attached_at_time_step,int,"attached_at_time_step")
+    ABORIA_VARIABLE(attached_leader_nr,int,"attached_leader_nr")
     ABORIA_VARIABLE(in_track, int, "in_track") // stores whether attached to a leader or follower
     // the chain and then increasing integer if it is. If it is attached to a leader, it is 1, and then increasing order.
     // stores the distance to the closest neighbour, if less than thresold
-    typedef Particles<std::tuple<radius, type, attached_to_id, attached_at_time_step, in_track, attached_leader_nr, direction, chain, chain_type, persistence_extent, same_dir_step>, 2> particle_type; // 2 stands for dimension
+    typedef Particles<std::tuple<radius, type, attached_to_id, attached_at_time_step,in_track, attached_leader_nr, direction, chain, chain_type, persistence_extent, same_dir_step>, 2> particle_type; // 2 stands for dimension
 
     // will use stored value of the position of a particle
     typedef particle_type::position position;
@@ -221,7 +219,7 @@ double prop_break(double diff_conc, int n_seed) {
     }
 
     // initialise neighbourhood search, note that the domain will grow in x direction, so I initialise larger domain
-    particles.init_neighbour_search(vdouble2(-0.1, -0.1), 5 * vdouble2(length_x, length_y), vbool2(false, false));
+    particles.init_neighbour_search(vdouble2(0, 0), 5 * vdouble2(length_x, length_y), vbool2(false, false));
 
     // save particles before they move
 
@@ -229,16 +227,16 @@ double prop_break(double diff_conc, int n_seed) {
 
     // initialise random number generator to obtain random number between 0 and 2*pi
     std::default_random_engine gen1;
-    gen1.seed(t * n_seed); // choose different seeds to obtain different random numbers
+    gen1.seed(t*n_seed); // choose different seeds to obtain different random numbers
     std::uniform_real_distribution<double> uniformpi(0, 2 * M_PI);
+
+
 
     //for each timestep
     cout << "how many times here?" << endl;
     for (int t = 0; t < N_steps; t++) {
 
-        if (t == 5) {
-            cout << "t is 5" << endl;
-        }
+
 
         cout << "domain length " << domain_length << endl;
         // insert new cells at the start of the domain at insertion time (have to think about this insertion time)
@@ -288,12 +286,10 @@ double prop_break(double diff_conc, int n_seed) {
         if (t % freq_growth == 0) {
 
             // with time delay and constant to make the initial conditions consistent
-            domain_length =
-                    ((L_inf * exp(a * (t / 60.0 - t_s))) / (L_inf / L_0 + exp(a * (t / 60.0 - t_s)) - 1)) + constant;
+            domain_length = ((L_inf * exp(a * (t/60.0 - t_s))) / (L_inf / L_0 + exp(a * (t/60.0 - t_s)) - 1)) + constant;
 
-            domain_len_der = ((a * L_inf * exp(a * (t / 60.0 - t_s))) / (L_inf / L_0 + exp(a * (t / 60.0 - t_s)) - 1) -
-                              (a * L_inf * exp(2 * a * (t / 60.0 - t_s))) /
-                              (L_inf / L_0 + exp(a * (t / 60.0 - t_s)) - 1));
+            domain_len_der = ((a * L_inf * exp(a * (t/60.0 - t_s))) / (L_inf / L_0 + exp(a * (t/60.0 - t_s)) - 1) -
+                              (a * L_inf * exp(2 * a * (t/60.0 - t_s))) / (L_inf / L_0 + exp(a * (t/60.0 - t_s)) - 1));
 
         }
 
@@ -340,7 +336,7 @@ double prop_break(double diff_conc, int n_seed) {
                                              (chemo(i + 1, j) - 2 * chemo(i, j) + chemo(i - 1, j)) / (dx * dx) +
                                              (chemo(i, j + 1) - 2 * chemo(i, j) + chemo(i, j - 1)) / (dy * dy)) -
                                         (chemo(i, j) * lam / (2 * M_PI * R * R)) * intern(i, j) +
-                                        kai * chemo(i, j) * (1 - chemo(i, j)) -
+                                        kai *  chemo(i,j) * (1 - chemo(i, j)) -
                                         double(domain_len_der) / double(domain_length) * chemo(i, j)) + chemo(i, j);
 
             }
@@ -384,7 +380,7 @@ double prop_break(double diff_conc, int n_seed) {
             for (int i = 0; i < particles.size(); i++) {
                 get<position>(particles)[i] *= vdouble2((domain_length / old_length), 1);
             }
-            cout << "ratio " << double(domain_length / old_length) << endl;
+            cout << "ratio " << double(domain_length/old_length) << endl;
             old_length = domain_length;
         }
 
@@ -398,7 +394,7 @@ double prop_break(double diff_conc, int n_seed) {
 
 
         std::default_random_engine gen2;
-        gen2.seed(t * n_seed); // different seeds
+        gen2.seed(t*n_seed); // different seeds
         std::uniform_real_distribution<double> uniform_particles(0, particles.size()); // can only move forward
 
         VectorXi particle_id = VectorXi::Zero(particles.size());
@@ -651,12 +647,39 @@ double prop_break(double diff_conc, int n_seed) {
 
                 vdouble2 x;
                 x = get<position>(particles[particle_id(j)]);
+                cout << "follower position " << x << endl;
 
                 double x_in; // x coordinate in initial domain length scale
                 x_in = (length_x / domain_length) * x[0];
 
-                // if the particle is part of the chain
+                /*
+                * if the particle is part of the chain
+                */
+
                 if (get<chain>(particles[particle_id(j)]) > 0) {
+
+
+                    // check if it is not too far from the cell it was following
+
+                    vdouble2 dist;
+
+                    dist = get<position>(particles[particle_id(j)]) -
+                           get<position>(particles[get<attached_to_id>(particles[particle_id(j)])]);
+
+                    // if it is sufficiently far dettach the cell
+                    if (dist.norm() > l_filo_max) {
+                        get<chain>(particles[particle_id(j)]) = 0;
+                        //dettach also all the cells that are behind it, so that other cells would not be attached to this chain
+                        for (int i = 0; i < particles.size(); ++i) {
+                            if (get<chain_type>(particles[i]) == get<chain_type>(particles)[particle_id(j)]) {
+                                // get<chain_type>(particles)[i] = -1;
+                                get<chain>(particles[i]) = 0;
+                            }
+
+                        }
+                        // get<chain_type>(particles)[particle_id(j)] = -1;
+                    }
+
 
                     // direction the same as of the cell it is attached to
                     get<direction>(particles)[particle_id(j)] = get<direction>(particles)[get<attached_to_id>(
@@ -691,28 +714,6 @@ double prop_break(double diff_conc, int n_seed) {
 
                     }
 
-
-
-                    // check if it is not too far from the cell it was following
-
-                    vdouble2 dist;
-
-                    dist = get<position>(particles[particle_id(j)]) -
-                           get<position>(particles[get<attached_to_id>(particles[particle_id(j)])]);
-
-                    // if it is sufficiently far dettach the cell
-                    if (dist.norm() > l_filo_max) {
-                        get<chain>(particles[particle_id(j)]) = 0;
-                        //dettach also all the cells that are behind it, so that other cells would not be attached to this chain
-                        for (int i = 0; i < particles.size(); ++i) {
-                            if (get<chain_type>(particles[i]) == get<chain_type>(particles)[particle_id(j)]) {
-                                // get<chain_type>(particles)[i] = -1;
-                                get<chain>(particles[i]) = 0;
-                            }
-
-                        }
-                        // get<chain_type>(particles)[particle_id(j)] = -1;
-                    }
                 }
 
 
@@ -727,8 +728,8 @@ double prop_break(double diff_conc, int n_seed) {
 
 
                     /* check if there are any cells distance l_filo_y apart
-* it can be either a leader or a follower already in a chain
-*/
+                     * it can be either a leader or a follower already in a chain
+                    */
 
 
                     // try to find a close leader
@@ -780,46 +781,53 @@ double prop_break(double diff_conc, int n_seed) {
                         }
                     }
 
+                    // if it is in the chain
+                    if (get<chain>(particles[particle_id(j)]) > 0){
+                        //try to move in the same direction as the cell it is attached to
+                        vdouble2 x_chain = x + increase_fol_speed * get<direction>(particles)[particle_id(j)];
 
-                    //try to move in the same direction as the cell it is attached to
-                    vdouble2 x_chain = x + increase_fol_speed * get<direction>(particles)[particle_id(j)];
+                        // Non-uniform domain growth
+                        double x_in_chain;
 
-                    // Non-uniform domain growth
-                    double x_in_chain;
-
-                    x_in_chain =
-                            (length_x / domain_length) * x_chain[0];//uniform growth in the first part of the domain
-
-
-
-                    bool free_position = true;
+                        x_in_chain =
+                                (length_x / domain_length) * x_chain[0];//uniform growth in the first part of the domain
 
 
-                    // check if the position it wants to move is free
-                    for (auto pos = euclidean_search(particles.get_query(), x_chain, diameter); pos != false; ++pos) {
 
-                        if (get<id>(*pos) !=
-                            get<id>(particles[particle_id(j)])) { // check if it is not the same particle
-                            free_position = false;
+                        bool free_position = true;
+
+
+                        // check if the position it wants to move is free
+                        for (auto pos = euclidean_search(particles.get_query(), x_chain, diameter); pos != false; ++pos) {
+
+                            if (get<id>(*pos) !=
+                                get<id>(particles[particle_id(j)])) { // check if it is not the same particle
+                                free_position = false;
+                            }
                         }
+
+
+                        // if the position is free and not out of bounds, move that direction
+                        if (free_position &&
+                            (x_in_chain) > 0 &&
+                            (x_in_chain) < length_x - 1 && (x_chain[1]) > 0 &&
+                            (x_chain[1]) < length_y - 1) {
+                            //cout << "direction " << get<direction>(particles[particle_id(j)]) << endl;
+                            get<position>(particles)[particle_id(j)] +=
+                                    increase_fol_speed * get<direction>(particles[particle_id(j)]);
+
+                        }
+
                     }
 
 
-                    // if the position is free and not out of bounds, move that direction
-                    if (free_position &&
-                        (x_in_chain) > 0 &&
-                        (x_in_chain) < length_x - 1 && (x_chain[1]) > 0 &&
-                        (x_chain[1]) < length_y - 1) {
-                        //cout << "direction " << get<direction>(particles[particle_id(j)]) << endl;
-                        get<position>(particles)[particle_id(j)] +=
-                                increase_fol_speed * get<direction>(particles[particle_id(j)]);
-
-                    }
-
-
-                    // if it hasn't found anything close, move randomly
+                    // if it hasn't found anything close, try to find a track or move randomly
 
                     if (get<chain>(particles[particle_id(j)]) == 0) {
+
+                        cout << "x before " << x << endl;
+                        x = get<position>(particles[particle_id(j)]);
+                        cout << "x after " << x << endl;
 
                         cout << "just before the found track " << endl;
 
@@ -875,16 +883,16 @@ double prop_break(double diff_conc, int n_seed) {
 
                         // move in the direction where track goes
 
-                        vdouble2 direc_follow = track_position[get<attached_at_time_step>(
-                                particles[particle_id(j)]) + 1][get<attached_leader_nr>(
-                                particles[particle_id(j)])] - track_position[get<attached_at_time_step>(
-                                particles[particle_id(j)])][get<attached_leader_nr>(
-                                particles[particle_id(j)])];
+                    vdouble2 direc_follow = track_position[get<attached_at_time_step>(
+                            particles[particle_id(j)])+1][get<attached_leader_nr>(
+                            particles[particle_id(j)])] - track_position[get<attached_at_time_step>(
+                            particles[particle_id(j)])][get<attached_leader_nr>(
+                            particles[particle_id(j)])];
 
-                        double normalise = direc_follow.norm();
-                        //normalise
-                        direc_follow = direc_follow / normalise;
-                        vdouble2 x_can = x + direc_follow * speed_f;
+                    double normalise = direc_follow.norm();
+                    //normalise
+                    direc_follow = direc_follow/normalise;
+                    vdouble2 x_can = x + direc_follow * speed_f;
 
                         // follow the track exactly
 //                        vdouble2 direc_follow =  track_position[get<attached_at_time_step>(
@@ -899,7 +907,7 @@ double prop_break(double diff_conc, int n_seed) {
                         // check if that position is free
                         //cout << "Position "<< x << endl;
 
-                        free_position = true; // check if the neighbouring position is free
+                        bool free_position = true; // check if the neighbouring position is free
 
                         // if this loop is entered, it means that there is another cell where I want to move
                         for (auto k = euclidean_search(particles.get_query(), x_can, diameter); k != false; ++k) {
@@ -910,8 +918,10 @@ double prop_break(double diff_conc, int n_seed) {
                                 //cout << "reject step " << 1 << endl;
                                 free_position = false;
                                 //break;
+                                cout << "how frequently free position is false" << endl;
                             }
                         }
+
 
 
                         // it is possible that randomly they get dettached
@@ -926,18 +936,17 @@ double prop_break(double diff_conc, int n_seed) {
                             get<position>(particles[particle_id(j)]) = x_can;
                             get<attached_at_time_step>(particles[particle_id(j)]) += 1;
                             get<in_track>(particles[particle_id(j)]) = 1;
-                            cout << "found track" << endl;
                         }
-
-                        // Dettached from track
-                        else {
+                        else{
                             get<in_track>(particles[particle_id(j)]) = 0;
                         }
 
 
 
                         // if it hasn't found a track
-                        if (get<in_track>(particles[particle_id(j)]) == 0){
+                        if (get<in_track>(particles[particle_id(j)]) == 0) {
+
+                            x = get<position>(particles)[particle_id(j)]; // make sure that x is set correctly
 
 
                             double random_angle = uniformpi(gen1);
@@ -1056,19 +1065,18 @@ double prop_break(double diff_conc, int n_seed) {
             }
         }
 
-        for (int i = 0; i < N; i++) {
+        for(int i=0; i<N; i++) {
             //if (get<type>(particles[i]) == 0){
             vdouble2 diff;
 
             // if shorter than track length
             if (track_time[i] < track_length) {
-                diff = track_position[track_time[i]][i] -
-                       get<position>(particles[i]); // the difference is some intermediate vecotr value
+                diff = track_position[track_time[i]][i] - get<position>(particles[i]); // the difference is some intermediate vecotr value
                 cout << "track position " << track_position[track_time[i]][i] << endl;
 
             }// if longer than track length
             else {
-                diff = track_position[track_length - 1][i] - get<position>(particles[i]); // the last position
+                diff = track_position[track_length-1][i] - get<position>(particles[i]); // the last position
                 cout << "track position last " << track_position[track_length][i] << endl;
             }
             cout << "get position " << get<position>(particles[i]) << endl;
@@ -1084,11 +1092,11 @@ double prop_break(double diff_conc, int n_seed) {
                     for (int j = 0; j < track_length; j++) {
                         track_position[j][i] = track_position[j + 1][i];// vector shifts by one
                     }
-                    track_position[track_length - 1][i] = get<position>(particles[i]); // new position added
+                    track_position[track_length-1][i] = get<position>(particles[i]); // new position added
 
                 }
             }
-            cout << "track time " << track_time[i] << endl;
+            cout << "track time " << track_time[i]<< endl;
             //}
 
         }
@@ -1110,11 +1118,12 @@ double prop_break(double diff_conc, int n_seed) {
 
         vdouble2 posi;
 
-        for (int i = 0; i < track_length; i++) {
-            for (int j = 0; j < 2; j++) {
-                if (j == 1) {
+        for (int i=0;i<track_length;i++){
+            for(int j=0;j<2;j++){
+                if(j==1){
                     output1 << 0 << ", ";
-                } else {
+                }
+                else{
                     posi = track_position[i][j];
                     output1 << posi[0] << ", " << posi[1] << ", ";
 

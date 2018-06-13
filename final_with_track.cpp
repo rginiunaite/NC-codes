@@ -218,7 +218,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
     }
 
     // initialise neighbourhood search, note that the domain will grow in x direction, so I initialise larger domain
-    particles.init_neighbour_search(vdouble2(-0.2, -0.2), 5 * vdouble2(length_x, length_y), vbool2(false, false));
+    particles.init_neighbour_search(vdouble2(0, 0), 5 * vdouble2(length_x, length_y), vbool2(false, false));
 
     // save particles before they move
 
@@ -646,12 +646,39 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
                 vdouble2 x;
                 x = get<position>(particles[particle_id(j)]);
+                cout << "follower position " << x << endl;
 
                 double x_in; // x coordinate in initial domain length scale
                 x_in = (length_x / domain_length) * x[0];
 
-                // if the particle is part of the chain
+                /*
+                * if the particle is part of the chain
+                */
+
                 if (get<chain>(particles[particle_id(j)]) > 0) {
+
+
+                    // check if it is not too far from the cell it was following
+
+                    vdouble2 dist;
+
+                    dist = get<position>(particles[particle_id(j)]) -
+                           get<position>(particles[get<attached_to_id>(particles[particle_id(j)])]);
+
+                    // if it is sufficiently far dettach the cell
+                    if (dist.norm() > l_filo_max) {
+                        get<chain>(particles[particle_id(j)]) = 0;
+                        //dettach also all the cells that are behind it, so that other cells would not be attached to this chain
+                        for (int i = 0; i < particles.size(); ++i) {
+                            if (get<chain_type>(particles[i]) == get<chain_type>(particles)[particle_id(j)]) {
+                                // get<chain_type>(particles)[i] = -1;
+                                get<chain>(particles[i]) = 0;
+                            }
+
+                        }
+                        // get<chain_type>(particles)[particle_id(j)] = -1;
+                    }
+
 
                     // direction the same as of the cell it is attached to
                     get<direction>(particles)[particle_id(j)] = get<direction>(particles)[get<attached_to_id>(
@@ -686,29 +713,6 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
                     }
 
-
-
-
-                    // check if it is not too far from the cell it was following
-
-                    vdouble2 dist;
-
-                    dist = get<position>(particles[particle_id(j)]) -
-                           get<position>(particles[get<attached_to_id>(particles[particle_id(j)])]);
-
-                    // if it is sufficiently far dettach the cell
-                    if (dist.norm() > l_filo_max) {
-                        get<chain>(particles[particle_id(j)]) = 0;
-                        //dettach also all the cells that are behind it, so that other cells would not be attached to this chain
-                        for (int i = 0; i < particles.size(); ++i) {
-                            if (get<chain_type>(particles[i]) == get<chain_type>(particles)[particle_id(j)]) {
-                                // get<chain_type>(particles)[i] = -1;
-                                get<chain>(particles[i]) = 0;
-                            }
-
-                        }
-                        // get<chain_type>(particles)[particle_id(j)] = -1;
-                    }
                 }
 
 
@@ -723,8 +727,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
 
                     /* check if there are any cells distance l_filo_y apart
-* it can be either a leader or a follower already in a chain
-*/
+                     * it can be either a leader or a follower already in a chain
+                    */
 
 
                     // try to find a close leader
@@ -776,46 +780,53 @@ VectorXi proportions(double diff_conc, int n_seed) {
                         }
                     }
 
+                    // if it is in the chain
+                    if (get<chain>(particles[particle_id(j)]) > 0){
+                        //try to move in the same direction as the cell it is attached to
+                        vdouble2 x_chain = x + increase_fol_speed * get<direction>(particles)[particle_id(j)];
 
-                    //try to move in the same direction as the cell it is attached to
-                    vdouble2 x_chain = x + increase_fol_speed * get<direction>(particles)[particle_id(j)];
+                        // Non-uniform domain growth
+                        double x_in_chain;
 
-                    // Non-uniform domain growth
-                    double x_in_chain;
-
-                    x_in_chain =
-                            (length_x / domain_length) * x_chain[0];//uniform growth in the first part of the domain
-
-
-
-                    bool free_position = true;
+                        x_in_chain =
+                                (length_x / domain_length) * x_chain[0];//uniform growth in the first part of the domain
 
 
-                    // check if the position it wants to move is free
-                    for (auto pos = euclidean_search(particles.get_query(), x_chain, diameter); pos != false; ++pos) {
 
-                        if (get<id>(*pos) !=
-                            get<id>(particles[particle_id(j)])) { // check if it is not the same particle
-                            free_position = false;
+                        bool free_position = true;
+
+
+                        // check if the position it wants to move is free
+                        for (auto pos = euclidean_search(particles.get_query(), x_chain, diameter); pos != false; ++pos) {
+
+                            if (get<id>(*pos) !=
+                                get<id>(particles[particle_id(j)])) { // check if it is not the same particle
+                                free_position = false;
+                            }
                         }
+
+
+                        // if the position is free and not out of bounds, move that direction
+                        if (free_position &&
+                            (x_in_chain) > 0 &&
+                            (x_in_chain) < length_x - 1 && (x_chain[1]) > 0 &&
+                            (x_chain[1]) < length_y - 1) {
+                            //cout << "direction " << get<direction>(particles[particle_id(j)]) << endl;
+                            get<position>(particles)[particle_id(j)] +=
+                                    increase_fol_speed * get<direction>(particles[particle_id(j)]);
+
+                        }
+
                     }
 
 
-                    // if the position is free and not out of bounds, move that direction
-                    if (free_position &&
-                        (x_in_chain) > 0 &&
-                        (x_in_chain) < length_x - 1 && (x_chain[1]) > 0 &&
-                        (x_chain[1]) < length_y - 1) {
-                        //cout << "direction " << get<direction>(particles[particle_id(j)]) << endl;
-                        get<position>(particles)[particle_id(j)] +=
-                                increase_fol_speed * get<direction>(particles[particle_id(j)]);
-
-                    }
-
-
-                    // if it hasn't found anything close, move randomly
+                    // if it hasn't found anything close, try to find a track or move randomly
 
                     if (get<chain>(particles[particle_id(j)]) == 0) {
+
+                        cout << "x before " << x << endl;
+                        x = get<position>(particles[particle_id(j)]);
+                        cout << "x after " << x << endl;
 
                         cout << "just before the found track " << endl;
 
@@ -895,7 +906,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
                         // check if that position is free
                         //cout << "Position "<< x << endl;
 
-                        free_position = true; // check if the neighbouring position is free
+                        bool free_position = true; // check if the neighbouring position is free
 
                         // if this loop is entered, it means that there is another cell where I want to move
                         for (auto k = euclidean_search(particles.get_query(), x_can, diameter); k != false; ++k) {
@@ -933,6 +944,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
                         // if it hasn't found a track
                         if (get<in_track>(particles[particle_id(j)]) == 0) {
+
+                            x = get<position>(particles)[particle_id(j)]; // make sure that x is set correctly
 
 
                             double random_angle = uniformpi(gen1);
