@@ -62,7 +62,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
     int closest_time;
     int leader_track;
     double track_spacing = 2; // spacing between positions on the track
-    int track_length = 100;
+    int track_length = 60;
 
 
 
@@ -218,7 +218,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
     }
 
     // initialise neighbourhood search, note that the domain will grow in x direction, so I initialise larger domain
-    particles.init_neighbour_search(vdouble2(0, 0), 5 * vdouble2(length_x, length_y), vbool2(false, false));
+    particles.init_neighbour_search(vdouble2(-0.2, -0.2), 5 * vdouble2(length_x, length_y), vbool2(false, false));
 
     // save particles before they move
 
@@ -1124,7 +1124,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
     /*
      * return the density of cells in domain_partition parts of the domain
      */
-    const int domain_partition = int(domain_length / double(5));; // number of intervalas of 50 \mu m
+    const int domain_partition = int(domain_length / double(5));; // number of intervals of 50 \mu m
 
     VectorXi proportions = VectorXi::Zero(domain_partition); // integer with number of cells in particular part
 
@@ -1158,7 +1158,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
 int main(){
 
     const int number_parameters = 1; // parameter range
-    const int sim_num = 10;
+    const int sim_num = 1;
 
     //VectorXi vector_check_length = proportions(0.05, 2); //just to know what the length is
     //cout << "prop " << vector_check_length << endl;
@@ -1193,7 +1193,7 @@ int main(){
         //for (int j = 0; j < 1; j++) {
 
 
-        numbers.block(0,0,num_parts,1) = proportions(threshold[0], n);
+        numbers.block(0,0,num_parts,1) = proportions(threshold[0], 1);
 
         //}
         // }
@@ -1219,7 +1219,7 @@ int main(){
     * will store everything in one matrix, the entries will be summed over all simulations
     */
 
-    ofstream output3("aqp_M2_tunnel.csv");
+    ofstream output3("aqp_M10_june13.csv");
 
     for (int i = 0; i < num_parts; i++) {
 

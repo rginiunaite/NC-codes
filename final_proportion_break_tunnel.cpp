@@ -62,7 +62,7 @@ double prop_break(double diff_conc, int n_seed) {
     int closest_time;
     int leader_track;
     double track_spacing = 2; // spacing between positions on the track
-    int track_length = 100;
+    int track_length = 60;
 
 
 
@@ -221,7 +221,7 @@ double prop_break(double diff_conc, int n_seed) {
     }
 
     // initialise neighbourhood search, note that the domain will grow in x direction, so I initialise larger domain
-    particles.init_neighbour_search(vdouble2(0, 0), 5 * vdouble2(length_x, length_y), vbool2(false, false));
+    particles.init_neighbour_search(vdouble2(-0.1, -0.1), 5 * vdouble2(length_x, length_y), vbool2(false, false));
 
     // save particles before they move
 
@@ -1208,7 +1208,7 @@ int main(){
     * will store everything in one matrix, the entries will be summed over all simulations
     */
 
-    ofstream output3("aqp_M1_prop.csv");
+    ofstream output3("aqp_M10_jun13_prop.csv");
 
 
 
