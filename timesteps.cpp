@@ -35,15 +35,15 @@ VectorXi proportions(double diff_conc, int n_seed) {
     double cell_radius = 0.75;//0.5; // radius of a cell
     const double diameter =
             2 * cell_radius; // diameter of a cell
-    const int N_steps = 100; // number of timesteps, 1min - 1timestep, from 6h tp 24hours.
-    const size_t N = 0; // initial number of cells
+    const int N_steps = 1800; // number of timesteps, 1min - 1timestep, from 6h tp 24hours.
+    const size_t N = 5; // initial number of cells
     double l_filo_y = 2.75;//2; // sensing radius, filopodia + cell radius
     double l_filo_x = 2.75; // sensing radius, it will have to be rescaled when domain grows
     double l_filo_x_in = l_filo_x; // this value is used for rescaling when domain grows based on initial value
     double l_filo_max = 4.5; // this is the length when two cells which were previously in a chain become dettached
     //double diff_conc = 0.1; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
-    int insertion_freq = 18000; // determines how frequently new cells are inserted, regulates the density of population
+    int insertion_freq = 1; // determines how frequently new cells are inserted, regulates the density of population
     double speed_l = 0.1;// 0.05;//1;//0.05; // speed of a leader cell
     double speed_f = 0.13;//0.05;//0.1;//0.08; // speed of a follower cell
     double increase_fol_speed = 1.3;
@@ -83,7 +83,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
     // parameters for the dynamics of chemoattractant concentration
 
-    double D = 0; // to 10^5 \nu m^2/h diffusion coefficient
+    double D = 0.001; // to 10^5 \nu m^2/h diffusion coefficient
     double t = 0; // initialise time, redundant
     double dt = 1; // time step
     double dt_init = dt;
@@ -91,13 +91,13 @@ VectorXi proportions(double diff_conc, int n_seed) {
     cout << "number " << number_time << endl;
     double dx = 1; // space step in x direction, double to be consistent with other types
     double dy = 1; // space step in y direction
-    double kai = 0;//0.01;//1 / 100;//0.0001/10; // to 1 /h production rate of chemoattractant
+    double kai = 0.1;//0;//0.1 // to 1 /h production rate of chemoattractant
 
 
     // parameters for internalisation
 
     double R = cell_radius;//7.5/10; // \nu m cell radius
-    double lam = 0;//(100)/10; // to 1000 /h chemoattractant internalisation
+    double lam = 0.001;//(100)/10; // to 1000 /h chemoattractant internalisation
 
 
     /*
@@ -1025,7 +1025,7 @@ int main(){
 
         // set the parameters
         for (int i = 0; i < number_parameters; i++) {
-            threshold[i] = 0.08;
+            threshold[i] = 0.2;
             //threshold[i] = 0.005 * (i + 1);// 0.01;
             //cout << "slope " << slope[i] << endl;
 
