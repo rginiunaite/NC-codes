@@ -44,9 +44,9 @@ VectorXi proportions(double diff_conc, int n_seed) {
     //double diff_conc = 0.1; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1; // determines how frequently new cells are inserted, regulates the density of population
-    double speed_l = 0.1;// 0.05;//1;//0.05; // speed of a leader cell
-    double speed_f = 0.13;//0.05;//0.1;//0.08; // speed of a follower cell
+    double speed_l = 0.136;// 0.05;//1;//0.05; // speed of a leader cell
     double increase_fol_speed = 1.3;
+    double speed_f = increase_fol_speed * speed_l;//0.05;//0.1;//0.08; // speed of a follower cell
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
     double chemo_leader = 0.9; //0.5; // phenotypic switching happens when the concentration of chemoattractant is higher than this (presentation video 0.95), no phenotypic switching
     double eps = 1; // for phenotypic switching, the distance has to be that much higher
@@ -83,18 +83,21 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
     // parameters for the dynamics of chemoattractant concentration
 
-    double D = 0.01; // to 10^5 \nu m^2/h diffusion coefficient
+    double D = 0.0001; // to 10^5 \nu m^2/h diffusion coefficient
     double t = 0; // initialise time, redundant
-    double dt = 0.00001; // time step
+    double dt = 1; // time step
+    double dt_init = dt;
+    int number_time = int(1/dt_init); // how many timesteps in 1min, which is the actual simulation timestep
+    cout << "number " << number_time << endl;
     double dx = 1; // space step in x direction, double to be consistent with other types
     double dy = 1; // space step in y direction
-    double kai = 0.1;//1 / 100;//0.0001/10; // to 1 /h production rate of chemoattractant
+    double kai = 0.00001;//0;//0.1 // to 1 /h production rate of chemoattractant
 
 
     // parameters for internalisation
 
     double R = cell_radius;//7.5/10; // \nu m cell radius
-    double lam = 10;//(100)/10; // to 1000 /h chemoattractant internalisation
+    double lam = 0.00015;//(100)/10; // to 1000 /h chemoattractant internalisation
 
 
     /*
@@ -211,9 +214,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
     cout << "how many times here?" << endl;
     for (int t = 0; t < N_steps; t++) {
 
-        if (t == 5){
-            cout << "t is 5" << endl;
-        }
+
 
         cout << "domain length " << domain_length << endl;
         // insert new cells at the start of the domain at insertion time (have to think about this insertion time)
@@ -259,15 +260,92 @@ VectorXi proportions(double diff_conc, int n_seed) {
          * */
 
 
-        if (t % freq_growth == 0) {
 
-            // with time delay and constant to make the initial conditions consistent
-            domain_length = ((L_inf * exp(a * (t/60.0 - t_s))) / (L_inf / L_0 + exp(a * (t/60.0 - t_s)) - 1)) + constant;
+        for (int ka =0; ka< number_time;ka++){
 
-            domain_len_der = ((a * L_inf * exp(a * (t/60.0 - t_s))) / (L_inf / L_0 + exp(a * (t/60.0 - t_s)) - 1) -
-                              (a * L_inf * exp(2 * a * (t/60.0 - t_s))) / (L_inf / L_0 + exp(a * (t/60.0 - t_s)) - 1));
+
+            domain_length = ((L_inf * exp(a * (dt/60.0 - t_s))) / (L_inf / L_0 + exp(a * (dt/60.0 - t_s)) - 1)) + constant;
+
+            domain_len_der = ((a * L_inf/60 * exp(a * (dt/60.0 - t_s))) / (L_inf / L_0 + exp(a * (dt/60.0 - t_s)) - 1) -
+                              (a * L_inf/60 * exp(2 * a * (dt/60.0 - t_s))) / ((L_inf / L_0 + exp(a * (dt/60.0 - t_s)) - 1)*(L_inf / L_0 + exp(a * (dt/60.0 - t_s)) - 1)));
+
+
+            // internalisation
+            for (int i = 0; i < length_x; i++) {
+                for (int j = 0; j < length_y; j++) {
+                    //go through all the cells
+                    for (int k = 0; k < particles.size(); k++) {
+                        // leaders
+                        //for (int k = 0; k < N; k++) {
+                        vdouble2 x;
+                        x = get<position>(particles[k]);
+                        intern(i, j) = intern(i, j) + exp(-(((domain_length / length_x) * i - x[0]) *
+                                                            ((domain_length / length_x) * i - x[0]) +
+                                                            (j - x[1]) * (j - x[1])) /
+                                                          (2 * R * R)); // mapping to fixed domain
+                    }
+                }
+            }
+
+
+
+            // timestep is 1
+            //while (dt <= 1) {
+
+            // reaction-diffusion equation for chemoattractant
+            for (int i = 1; i < length_x - 1; i++) {
+                for (int j = 1; j < length_y - 1; j++) {
+
+
+                    // logistic production rate
+
+                    chemo_new(i, j) = dt_init * (D * ((1 / ((domain_length / length_x) * (domain_length / length_x))) *
+                                                      (chemo(i + 1, j) - 2 * chemo(i, j) + chemo(i - 1, j)) / (dx * dx) +
+                                                      (chemo(i, j + 1) - 2 * chemo(i, j) + chemo(i, j - 1)) / (dy * dy)) -
+                                                 (chemo(i, j) * lam / (2 * M_PI * R * R)) * intern(i, j) +
+                                                 kai * chemo(i, j) * (1 - chemo(i, j)) -
+                                                 double(domain_len_der) / double(domain_length) * chemo(i, j)) + chemo(i, j);
+                    cout << "all change " << dt_init * (D * ((1 / ((domain_length / length_x) * (domain_length / length_x))) *
+                                    (chemo(i + 1, j) - 2 * chemo(i, j) + chemo(i - 1, j)) / (dx * dx) +
+                                    (chemo(i, j + 1) - 2 * chemo(i, j) + chemo(i, j - 1)) / (dy * dy)) -
+                               (chemo(i, j) * lam / (2 * M_PI * R * R)) * intern(i, j) +
+                               kai * chemo(i, j) * (1 - chemo(i, j)) -
+                               double(domain_len_der) / double(domain_length) * chemo(i, j)) << endl;
+//                    cout << "chemo i j" << chemo(i,j) << endl;
+//                    cout << "new chemo i j" << chemo_new(i,j) << endl;
+//                    cout << "deriv " << double(domain_len_der) << endl;
+//                    cout << "length" << double(domain_length) << endl;
+//                    cout <<  "change " << (double(domain_len_der) / double(domain_length) * chemo(i, j)) << endl;
+
+                }
+            }
+
+            cout << "chemo 11 " << chemo(1,1) << endl;
+            cout << "new chemo 11 " << chemo_new(1,1) << endl;
+            dt += dt_init;
+            cout << "how many times here " << dt << endl;
+
+
+            // zero flux boundary conditions
+
+            for (int i = 0; i < length_y; i++) {
+                chemo_new(0, i) = chemo_new(1, i);
+                chemo_new(length_x - 1, i) = chemo_new(length_x - 2, i);
+
+            }
+
+            for (int i = 0; i < length_x; i++) {
+                chemo_new(i, 0) = chemo_new(i, 1);
+                chemo_new(i, length_y - 1) = chemo_new(i, length_y - 2);
+            }
+
+
+            chemo = chemo_new; // update chemo concentration
+            //}
+
 
         }
+
 
 
         // save the chemoattractant concentration with properly rescaled coordinates
@@ -285,54 +363,16 @@ VectorXi proportions(double diff_conc, int n_seed) {
         // update chemoattractant profile after the domain grew
 
 
-        // internalisation
-        for (int i = 0; i < length_x; i++) {
-            for (int j = 0; j < length_y; j++) {
-                //go through all the cells
-                for (int k = 0; k < particles.size(); k++) {
-                    // leaders
-                    //for (int k = 0; k < N; k++) {
-                    vdouble2 x;
-                    x = get<position>(particles[k]);
-                    intern(i, j) = intern(i, j) + exp(-(((domain_length / length_x) * i - x[0]) *
-                                                        ((domain_length / length_x) * i - x[0]) +
-                                                        (j - x[1]) * (j - x[1])) /
-                                                      (2 * R * R)); // mapping to fixed domain
-                }
-            }
-        }
-
-        // reaction-diffusion equation for chemoattractant
-        for (int i = 1; i < length_x - 1; i++) {
-            for (int j = 1; j < length_y - 1; j++) {
 
 
-                // logistic production rate
-                chemo_new(i, j) = dt * (D * ((1 / ((domain_length / length_x) * (domain_length / length_x))) *
-                                             (chemo(i + 1, j) - 2 * chemo(i, j) + chemo(i - 1, j)) / (dx * dx) +
-                                             (chemo(i, j + 1) - 2 * chemo(i, j) + chemo(i, j - 1)) / (dy * dy)) -
-                                        (chemo(i, j) * lam / (2 * M_PI * R * R)) * intern(i, j) +
-                                        kai *  chemo(i,j) * (1 - chemo(i, j)) -
-                                        double(domain_len_der) / double(domain_length) * chemo(i, j)) + chemo(i, j);
-
-            }
-        }
-
-        // zero flux boundary conditions
-
-        for (int i = 0; i < length_y; i++) {
-            chemo_new(0, i) = chemo_new(1, i);
-            chemo_new(length_x - 1, i) = chemo_new(length_x - 2, i);
-
-        }
-
-        for (int i = 0; i < length_x; i++) {
-            chemo_new(i, 0) = chemo_new(i, 1);
-            chemo_new(i, length_y - 1) = chemo_new(i, length_y - 2);
-        }
 
 
-        chemo = chemo_new; // update chemo concentration
+        //}
+
+
+
+
+
 
 
         // save data to plot chemoattractant concentration
@@ -759,9 +799,9 @@ VectorXi proportions(double diff_conc, int n_seed) {
                         }
                     }
 
-                   // try to move if it has found something
+                    // try to move if it has found something
 
-                   if (get<chain>(particles[particle_id(j)]) > 0){
+                    if (get<chain>(particles[particle_id(j)]) > 0){
 
                         //try to move in the same direction as the cell it is attached to
                         vdouble2 x_chain = x + increase_fol_speed * get<direction>(particles)[particle_id(j)];
@@ -797,7 +837,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
                                     increase_fol_speed * get<direction>(particles[particle_id(j)]);
 
                         }
-                   }
+                    }
 
 
                     /*
@@ -985,7 +1025,7 @@ int main(){
 
         // set the parameters
         for (int i = 0; i < number_parameters; i++) {
-            threshold[i] = 0.08;
+            threshold[i] = 0.1;
             //threshold[i] = 0.005 * (i + 1);// 0.01;
             //cout << "slope " << slope[i] << endl;
 
@@ -994,8 +1034,8 @@ int main(){
         //initialise the matrix to store the values
         MatrixXi numbers = MatrixXi::Zero(num_parts,number_parameters);
 
-    //#pragma omp parallel for
-      //        for (int i = 0; i < number_parameters; i++) {
+        //#pragma omp parallel for
+        //        for (int i = 0; i < number_parameters; i++) {
 
         //for (int j = 0; j < 1; j++) {
 
