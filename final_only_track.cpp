@@ -44,14 +44,14 @@ VectorXi proportions(double diff_conc, int n_seed) {
     //double diff_conc = 0.1; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1; // determines how frequently new cells are inserted, regulates the density of population
-    double speed_l = 0.136;// 0.05;//1;//0.05; // speed of a leader cell
-    double speed_f = 0.136;//0.05;//0.1;//0.08; // speed of a follower cell
+    double speed_l = 0.1;// 0.05;//1;//0.05; // speed of a leader cell
+    double speed_f = 0.1;//0.05;//0.1;//0.08; // speed of a follower cell
     double increase_fol_speed = 1.2;
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
     double chemo_leader = 0.9; //0.5; // phenotypic switching happens when the concentration of chemoattractant is higher than this (presentation video 0.95), no phenotypic switching
     double eps = 1; // for phenotypic switching, the distance has to be that much higher
-    const int filo_number = 2; // number of filopodia sent
-    int same_dir = 2; // number of steps in the same direction +1, because if 0, then only one step in the same direction
+    const int filo_number = 3; // number of filopodia sent
+    int same_dir = 0; // number of steps in the same direction +1, because if 0, then only one step in the same direction
     bool random_pers = true; // persistent movement also when the cell moves randomly
     int count_dir = 0; // this is to count the number of times the cell moved the same direction, up to same_dir for each cell
 
@@ -1068,7 +1068,7 @@ int main(){
     * will store everything in one matrix, the entries will be summed over all simulations
     */
 
-    ofstream output3("aqp_M11.csv");
+    ofstream output3("aqp_M11_jun26.csv");
 
     for (int i = 0; i < num_parts; i++) {
 
