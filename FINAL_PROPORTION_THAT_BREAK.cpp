@@ -71,7 +71,7 @@ double prop_break(double diff_conc, int n_seed) {
 //    double a = 0.001;//0.008;//0.23/10;
 //    double L_inf = 86.76;
 //    double t_s = 16;//4.31*10;
-//    double constant = 29.12;
+//    double constant = 29.12;3
 
 
 //    double L_0 = 30;
@@ -1207,7 +1207,7 @@ double prop_break(double diff_conc, int n_seed) {
 int main(){
 
     const int number_parameters = 1; // parameter range
-    const int sim_num = 1;
+    const int sim_num = 10;
 
     //VectorXi vector_check_length = proportions(0.05, 2); //just to know what the length is
     //cout << "prop " << vector_check_length << endl;
