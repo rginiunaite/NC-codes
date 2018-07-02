@@ -35,7 +35,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
     double cell_radius = 0.75;//0.5; // radius of a cell
     const double diameter =
             2 * cell_radius; // diameter of a cell
-    const int N_steps = 1800; // number of timesteps, 1min - 1timestep, from 6h tp 24hours.
+    const int N_steps = 1440; // number of timesteps, 1min - 1timestep, from 6h tp 24hours.
     const size_t N = 5; // initial number of cells
     double l_filo_y = 2.75;//2; // sensing radius, filopodia + cell radius
     double l_filo_x = 2.75; // sensing radius, it will have to be rescaled when domain grows
@@ -50,7 +50,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
     double chemo_leader = 0.9; //0.5; // phenotypic switching happens when the concentration of chemoattractant is higher than this (presentation video 0.95), no phenotypic switching
     double eps = 1; // for phenotypic switching, the distance has to be that much higher
-    const int filo_number = 2; // number of filopodia sent
+    const int filo_number =2; // number of filopodia sent
     int same_dir = 3; // number of steps in the same direction +1, because if 0, then only one step in the same direction
     bool random_pers = true; // persistent movement also when the cell moves randomly
     int count_dir = 0; // this is to count the number of times the cell moved the same direction, up to same_dir for each cell
@@ -71,11 +71,21 @@ VectorXi proportions(double diff_conc, int n_seed) {
 //    double constant = 29.12;
 
 
+//    double L_0 = 30;
+//    double a =0.23;
+//    double L_inf = 86.76;
+//    double t_s = 15.9; // think about these rescaled variables
+//    double constant = 29.12 ;
+
+    // for 24 hours
+
     double L_0 = 30;
-    double a = 0.23;
+    double a =0.288;
     double L_inf = 86.76;
-    double t_s = 15.9; // think about these rescaled variables
+    double t_s = 12.77; // think about these rescaled variables
     double constant = 29.12 ;
+
+
 
 
     double domain_len_der = 0; // initialise derivative of the domain growth function
@@ -97,7 +107,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
     // parameters for internalisation
 
     double R = cell_radius;//7.5/10; // \nu m cell radius
-    double lam = 0.00015;//(100)/10; // to 1000 /h chemoattractant internalisation
+    double lam = 0.00035;//(100)/10; // to 1000 /h chemoattractant internalisation
 
 
     /*
@@ -268,6 +278,13 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
             domain_len_der = ((a * L_inf/60 * exp(a * (dt/60.0 - t_s))) / (L_inf / L_0 + exp(a * (dt/60.0 - t_s)) - 1) -
                               (a * L_inf/60 * exp(2 * a * (dt/60.0 - t_s))) / ((L_inf / L_0 + exp(a * (dt/60.0 - t_s)) - 1)*(L_inf / L_0 + exp(a * (dt/60.0 - t_s)) - 1)));
+
+
+//            domain_length = ((L_inf * exp(a * (dt - t_s))) / (L_inf / L_0 + exp(a * (dt - t_s)) - 1)) + constant;
+//
+//            domain_len_der = ((a * L_inf * exp(a * (dt - t_s))) / (L_inf / L_0 + exp(a * (dt - t_s)) - 1) -
+//                              (a * L_inf * exp(2 * a * (dt - t_s))) / ((L_inf / L_0 + exp(a * (dt - t_s)) - 1)*(L_inf / L_0 + exp(a * (dt - t_s)) - 1)));
+
 
 
             // internalisation
@@ -1039,7 +1056,7 @@ int main(){
 
         //for (int j = 0; j < 1; j++) {
 
-        numbers.block(0,0,num_parts,1) = proportions(threshold[0], 5);
+        numbers.block(0,0,num_parts,1) = proportions(threshold[0], 3);
 
         //}
         // }
