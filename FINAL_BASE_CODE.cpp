@@ -44,14 +44,14 @@ VectorXi proportions(double diff_conc, int n_seed) {
     //double diff_conc = 0.1; // sensing threshold, i.e. how much concentration has to be bigger, so that the cell moves in that direction
     int freq_growth = 1; // determines how frequently domain grows (actually not relevant because it will go every timestep)
     int insertion_freq = 1; // determines how frequently new cells are inserted, regulates the density of population
-    double speed_l = 0.136;// 0.05;//1;//0.05; // speed of a leader cell
+    double speed_l = 0.14;// 0.05;//1;//0.05; // speed of a leader cell
     double increase_fol_speed = 1.3;
     double speed_f = increase_fol_speed * speed_l;//0.05;//0.1;//0.08; // speed of a follower cell
     double dettach_prob = 0.5; // probability that a follower cell which is on trail looses the trail
     double chemo_leader = 0.9; //0.5; // phenotypic switching happens when the concentration of chemoattractant is higher than this (presentation video 0.95), no phenotypic switching
     double eps = 1; // for phenotypic switching, the distance has to be that much higher
-    const int filo_number =2; // number of filopodia sent
-    int same_dir = 2; // number of steps in the same direction +1, because if 0, then only one step in the same direction
+    const int filo_number = 3; // number of filopodia sent
+    int same_dir = 0; // number of steps in the same direction +1, because if 0, then only one step in the same direction
     bool random_pers = true; // persistent movement also when the cell moves randomly
     int count_dir = 0; // this is to count the number of times the cell moved the same direction, up to same_dir for each cell
 
@@ -98,7 +98,6 @@ VectorXi proportions(double diff_conc, int n_seed) {
     double dt = 1; // time step
     double dt_init = dt;
     int number_time = int(1/dt_init); // how many timesteps in 1min, which is the actual simulation timestep
-    cout << "number " << number_time << endl;
     double dx = 1; // space step in x direction, double to be consistent with other types
     double dy = 1; // space step in y direction
     double kai = 0.00001;//0;//0.1 // to 1 /h production rate of chemoattractant
@@ -186,7 +185,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
     // initialise random number generator for particles entering the domain, appearing at the start in x and uniformly in y
     std::default_random_engine gen;
-    std::uniform_real_distribution<double> uniform(2, length_y - 1);
+    std::uniform_real_distribution<double> uniform(2, length_y - 2);
 
 
     /*
@@ -221,12 +220,10 @@ VectorXi proportions(double diff_conc, int n_seed) {
     std::uniform_real_distribution<double> uniformpi(0, 2 * M_PI);
 
     //for each timestep
-    cout << "how many times here?" << endl;
     for (int t = 0; t < N_steps; t++) {
 
 
 
-        cout << "domain length " << domain_length << endl;
         // insert new cells at the start of the domain at insertion time (have to think about this insertion time)
 
         if (t % insertion_freq == 0) {
@@ -259,7 +256,6 @@ VectorXi proportions(double diff_conc, int n_seed) {
                 get<chain_type>(f) = -1;
                 get<attached_to_id>(f) = -1;
                 particles.push_back(f);
-                cout << " new position, coordinates " << get<position>(f) << endl;
             }
 
         }
@@ -322,25 +318,13 @@ VectorXi proportions(double diff_conc, int n_seed) {
                                                  (chemo(i, j) * lam / (2 * M_PI * R * R)) * intern(i, j) +
                                                  kai * chemo(i, j) * (1 - chemo(i, j)) -
                                                  double(domain_len_der) / double(domain_length) * chemo(i, j)) + chemo(i, j);
-                    cout << "all change " << dt_init * (D * ((1 / ((domain_length / length_x) * (domain_length / length_x))) *
-                                    (chemo(i + 1, j) - 2 * chemo(i, j) + chemo(i - 1, j)) / (dx * dx) +
-                                    (chemo(i, j + 1) - 2 * chemo(i, j) + chemo(i, j - 1)) / (dy * dy)) -
-                               (chemo(i, j) * lam / (2 * M_PI * R * R)) * intern(i, j) +
-                               kai * chemo(i, j) * (1 - chemo(i, j)) -
-                               double(domain_len_der) / double(domain_length) * chemo(i, j)) << endl;
-//                    cout << "chemo i j" << chemo(i,j) << endl;
-//                    cout << "new chemo i j" << chemo_new(i,j) << endl;
-//                    cout << "deriv " << double(domain_len_der) << endl;
-//                    cout << "length" << double(domain_length) << endl;
-//                    cout <<  "change " << (double(domain_len_der) / double(domain_length) * chemo(i, j)) << endl;
+
 
                 }
             }
 
-            cout << "chemo 11 " << chemo(1,1) << endl;
-            cout << "new chemo 11 " << chemo_new(1,1) << endl;
             dt += dt_init;
-            cout << "how many times here " << dt << endl;
+
 
 
             // zero flux boundary conditions
@@ -413,7 +397,6 @@ VectorXi proportions(double diff_conc, int n_seed) {
             for (int i = 0; i < particles.size(); i++) {
                 get<position>(particles)[i] *= vdouble2((domain_length / old_length), 1);
             }
-            cout << "ratio " << double(domain_length/old_length) << endl;
             old_length = domain_length;
         }
 
@@ -505,8 +488,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
                     }
 
                     // check that the position they want to move to is free and not out of bounds
-                    if (free_position && (x_in) > 0 && (x_in) < length_x - 1 && (x[1]) > 0 &&
-                        (x[1]) < length_y - 1) {
+                    if (free_position && (x_in) > 0 && (x_in) < length_x - 1 && (x[1]) > 1 &&
+                        (x[1]) < length_y - 1.5) {
                         // if that is the case, move into that position
                         get<position>(particles)[particle_id(j)] +=
                                 get<direction>(particles)[particle_id(j)];
@@ -573,11 +556,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
                     }
 
                     // if the concentration in a new place is relatively higher than the old one (diff_conc determines that threshold), move that way
-                    cout << "diff conc" << diff_conc << endl;
                     if ((new_chemo[chemo_max_number] - old_chemo) / sqrt(old_chemo) > diff_conc) {
-
-                        cout << "pers direc, higher conc " << endl;
-                        cout << "old chemo " << (new_chemo[chemo_max_number] - old_chemo) / sqrt(old_chemo) << endl;
 
                         count_dir += 1;
 
@@ -600,8 +579,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
 
                         // if the position they want to move to is free and not out of bounds, move that direction
-                        if (free_position && (x_in) > 0 && (x_in) < length_x - 1 && (x[1]) > 0 &&
-                            (x[1]) < length_y - 1) {
+                        if (free_position && (x_in) > 0 && (x_in) < length_x - 1 && (x[1]) > 1 &&
+                                    (x[1]) < length_y - 1.5) {
                             get<position>(particles)[particle_id(j)] +=
                                     speed_l * vdouble2(sin(random_angle[chemo_max_number]),
                                                        cos(random_angle[chemo_max_number])); // update if nothing is in the next position
@@ -624,7 +603,6 @@ VectorXi proportions(double diff_conc, int n_seed) {
                         // if the concentration is not higher, move in random direction
                     else {
 
-                        cout << "pers direc, random " << endl;
 
                         x += speed_l * vdouble2(sin(random_angle[filo_number]), cos(random_angle[filo_number]));
 
@@ -643,8 +621,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
 
                         // update the position if the place they want to move to is free and not out of bounds
-                        if (free_position && (x_in) > 0 && (x_in) < length_x - 1 && (x[1]) > 0 &&
-                            (x[1]) < length_y - 1) {
+                        if (free_position && (x_in) > 0 && (x_in) < length_x - 1 && (x[1]) > 1 &&
+                                    (x[1]) < length_y - 1.5) {
                             get<position>(particles)[particle_id(j)] +=
                                     speed_l * vdouble2(sin(random_angle[filo_number]),
                                                        cos(random_angle[filo_number])); // update if nothing is in the next position
@@ -738,8 +716,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
 
                     // update the position if the place they want to move to is free and not out of bounds
-                    if (free_position && (x_in_chain) > 0 && (x_in_chain) < length_x - 1 && (x_chain[1]) > 0 &&
-                        (x_chain[1]) < length_y - 1) {
+                    if (free_position && (x_in_chain) > 0 && (x_in_chain) < length_x - 1 && (x_chain[1]) > 1 &&
+                        (x_chain[1]) < length_y - 1.5) {
                         get<position>(particles)[particle_id(j)] +=
                                 increase_fol_speed * get<direction>(particles[particle_id(j)]);
 
@@ -847,8 +825,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
                         // if the position is free and not out of bounds, move that direction
                         if (free_position &&
                             (x_in_chain) > 0 &&
-                            (x_in_chain) < length_x - 1 && (x_chain[1]) > 0 &&
-                            (x_chain[1]) < length_y - 1) {
+                            (x_in_chain) < length_x - 1 && (x_chain[1]) > 1 &&
+                            (x_chain[1]) < length_y - 1.5) {
                             //cout << "direction " << get<direction>(particles[particle_id(j)]) << endl;
                             get<position>(particles)[particle_id(j)] +=
                                     increase_fol_speed * get<direction>(particles[particle_id(j)]);
@@ -896,14 +874,12 @@ VectorXi proportions(double diff_conc, int n_seed) {
                         }
 
                         // if the position they want to move to is free and not out of bounds, move to that position
-                        if (free_position && x_in > 0 &&
-                            (x_in) < length_x - 1 && (x[1]) > 0 &&
-                            (x[1]) < length_y - 1) {
+                        if (free_position && (x_in) > 0 && (x_in) < length_x - 1 && (x[1]) > 1 &&
+                                                     (x[1]) < length_y - 1.5) {
                             get<position>(particles)[particle_id(j)] += speed_f * vdouble2(sin(random_angle),
                                                                                            cos(random_angle)); // update if nothing is in the next position
                             get<direction>(particles)[particle_id(j)] = speed_f * vdouble2(sin(random_angle),
                                                                                            cos(random_angle)); // update direction as well
-                            cout << "is it ever here?" << endl;
                         }
 
                     }
@@ -1056,7 +1032,7 @@ int main(){
 
         //for (int j = 0; j < 1; j++) {
 
-        numbers.block(0,0,num_parts,1) = proportions(threshold[0], 3);
+        numbers.block(0,0,num_parts,1) = proportions(threshold[0], 0);
 
         //}
         // }
