@@ -100,7 +100,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
     int number_time = int(1/dt_init); // how many timesteps in 1min, which is the actual simulation timestep
     double dx = 1; // space step in x direction, double to be consistent with other types
     double dy = 1; // space step in y direction
-    double kai = 0.00001;//0;//0.1 // to 1 /h production rate of chemoattractant
+    double kai = 0.0001;//0;//0.1 // to 1 /h production rate of chemoattractant
 
 
     // parameters for internalisation
@@ -185,7 +185,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
     // initialise random number generator for particles entering the domain, appearing at the start in x and uniformly in y
     std::default_random_engine gen;
-    std::uniform_real_distribution<double> uniform(2, length_y - 2);
+    std::uniform_real_distribution<double> uniform(cell_radius, length_y-1 - cell_radius);
 
 
     /*
@@ -199,8 +199,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
         get<type>(particles[i]) = 0; // initially all cells are leaders
 
         //get<position>(p) = vdouble2(cell_radius,(i+1)*diameter); // x=2, uniformly in y
-        get<position>(particles[i]) = vdouble2(cell_radius, (i + 1) * double(length_y - 1) / double(N) -
-                                                            0.5 * double(length_y - 1) /
+        get<position>(particles[i]) = vdouble2(cell_radius, (i + 1) * double(length_y-1 - cell_radius) / double(N) -
+                                                            0.5 * double(length_y-1 - cell_radius) /
                                                             double(N)); // x=2, uniformly in y
         get<persistence_extent>(particles[i]) = 0;
         get<same_dir_step>(particles[i]) = 0;
@@ -248,7 +248,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
             }
 
             // our assumption that all new cells are followers
-            get<type>(f) = 1;
+            get<type>(f) = 0;
 
 
             if (free_position) {
@@ -316,7 +316,7 @@ VectorXi proportions(double diff_conc, int n_seed) {
                                                       (chemo(i + 1, j) - 2 * chemo(i, j) + chemo(i - 1, j)) / (dx * dx) +
                                                       (chemo(i, j + 1) - 2 * chemo(i, j) + chemo(i, j - 1)) / (dy * dy)) -
                                                  (chemo(i, j) * lam / (2 * M_PI * R * R)) * intern(i, j) +
-                                                 kai * chemo(i, j) * (1 - chemo(i, j)) -
+                                                 kai*(chemo(i,j)) -
                                                  double(domain_len_der) / double(domain_length) * chemo(i, j)) + chemo(i, j);
 
 
@@ -488,8 +488,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
                     }
 
                     // check that the position they want to move to is free and not out of bounds
-                    if (free_position && (x_in) > 0 && (x_in) < length_x - 1 && (x[1]) > 1 &&
-                        (x[1]) < length_y - 1.5) {
+                    if (free_position && x[0] > cell_radius && (x[1]) > cell_radius &&
+                        (x[1]) < length_y-1 - cell_radius) {
                         // if that is the case, move into that position
                         get<position>(particles)[particle_id(j)] +=
                                 get<direction>(particles)[particle_id(j)];
@@ -579,8 +579,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
 
                         // if the position they want to move to is free and not out of bounds, move that direction
-                        if (free_position && (x_in) > 0 && (x_in) < length_x - 1 && (x[1]) > 1 &&
-                                    (x[1]) < length_y - 1.5) {
+                        if (free_position && x[0] > cell_radius && (x[1]) > cell_radius &&
+                                    (x[1]) < length_y-1 - cell_radius) {
                             get<position>(particles)[particle_id(j)] +=
                                     speed_l * vdouble2(sin(random_angle[chemo_max_number]),
                                                        cos(random_angle[chemo_max_number])); // update if nothing is in the next position
@@ -621,8 +621,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
 
                         // update the position if the place they want to move to is free and not out of bounds
-                        if (free_position && (x_in) > 0 && (x_in) < length_x - 1 && (x[1]) > 1 &&
-                                    (x[1]) < length_y - 1.5) {
+                        if (free_position && x[0] > cell_radius &&  (x[1]) > cell_radius &&
+                                    (x[1]) < length_y-1 - cell_radius) {
                             get<position>(particles)[particle_id(j)] +=
                                     speed_l * vdouble2(sin(random_angle[filo_number]),
                                                        cos(random_angle[filo_number])); // update if nothing is in the next position
@@ -716,8 +716,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
 
                     // update the position if the place they want to move to is free and not out of bounds
-                    if (free_position && (x_in_chain) > 0 && (x_in_chain) < length_x - 1 && (x_chain[1]) > 1 &&
-                        (x_chain[1]) < length_y - 1.5) {
+                    if (free_position && x_chain[0] > cell_radius  && (x_chain[1]) > cell_radius &&
+                        (x_chain[1]) < length_y -1- cell_radius) {
                         get<position>(particles)[particle_id(j)] +=
                                 increase_fol_speed * get<direction>(particles[particle_id(j)]);
 
@@ -824,9 +824,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
 
                         // if the position is free and not out of bounds, move that direction
                         if (free_position &&
-                            (x_in_chain) > 0 &&
-                            (x_in_chain) < length_x - 1 && (x_chain[1]) > 1 &&
-                            (x_chain[1]) < length_y - 1.5) {
+                            x_chain[0]> cell_radius && (x_chain[1]) > cell_radius &&
+                            (x_chain[1]) < length_y -1- cell_radius) {
                             //cout << "direction " << get<direction>(particles[particle_id(j)]) << endl;
                             get<position>(particles)[particle_id(j)] +=
                                     increase_fol_speed * get<direction>(particles[particle_id(j)]);
@@ -874,8 +873,8 @@ VectorXi proportions(double diff_conc, int n_seed) {
                         }
 
                         // if the position they want to move to is free and not out of bounds, move to that position
-                        if (free_position && (x_in) > 0 && (x_in) < length_x - 1 && (x[1]) > 1 &&
-                                                     (x[1]) < length_y - 1.5) {
+                        if (free_position &&x[0] > cell_radius && (x[1]) > cell_radius &&
+                                                     (x[1]) < length_y-1 - cell_radius) {
                             get<position>(particles)[particle_id(j)] += speed_f * vdouble2(sin(random_angle),
                                                                                            cos(random_angle)); // update if nothing is in the next position
                             get<direction>(particles)[particle_id(j)] = speed_f * vdouble2(sin(random_angle),
