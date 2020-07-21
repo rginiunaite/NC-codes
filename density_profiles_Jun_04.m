@@ -1,48 +1,57 @@
 clear all
 %%%% average simulations
 
-% simulations1 = 'aqp_M1_increased_int.csv';
-% M1 = csvread(simulations1); % 
-% M1 = M1(:,1)/10;
+simulations1 = 'AQP-1-GOOD/aqp_M1_Jul5.csv';
 
-simulations2 = 'aqp_M2_increased_int.csv';
+M1 = csvread(simulations1); % 
+M1 = M1(:,1)/10;
+
+simulations2 = 'AQP-1-GOOD/aqp_M2_Jul5.csv';
 M2 = csvread(simulations2);
 M2 = M2(:,1)/10;
 % 
-% simulations3 = 'aqp_M3_increased_int.csv';
-% M3 = csvread(simulations3); 
-% M3 = M3(:,1)/10;
+ simulations3 = 'AQP-1-GOOD/aqp_M3_Jul5.csv';
+M3 = csvread(simulations3); 
+M3 = M3(:,1)/10;
  
-simulations4 = 'aqp_M4_increased_int.csv';
+simulations4 = 'AQP-1-GOOD/aqp_M4_Jul5.csv';
 M4 = csvread(simulations4); 
 M4 = M4(:,1)/10;
 
-simulations5 = 'aqp_M5_increased_int.csv';
+simulations5 = 'AQP-1-GOOD/aqp_M5_Jul5.csv';
 M5 = csvread(simulations5); 
 M5 = M5(:,1)/10;
 
-% simulations6 = 'aqp_M6_increased_int.csv';
-% M6 = csvread(simulations6); 
-% M6 = M6(:,1)/10;
+simulations6 = 'AQP-1-GOOD/aqp_M6_Jul5.csv';
+M6 = csvread(simulations6); 
+M6 = M6(:,1)/10;
 % 
-% simulations7 = 'aqp_M7_increased_int.csv';
-% M7 = csvread(simulations7); 
-% M7 = M7(:,1)/10;
+simulations7 ='AQP-1-GOOD/aqp_M7_Jul5.csv';
+M7 = csvread(simulations7); 
+M7 = M7(:,1)/10;
 % 
-% simulations8 = 'aqp_M8_increased_int.csv';
-% M8 = csvread(simulations8); 
-% M8 = M8(:,1)/10;
+simulations8 = 'AQP-1-GOOD/aqp_M8_Jul5.csv';
+M8 = csvread(simulations8); 
+M8 = M8(:,1)/10;
 
-simulations9 = 'aqp_M9_increased_int.csv';
+simulations9 = 'AQP-1-GOOD/aqp_M9_Jul5.csv';
 M9 = csvread(simulations9); 
 M9 = M9(:,1)/10;
 
-% simulations10 = 'aqp_M2_tunnel.csv';
-% M10 = csvread(simulations10);
-% M10 = M10(:,1)/10;
+ simulations10 = 'AQP-1-GOOD/aqp_M10_Jul5.csv';
+
+ M10 = csvread(simulations10);
+ M10 = M10(:,1)/10;
 
 x = [0:55:1100];
 
+
+ simulations11 = 'AQP-1-GOOD/aqp_M11_Jul5.csv';
+
+ M11= csvread(simulations11);
+ M11 = M11(:,1)/10;
+
+x = [0:55:1100];
 
 figure 
 
@@ -74,17 +83,18 @@ hold on
 % h9 = plot(f9,'magenta')
  
  
- %h1 = plot(x,M1)
- h2 = plot(x,M2)
- %h3 = plot(x,M3)
- h4 = plot(x,M4)
- h5 = plot(x,M5)
- %h6 = plot(x,M6)
- %h7 = plot(x,M7)
- %h8 = plot(x,M8)
- h9 = plot(x,M9)
- %h10 = plot(x,M10)
- 
+  h1 = plot(x,M1,'--k')
+  h2 = plot(x,M2,':','Color',[0.6350 0.0780 0.1840])
+%  h3 = plot(x,M3,'Color',[0.9290 0.6940 0.1250])
+% h4 = plot(x,M4,'Color',[0.4660 0.6740 0.1880])
+ %h5 = plot(x,M5,':','Color',[0.3010 0.7450 0.9330])
+ %h6 = plot(x,M6,'-.','Color', '[0.6350 0.0780 0.1840]')
+% h7 = plot(x,M7,'--','Color',[0 0.4470 0.7410])
+%  h8 = plot(x,M8,'-.','Color',[0.9290 0.6940 0.1250])
+%  h9 = plot(x,M9,'Color',[0.4940 0.1840 0.5560])
+  h10 = plot(x,M10,'-.','Color',[0.3010 0.7450 0.9330])
+  h11 = plot(x,M11,'Color',[0.4660 0.6740 0.1880])
+
  
  %h1 = stairs(x,M1)
  %h2 = stairs(x,M2)
@@ -97,8 +107,10 @@ hold on
  %h9 = stairs(x,M9)
 
 
-%legend ('Model 1','Model 2','Model 3','M4','M5','M6','M7')
-legend ('Model 2','Model 4','Model 5','Model 9')
+%legend ('Model 1','Model 2','Model 3')%,'M4','M5','M6','M7')
+%legend('Model 4','Model 5','Model 6','Model 7')
+%legend('Model 2', 'Model 7','Model 8','Model 9')
+legend ('Model 1','Model 2','Model 10','Model 11')
 
 
 % hold off
@@ -118,17 +130,19 @@ h4.LineWidth =3;
  h7.LineWidth =3;
  h8.LineWidth =3;
  h9.LineWidth = 3;
- h9.LineWidth = 3;
+ h10.LineWidth = 3;
+ h11.LineWidth = 3;
 
 xlim([0 1100])
 
 
-xlabel('Distance from the neural tube, \mu m','FontSize',14)
+xlabel(['Distance from the neural tube, ',char(181),'m'],'FontSize',14)
 set(gca,'linewidth',2)
-ylabel('Number of cells','FontSize',14)
+ylabel(['Number of cells (per 55 ',char(181),'m)'],'FontSize',14)
 set(gca,'FontSize',36)
 ax = gca;
-
+box on
+grid on
 
 
 % 
